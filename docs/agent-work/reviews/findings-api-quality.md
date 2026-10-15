@@ -80,5 +80,5 @@ Reviewed the ports, adapters, use cases, server composition root, route handlers
 - `cd /tmp/review-copy && npx vitest run --config /tmp/vitest-configs/vitest.config.mjs --reporter=dot`. Exit 0. 12 files, 147 passed, 3 skipped (`tests/api/actions-repository.test.ts` Supabase cases; `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` were unset).
 - `cd /tmp/review-copy && npx vitest run --config /tmp/vitest-configs/vitest.config.mjs tests/api/review-proof.test.ts --disableConsoleIntercept`. Exit 1. The script printed the body-limit, env, identity, and quantity results, then threw `TypeError: Cannot assign to property 'readFileSync'` in the proof harness. That failure is the harness, not the app.
 - `cd /tmp/review-copy && npx vitest run --config /tmp/vitest-configs/vitest.config.mjs tests/api/review-proof-2.test.ts --disableConsoleIntercept`. Exit 0. Printed the list/readiness, idempotency rebind, domain `clear`, content-length pull counts, and catalogue identity result.
-- Node scan of `/Users/joe/workspace/qantum-team-leader-slice/.next/static`. Exit 0. `{"files":9,"keyName":0,"role":0,"supabaseHost":0}`.
+- Node scan of `/Users/joe/workspace/qantum-warehouse-management/.next/static`. Exit 0. `{"files":9,"keyName":0,"role":0,"supabaseHost":0}`.
 - `next dev` and `next start` were not run.

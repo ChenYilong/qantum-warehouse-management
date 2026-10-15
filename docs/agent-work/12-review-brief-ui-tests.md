@@ -23,7 +23,7 @@ In your read-only sandbox `npm test` fails with EPERM writing `node_modules/.vit
 - **Low**: style, naming, minor clarity.
 
 ## Output
-Write your report to `/private/tmp/claude-501/-Users-joe-workspace-qantum-team-leader-slice/fd2e3fd1-8e45-4067-8ca8-422119e60a98/scratchpad/findings-ui-tests.md` (outside the repo, allowed). For each finding: severity, file:line, one-sentence defect, concrete failing scenario or evidence, suggested fix. Order by severity. End with a "Verified OK" list of what you actively checked and found correct, and the commands you ran with exit codes. If a category has nothing, say so; do not pad. Print the report path when done.
+Write your report to `/private/XXX/scratchpad/findings-ui-tests.md` (outside the repo, allowed). For each finding: severity, file:line, one-sentence defect, concrete failing scenario or evidence, suggested fix. Order by severity. End with a "Verified OK" list of what you actively checked and found correct, and the commands you ran with exit codes. If a category has nothing, say so; do not pad. Print the report path when done.
 
 ## Your lens (only this one): test quality and coverage
 1. **AC mapping**: for AC 30, 31 and 32 and every UI-relevant FR, find the test that proves it and judge whether it could actually fail. Name tests that pass for the wrong reason (assert something always true, wait for the wrong thing, check only the loading state).

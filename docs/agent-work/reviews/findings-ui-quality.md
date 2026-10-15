@@ -152,6 +152,6 @@ Run from a copy at `/tmp/review-copy` (rsync excluding `node_modules`, `.next`, 
 | Same test with a `"use client"` file that directly imported `../server/deps` | 1 (caught that one specifier) |
 | `npx vitest run tests/unit/review-probe.test.ts` (announcement replay, storage throw, non-JSON body, fail-open mappers, dependency override) | 0 (5 passed; these assert the defects) |
 | Dialog branch trace (node) | 0 (`dropped K1` while closed; `applied K1` then `dropped K2` after reopen) |
-| Read-only scan of `/Users/joe/workspace/qantum-team-leader-slice/.next/static` | 0 (no `SUPABASE_SERVICE_KEY`, `service_role`, or `NEXT_PUBLIC_`) |
+| Read-only scan of `/Users/joe/workspace/qantum-warehouse-management/.next/static` | 0 (no `SUPABASE_SERVICE_KEY`, `service_role`, or `NEXT_PUBLIC_`) |
 
 Playwright, `next dev`, and `next start` were not run.

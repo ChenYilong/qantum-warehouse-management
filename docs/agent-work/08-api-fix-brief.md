@@ -8,7 +8,7 @@ You are the **worker** for this brief. Execute it. Do not engage another externa
 
 - Cwd is the repo root: Next.js 16.3, strict TypeScript, Vitest, Zod 4. **Dependencies are installed. Do not run `npm install` and do not edit `package.json`.**
 - The API layer exists and passes: 147 tests, 100% coverage on `src/domain`, `npm run build` clean. Three independent reviewers found the defects and test gaps below. Their reports (read them, they hold the evidence and the exact probes):
-  - `/private/tmp/claude-501/-Users-joe-workspace-qantum-team-leader-slice/fd2e3fd1-8e45-4067-8ca8-422119e60a98/scratchpad/findings-api-spec.md`
+  - `/private/XXX/scratchpad/findings-api-spec.md`
   - `.../scratchpad/findings-api-tests.md`
   - `.../scratchpad/findings-api-quality.md`
 - Read first: `AGENTS.md`, `docs/slice-specification.md` section 4, `docs/technical-design.md` sections 4 to 6 and 8, and the code under `src/application`, `src/server`, `src/adapters`, `src/ports`, `src/domain/availability.ts`, plus `tests/api` and `tests/unit`.

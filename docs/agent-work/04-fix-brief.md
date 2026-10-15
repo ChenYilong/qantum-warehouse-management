@@ -6,7 +6,7 @@ You are the **worker** for this brief. Execute it. Do not delegate onward and do
 ## 2. Facts
 - Cwd is the repo root. TypeScript strict, `noUncheckedIndexedAccess`. Dependencies are installed. Do not run `npm install`. Commands: `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:coverage`.
 - The domain core already exists and passes 69 tests at 100% coverage: `src/domain/{types,normalise,catalogue,readiness,lifecycle,candidates,index}.ts`, `src/adapters/catalogue-csv.ts`, tests in `tests/unit/*.test.ts`. Three independent reviewers found defects. Their evidence is in these files (read them, they are the detail behind this brief):
-  - `/private/tmp/claude-501/-Users-joe-workspace-qantum-team-leader-slice/fd2e3fd1-8e45-4067-8ca8-422119e60a98/scratchpad/findings-spec.md`
+  - `/private/XXX/scratchpad/findings-spec.md`
   - `.../scratchpad/findings-tests.md`
   - `.../scratchpad/findings-quality.md`
 - Source of truth for behaviour: `docs/slice-specification.md` section 4, `docs/technical-design.md` sections 4 to 6, and `AGENTS.md`. Original API shapes are in `BRIEF.md`.

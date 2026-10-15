@@ -15,7 +15,7 @@ You may run read-only commands (`npm test`, `npm run typecheck`, `npm run lint`,
 - **Low**: style, naming, minor clarity.
 
 ## Output
-Write your report to `/private/tmp/claude-501/-Users-joe-workspace-qantum-team-leader-slice/fd2e3fd1-8e45-4067-8ca8-422119e60a98/scratchpad/findings-quality.md` (outside the repo, allowed). For each finding: severity, file:line, one-sentence defect, concrete failing scenario or evidence, suggested fix. Order by severity. End with a short "Verified OK" list of the things you actively checked and found correct, and the commands you ran with exit codes. If you find nothing in a category say so; do not pad. Do not report style nits unless your lens is code quality. Finish by printing the path of the report.
+Write your report to `/private/XXX/scratchpad/findings-quality.md` (outside the repo, allowed). For each finding: severity, file:line, one-sentence defect, concrete failing scenario or evidence, suggested fix. Order by severity. End with a short "Verified OK" list of the things you actively checked and found correct, and the commands you ran with exit codes. If you find nothing in a category say so; do not pad. Do not report style nits unless your lens is code quality. Finish by printing the path of the report.
 
 ## Your lens (only this one): code quality and security
 Focus on:

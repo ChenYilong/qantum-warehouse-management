@@ -4,7 +4,7 @@ source: "https://github.com/ChenYilong/qantum-warehouse-management/actions"
 author:
 published:
 created: 2026-10-14
-description: "QAntum take-home: team leader stock readiness slice (Next.js, Supabase, Vercel) - All Workflow Runs · ChenYilong/qantum-team-leader-slice"
+description: "QAntum take-home: team leader stock readiness slice (Next.js, Supabase, Vercel) - All Workflow Runs · ChenYilong/qantum-warehouse-management"
 tags:
   - "clippings"
 ---
