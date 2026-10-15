@@ -8,7 +8,7 @@ You are the **worker** for this brief. Execute it. Do not engage another externa
 
 - Cwd is the repo root: Next.js 16.3, strict TypeScript, Vitest, Zod 4, Playwright. **Dependencies are installed. Do not run `npm install` and do not edit `package.json` or the lockfile.**
 - The UI layer exists. The orchestrator ran all gates in a normal shell: typecheck, lint, 235 unit tests, 100% coverage on `src/domain` and `src/ui/*.ts`, build, `check:ac`, and 6 of 6 Playwright tests. Three independent reviewers then found the defects and test gaps below. **Read their reports first; they hold the evidence and the probes:**
-  - `/private/tmp/claude-501/-Users-joe-workspace-qantum-team-leader-slice/fd2e3fd1-8e45-4067-8ca8-422119e60a98/scratchpad/findings-ui-spec.md`
+  - `/private/XXX/scratchpad/findings-ui-spec.md`
   - `.../scratchpad/findings-ui-tests.md`
   - `.../scratchpad/findings-ui-quality.md`
 - Read also: `AGENTS.md`, `docs/ui-design.md`, `docs/slice-specification.md` (FR and AC), `docs/api.md`, and the code under `src/ui`, `src/app`, `src/application`, `src/server/deps.ts`, plus `tests/unit/ui-*.test.ts`, `tests/e2e`, `tests/api`.

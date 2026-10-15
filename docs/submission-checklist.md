@@ -10,8 +10,8 @@ Legend: `[x]` done, `[~]` partial, `[ ]` not started.
 
 | # | Item | Status | Evidence / next step |
 | --- | --- | --- | --- |
-| 1 | GitHub repository link | [x] | https://github.com/binartist/qantum-team-leader-slice (public, default branch `main`). |
-| 2 | Public URL for the working experience | [x] | https://qantum-team-leader-slice.vercel.app (Vercel, functions in `syd1`, actions in Postgres database `qantum_slice`). |
+| 1 | GitHub repository link | [x] | https://github.com/ChenYilong/qantum-warehouse-management (public, default branch `main`). |
+| 2 | Public URL for the working experience | [x] | https://qantum-warehouse-management.vercel.app (Vercel, functions in `syd1`, actions in Postgres database `qantum_slice`). |
 | 3 | Try-it instructions | [x] | README "Try it": a two-minute walk through the live demo. |
 | 4 | README: run locally | [x] | README "Run locally": `npm ci`, `npm run dev`, memory store, no credentials. |
 | 5 | README: run tests | [x] | README "Tests": typecheck, lint, coverage, AC check, Playwright, database contract. |

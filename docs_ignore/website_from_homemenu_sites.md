@@ -1,6 +1,6 @@
 ---
 title: "Team leader"
-source: "https://qantum-team-leader-slice.vercel.app/sites"
+source: "https://qantum-warehouse-management.vercel.app/sites"
 author:
 published:
 created: 2026-10-14
@@ -12,10 +12,10 @@ page menu :  sites (home )/ materials / actions log / about this domo
 
 ## Sites(home )
 
-- [Riverside Plaza, Block A status:             Crew can go](https://qantum-team-leader-slice.vercel.app/sites/site-a)
-- [Harbour Point, Levels 3 to 5Blocked ·            status: 2 shortages](https://qantum-team-leader-slice.vercel.app/sites/site-b)
-- [Kingsway Works, Phase 2Blocked ·  status:   1 shortage, 4 data problems](https://qantum-team-leader-slice.vercel.app/sites/site-c)
-- [Old Mill Annex status: Nothing planned](https://qantum-team-leader-slice.vercel.app/sites/site-d)
+- [Riverside Plaza, Block A status:             Crew can go](https://qantum-warehouse-management.vercel.app/sites/site-a)
+- [Harbour Point, Levels 3 to 5Blocked ·            status: 2 shortages](https://qantum-warehouse-management.vercel.app/sites/site-b)
+- [Kingsway Works, Phase 2Blocked ·  status:   1 shortage, 4 data problems](https://qantum-warehouse-management.vercel.app/sites/site-c)
+- [Old Mill Annex status: Nothing planned](https://qantum-warehouse-management.vercel.app/sites/site-d)
 
 0
 

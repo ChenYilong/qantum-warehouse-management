@@ -1,6 +1,6 @@
 ---
 title: "L3, Riser 2 · Team leader"
-source: "https://qantum-team-leader-slice.vercel.app/sites/site-b/penetrations/pen-b-01"
+source: "https://qantum-warehouse-management.vercel.app/sites/site-b/penetrations/pen-b-01"
 author:
 published:
 created: 2026-10-14
@@ -8,7 +8,7 @@ description: "Site readiness and shortage decisions"
 tags:
   - "clippings"
 ---
-- [Short material: Intumescent sealant, 310 ml cartridge · this site short 2 of 10](https://qantum-team-leader-slice.vercel.app/materials/MAT-SEALANT?from=pen-b-01#site-site-b)
+- [Short material: Intumescent sealant, 310 ml cartridge · this site short 2 of 10](https://qantum-warehouse-management.vercel.app/materials/MAT-SEALANT?from=pen-b-01#site-site-b)
 
 | Field | Penetration | Solution 0451 |
 | --- | --- | --- |
