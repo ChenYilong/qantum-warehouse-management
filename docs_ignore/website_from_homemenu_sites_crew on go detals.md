@@ -1,6 +1,6 @@
 ---
 title: "Riverside Plaza, Block A"
-source: "https://qantum-team-leader-slice.vercel.app/sites/site-a"
+source: "https://qantum-warehouse-management.vercel.app/sites/site-a"
 author:
 published:
 created: 2026-10-14
@@ -18,11 +18,11 @@ These stock figures are more than a day old. Check with the warehouse before rel
 
 ## Penetrations6
 
-- [L2, Corridor north · Steel Pipe Ø28mmSubstitutes](https://qantum-team-leader-slice.vercel.app/sites/site-a/penetrations/pen-a-01)
-- [L2, Corridor north · Steel Pipe Ø28mmSubstitutes](https://qantum-team-leader-slice.vercel.app/sites/site-a/penetrations/pen-a-02)
-- [L2, Plant room · Copper Pipe - 50mm Fibreglass Ø32mmSubstitutes](https://qantum-team-leader-slice.vercel.app/sites/site-a/penetrations/pen-a-03)
-- [L2, Plant room · Copper Pipe - 50mm Fibreglass Ø32mmSubstitutes](https://qantum-team-leader-slice.vercel.app/sites/site-a/penetrations/pen-a-04)
-- [L2, Riser 1 · PEX-AL Pipe Ø25mmSubstitutes](https://qantum-team-leader-slice.vercel.app/sites/site-a/penetrations/pen-a-05)
-- [L2, Riser 1 · PEX-AL Pipe Ø25mmSubstitutes](https://qantum-team-leader-slice.vercel.app/sites/site-a/penetrations/pen-a-06)
+- [L2, Corridor north · Steel Pipe Ø28mmSubstitutes](https://qantum-warehouse-management.vercel.app/sites/site-a/penetrations/pen-a-01)
+- [L2, Corridor north · Steel Pipe Ø28mmSubstitutes](https://qantum-warehouse-management.vercel.app/sites/site-a/penetrations/pen-a-02)
+- [L2, Plant room · Copper Pipe - 50mm Fibreglass Ø32mmSubstitutes](https://qantum-warehouse-management.vercel.app/sites/site-a/penetrations/pen-a-03)
+- [L2, Plant room · Copper Pipe - 50mm Fibreglass Ø32mmSubstitutes](https://qantum-warehouse-management.vercel.app/sites/site-a/penetrations/pen-a-04)
+- [L2, Riser 1 · PEX-AL Pipe Ø25mmSubstitutes](https://qantum-warehouse-management.vercel.app/sites/site-a/penetrations/pen-a-05)
+- [L2, Riser 1 · PEX-AL Pipe Ø25mmSubstitutes](https://qantum-warehouse-management.vercel.app/sites/site-a/penetrations/pen-a-06)
 
 ![Video Roll](chrome-extension://cokngoholafkeghnhhdlmiadlojpindm/icons/icon_48.png)

@@ -10,8 +10,8 @@ Legend: `[x]` done, `[~]` partial, `[ ]` not started.
 
 | # | Item | Status | Evidence / next step |
 | --- | --- | --- | --- |
-| 1 | GitHub repository link | [x] | https://github.com/binartist/qantum-team-leader-slice (public, default branch `main`). |
-| 2 | Public URL for the working experience | [x] | https://qantum-team-leader-slice.vercel.app (Vercel, functions in `syd1`, actions in Postgres database `qantum_slice`). |
+| 1 | GitHub repository link | [x] | https://github.com/ChenYilong/qantum-warehouse-management (public, default branch `main`). |
+| 2 | Public URL for the working experience | [x] | https://qantum-warehouse-management.vercel.app (Vercel, functions in `syd1`, actions in Postgres database `qantum_slice`). |
 | 3 | Try-it instructions | [x] | README "Try it": a two-minute walk through the live demo. |
 | 4 | README: run locally | [x] | README "Run locally": `npm ci`, `npm run dev`, memory store, no credentials. |
 | 5 | README: run tests | [x] | README "Tests": typecheck, lint, coverage, AC check, Playwright, database contract. |
@@ -26,7 +26,7 @@ Legend: `[x]` done, `[~]` partial, `[ ]` not started.
 | 14 | Working application code | [x] | Domain core, stubs, Postgres and memory stores, use cases, seven-route API, seven screens (landing, sites, materials, material, actions log, site, penetration). Live and proven against the real database. |
 | 15 | Automated tests | [x] | 434 unit and API tests, 5 database contract tests on Postgres 17, 40 Playwright tests with axe at 375px (and at 1024 and 1280px for the side menu); all 47 ACs referenced; all run in CI. |
 | 16 | CI/CD config | [x] | `.github/workflows/ci.yml`: checks (typecheck, lint, coverage, build, bundle credential scan, audit, gitleaks), db (contract suite on Postgres 17), e2e (Playwright, axe, AC check), and on `main` a Vercel prebuilt deploy plus smoke test. |
-| 17 | Pipeline inspectable, with successful deploy evidence | [x] | Latest green run on `main` with deploy and smoke (PR #3): https://github.com/binartist/qantum-team-leader-slice/actions/runs/37528327015. First: https://github.com/binartist/qantum-team-leader-slice/actions/runs/37309054947. Live check 2026-10-06: `x-vercel-id` syd1, smoke ok, an escalation recorded through the live API survived a production redeploy. |
+| 17 | Pipeline inspectable, with successful deploy evidence | [x] | Latest green run on `main` with deploy and smoke (PR #3): https://github.com/ChenYilong/qantum-warehouse-management/actions/runs/37528327015. First: https://github.com/ChenYilong/qantum-warehouse-management/actions/runs/38689725716. Live check 2026-10-06: `x-vercel-id` syd1, smoke ok, an escalation recorded through the live API survived a production redeploy. |
 | 18 | Agentic coding account | [x] | `docs/agentic-approach.md`: tools, planning, verification ladder, corrections, cost. |
 
 ## 2. Assessment criteria
@@ -163,7 +163,7 @@ From `technical-design.md` section 11 and 12.
 
 Readiness check 2026-10-07 on `b169450` (`origin/main`; `dev` had the same tree).
 
-- [x] CI green on the default branch (lint, typecheck, unit, API, DB, end-to-end). Run https://github.com/binartist/qantum-team-leader-slice/actions/runs/37528327015: checks, db, e2e and deploy all succeeded, including Secret scan (gitleaks), Bundle credential scan, production audit and Smoke. Re-run locally: typecheck, lint, 426 tests (100% lines, 99.84% branches), `check:ac` 46 of 46, build, 34 Playwright tests, `npm audit --omit=dev` 0, `skf sync --check` in sync.
+- [x] CI green on the default branch (lint, typecheck, unit, API, DB, end-to-end). Run https://github.com/ChenYilong/qantum-warehouse-management/actions/runs/37528327015: checks, db, e2e and deploy all succeeded, including Secret scan (gitleaks), Bundle credential scan, production audit and Smoke. Re-run locally: typecheck, lint, 426 tests (100% lines, 99.84% branches), `check:ac` 46 of 46, build, 34 Playwright tests, `npm audit --omit=dev` 0, `skf sync --check` in sync.
 - [x] Public URL loads and the demo scenario works from a clean browser. README "Try it" steps 1 to 8 walked read-only in an isolated browser at 375px: no console errors, no sideways scroll, `x-vercel-id` syd1. Writes were proven live on 2026-10-06 (row 17); not repeated, to keep the shared demo state.
 - [x] No secrets in the repo or history. `.env.example` lists names only. gitleaks green on `main`; the only credential-shaped strings in history are `127.0.0.1` URLs for throwaway test databases.
 - [x] Sample data clearly labelled as invented. Every sample penetration references a real `internal_code`. All four files carry an "INVENTED SAMPLE DATA" `label`; 15 of 16 codes are in the 148-row catalogue, and `9999` is the deliberate missing code. CSV hash unchanged.
@@ -195,8 +195,8 @@ Readiness check 2026-10-07 on `b169450` (`origin/main`; `dev` had the same tree)
 | 2026-10-04 | UI built by Grok (116 turns, $3.29), then three fresh review sessions ($4.10) and a fix round (108 turns, $3.24). Orchestrator gates: typecheck, lint, 269 tests, 100% coverage, build, `check:ac`, 11 Playwright tests stable over three runs, reviewer mutants killed, CSV traced in all 11 routes. Docs updated: api.md, ui-design.md section 9, spec AC 9, test strategy. |
 | 2026-10-04 | Navigation shell after phone review (docs/agent-work/16-ui-nav-brief.md): bottom demo bar, sticky title header, chevron back control, "Ref" label. Built by Grok on the fast model (41 turns, $2.39). Gates and 12 e2e tests green over repeated runs. ui-design.md updated. |
 | 2026-10-05 | Usability round from a UX review against the brief (docs/agent-work/18-ui-usability-brief.md), built by Grok on the default model (45 turns, $1.34). Two additive API fields (site counts; service and size on readiness penetrations). 281 tests, 12 e2e green over repeated runs. api.md and ui-design.md updated. Skill lock re-synced (registry pointer only, no skill content changed). |
-| 2026-10-06 | PR #1 merged; CI on main deployed to https://qantum-team-leader-slice.vercel.app with a green smoke test. Orchestrator verified the live region, idempotent replay through Postgres (201 then 200), and that the action survives a redeploy (AC 7 of the delivery spec). |
-| 2026-10-06 | Public repo github.com/binartist/qantum-team-leader-slice created (gitleaks clean over all commits, first CI green). Skills vercel-deploy, supabase-postgres, data-migration added. Storage moved from supabase-js to pg on a new database with an append-only app role (Grok, default model, 50 turns, $1.42); contract suite on real Postgres 17; CI gains db, e2e and deploy jobs. Docs updated. |
+| 2026-10-06 | PR #1 merged; CI on main deployed to https://qantum-warehouse-management.vercel.app with a green smoke test. Orchestrator verified the live region, idempotent replay through Postgres (201 then 200), and that the action survives a redeploy (AC 7 of the delivery spec). |
+| 2026-10-06 | Public repo github.com/ChenYilong/qantum-team-leader-slice created (gitleaks clean over all commits, first CI green). Skills vercel-deploy, supabase-postgres, data-migration added. Storage moved from supabase-js to pg on a new database with an append-only app role (Grok, default model, 50 turns, $1.42); contract suite on real Postgres 17; CI gains db, e2e and deploy jobs. Docs updated. |
 | 2026-10-06 | Post-delivery walkthrough: substitute availability now accounts for site shortages (AC 33) and the blocked banner names data problems in its next step (AC 34). Spec, design, api.md, ui-design.md, test strategy and README updated. |
 | 2026-10-06 | Site reference removed from the sites list (names already tell sites apart) and kept on the site screen as "Job ref", where an escalation would quote it. API unchanged. |
 | 2026-10-06 | Landing page at `/` explains the demo; sites list moved to `/sites`; bottom demo bar replaced by a Demo tag in every header (user decision). Smoke test now checks both pages. |

@@ -24,7 +24,7 @@ export default function LandingPage() {
             <li>
               <p>
                 Source code, specs and how it was built with AI agents: the{" "}
-                <a href="https://github.com/binartist/qantum-team-leader-slice">GitHub repository</a>.
+                <a href="https://github.com/ChenYilong/qantum-warehouse-management">GitHub repository</a>.
               </p>
             </li>
           </ul>

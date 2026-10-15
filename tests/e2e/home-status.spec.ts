@@ -25,7 +25,7 @@ test("landing page explains the demo, no screen carries a Demo tag, and there is
   // One pointer to the source, specs and agent briefs; a plain link in the list, not a menu item.
   await expect(page.getByRole("link", { name: "GitHub repository" })).toHaveAttribute(
     "href",
-    "https://github.com/binartist/qantum-team-leader-slice",
+    "https://github.com/ChenYilong/qantum-warehouse-management",
   );
   await expect(page.getByRole("link", { name: /^Demo/ })).toHaveCount(0);
   await expect(page.getByRole("contentinfo")).toHaveCount(0);
