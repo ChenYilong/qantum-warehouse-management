@@ -12,7 +12,7 @@ Shell
 Before sending a crew to site, a team leader checks whether the materials for the planned penetrations are in stock. For each shortage they record a decision: **wait**, **escalate** to purchasing or the warehouse, or **propose a substitute** solution from the catalogue for a manager to verify. The app never approves a substitute and never says the crew can go while anything is short or unknown.
 
 - **Live:** https://qantum-warehouse-management.vercel.app (best on a phone-width window)
-- **Pipeline:** [GitHub Actions](https://github.com/ChenYilong/qantum-warehouse-management/actions), e.g. [the run that deployed main](https://github.com/ChenYilong/qantum-warehouse-management/actions/runs/38689725716)
+- **Pipeline:** [GitHub Actions](https://github.com/ChenYilong/qantum-warehouse-management/actions), e.g. [the latest green run on main](https://github.com/ChenYilong/qantum-warehouse-management/actions/runs/38689725716)
 
 ## Try it (about two minutes)
 
