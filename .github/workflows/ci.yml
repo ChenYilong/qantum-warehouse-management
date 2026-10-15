@@ -11,6 +11,7 @@ permissions:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
         with:
@@ -20,6 +21,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The supplied catalogue is kept out of the public repo; restore it from a secret and check its hash.
+      - name: Restore catalogue CSV from secret
+        env:
+          SOLUTIONS_CSV_B64: ${{ secrets.SOLUTIONS_CSV_B64 }}
+        run: |
+          test -n "$SOLUTIONS_CSV_B64" || { echo "::error::Secret SOLUTIONS_CSV_B64 is missing"; exit 1; }
+          printf '%s' "$SOLUTIONS_CSV_B64" | base64 -d > data/solutions-excerpt.csv
+          echo "cc01d2ab3fd65a29d95ef42fd04648682e116b1142700300fab9074a30b5e805  data/solutions-excerpt.csv" | sha256sum -c -
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run test:coverage
@@ -35,6 +44,7 @@ jobs:
 
   db:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:17
@@ -64,6 +74,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       actions: write
@@ -74,6 +85,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Restore catalogue CSV from secret
+        env:
+          SOLUTIONS_CSV_B64: ${{ secrets.SOLUTIONS_CSV_B64 }}
+        run: |
+          test -n "$SOLUTIONS_CSV_B64" || { echo "::error::Secret SOLUTIONS_CSV_B64 is missing"; exit 1; }
+          printf '%s' "$SOLUTIONS_CSV_B64" | base64 -d > data/solutions-excerpt.csv
+          echo "cc01d2ab3fd65a29d95ef42fd04648682e116b1142700300fab9074a30b5e805  data/solutions-excerpt.csv" | sha256sum -c -
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm run check:ac
@@ -87,8 +105,12 @@ jobs:
 
   deploy:
     needs: [checks, db, e2e]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Deploy only from main, and only once the Vercel project is configured (repository variable VERCEL_PROJECT_ID).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.VERCEL_PROJECT_ID != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Deployment secrets live in the protected "production" environment, as in qantum-stock.
+    environment: production
     concurrency:
       group: deploy-production
     env:
@@ -102,6 +124,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Restore catalogue CSV from secret
+        env:
+          SOLUTIONS_CSV_B64: ${{ secrets.SOLUTIONS_CSV_B64 }}
+        run: |
+          test -n "$SOLUTIONS_CSV_B64" || { echo "::error::Secret SOLUTIONS_CSV_B64 is missing"; exit 1; }
+          printf '%s' "$SOLUTIONS_CSV_B64" | base64 -d > data/solutions-excerpt.csv
+          echo "cc01d2ab3fd65a29d95ef42fd04648682e116b1142700300fab9074a30b5e805  data/solutions-excerpt.csv" | sha256sum -c -
       - run: npx vercel@62.2.0 pull --yes --environment=production --token "$VERCEL_TOKEN"
       - run: npx vercel@62.2.0 build --prod --token "$VERCEL_TOKEN"
       - run: npx vercel@62.2.0 deploy --prebuilt --prod --token "$VERCEL_TOKEN"
