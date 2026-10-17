@@ -60,8 +60,8 @@ test("AC 47: collapse is remembered across a reload and expand clears it", async
 
   const sites = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Sites", exact: true });
   const box = await sites.boundingBox();
-  expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
-  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  expect(box?.width ?? 0).toBeGreaterThanOrEqual(48);
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(48);
   await expect(page.locator("aside").getByRole("group", { name: "Theme" })).toHaveCount(0);
 
   await page.reload();

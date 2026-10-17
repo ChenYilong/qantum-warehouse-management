@@ -12,9 +12,9 @@ Before a crew leaves for a site, the team leader needs to know whether the mater
 
 ## 2. Scope
 
-**In:** list sites, compute readiness for a site, show shortages and missing-data blockers, show each material's shared stock against every site's need, record wait, escalate and substitute-proposal, list recorded actions, suggest catalogue-similar substitutes.
+**In:** list sites, compute readiness for a site, show shortages and missing-data blockers, show each material's shared stock against every site's need, record wait, escalate and substitute-proposal, list recorded actions, suggest catalogue-similar substitutes. Field use round (2026-10-18): show the connection state on every screen and let the leader work offline, text or call a clear site's operator, and open a blocked site with what needs a decision.
 
-**Out (see section 8):** real auth, real inventory or nomination systems, approving substitutes, stock reservation across sites, crew scheduling, offline use, install, pins and photos.
+**Out (see section 8):** real auth, real inventory or nomination systems, approving substitutes, stock reservation across sites, crew scheduling, offline data and queued writes, install, pins and photos.
 
 ## 3. Functional requirements
 
@@ -37,6 +37,10 @@ Before a crew leaves for a site, the team leader needs to know whether the mater
 | FR15 | Every screen has a defined state for loading, empty, error and upstream-unavailable. Upstream failure never shows crew as clear. |
 | FR16 | Every write requires an idempotency key, and a repeat records once. A repeat for the same target returns the original even if the shortage has since resolved. A repeat for a different target is rejected with 409. |
 | FR17 | A drawer side menu gives the three top-level views, Sites, Materials and the Actions log. Materials shows each material a site plans to use against the one shared stock, across sites, and is where a site's shortage is waited on or escalated. The Actions log lists every site's recorded decisions and proposals. A decision on a penetration also shows on its list row as a mark, and the penetration page has its own actions log. |
+| FR18 | Every screen shows whether the phone can reach the app, when it last could, and the picker's last action. The leader can switch Online off to work offline; offline, the app sends nothing, says how old the screen is, and offers Sync now with the last sync time. |
+| FR19 | Each site on the sites list has one main action: a clear site's operator can be texted or called in one tap (the operator is told first and passes word to the picker); a blocked site goes to what needs a decision. |
+| FR20 | A blocked site opens with what needs a decision: what is short, with its unit and the penetrations it affects, what is covered, the options with what each does, and who to call. |
+| FR21 | The screens are sized for gloves and glare: 18px body text and 48px targets. |
 
 ## 4. Acceptance criteria
 
@@ -81,10 +85,10 @@ Numbered for use as test names. Sample data is defined in section 7.
 
 **Experience**
 30. Every shortage shows its material, required, on hand, short by, the penetrations it is planned on, and its state, without relying on colour alone.
-31. All controls are keyboard operable, and interactive targets are at least 44px.
+31. All controls are keyboard operable, and interactive targets are at least 48px (raised from 44px in the field use round).
 32. On a 375px wide screen, nothing needs horizontal scrolling.
 33. A candidate that uses a material the site is already short of has availability `short`, even when one install fits in the stock on hand. A material whose site stock is unknown makes the candidate `unknown`. Shortages of other materials leave a candidate that fits on hand `in_stock`.
-34. On the site screen, a blocked site has no summary banner. Filter chips for shortages, data problems and acted count the penetrations and narrow the list. Acted means a current wait or escalation on a shortage that lists the penetration or on its own data problem, or any substitute proposed for it; an earlier or resolved decision still shows as a row mark (AC 44) but does not count. Each row still shows its own line. A clear site's banner still reads "Crew can go." The sites list chip still names the shortage and data-problem counts.
+34. On the site screen, a blocked site has no summary banner; it opens with the Needs your decision panel instead (AC 50). Filter chips for shortages, data problems and acted count the penetrations and narrow the list. Acted means a current wait or escalation on a shortage that lists the penetration or on its own data problem, or any substitute proposed for it; an earlier or resolved decision still shows as a row mark (AC 44) but does not count. Each row still shows its own line. A clear site's banner still reads "Crew can go." The sites list chip still names the shortage and data-problem counts.
 35. A penetration whose nominated solution differs on orientation, normalised substrate, normalised service type or normalised size, or falls short of a stated integrity or insulation requirement, gets a `solution_mismatch` blocker listing the failing fields. The crew is blocked, wait is rejected with 422, escalate is accepted, and the penetration adds no material need. Text that differs only by spacing or capitals is not a mismatch. A substrate cut off after the family name, on either side, never fits, even against identical cut-off text. Blank text, or a requirement or rating that is not a usable number, never fits.
 36. The penetration page shows each field side by side for the penetration and its nominated solution, and marks every field that does not fit with an icon and text, never colour alone.
 37. Below 1024px wide, on the sites list, the materials list, the actions log and the landing page (About this demo, at `/about-this-demo`; `/` redirects there), the leading header control opens a left drawer listing Sites, Materials and Actions log, with the current section marked (About this demo, when the landing page is open), and, at its foot, a theme choice (System, Light, Dark; System follows the device, and a choice is remembered on this device and applied before the page paints) and a link to the landing page. Escape, the backdrop, the close control and choosing a link close it, and focus returns to the menu control when the drawer closes without navigating. Inner screens lead with the back control instead, never both.
@@ -98,6 +102,12 @@ Numbered for use as test names. Sample data is defined in section 7.
 45. The penetration page has two tabs, Solution (the default) and Actions log, as links (`?tab=log`) with the current one marked. Solution holds the nominated solution and substitutes. Actions log lists this penetration's decisions newest first: waits and escalations on a site shortage of a material its nominated solution uses (including resolved ones), on its own data problem, and substitutes proposed for it, each with date, author and whether it still applies. A material decision that still has a shortage says it applies to all N penetrations at this site, and opens the material page, whose back control returns to this tab. The tab shows a count; when the log cannot be read, it shows no number and never "nothing recorded". Tab links keep the log origin (`fromLog`).
 46. The material page has two tabs, Stock (the default) and Actions log, as links (`?tab=log`) that keep `from` and `fromLog`. Actions log lists every wait and escalation on this material's shortage at every site, newest first, each naming its site, with no links; proposals are not listed. The count shows only when every site's log was read. A site that could not be read is named in a warning and its decisions are not listed; with no log readable the tab says it can't load. Never 0 or "nothing recorded" in either case.
 47. From 1024px wide, the drawer's contents sit in a side menu beside every page instead (one navigation named Main, the current section marked: a site or penetration marks Sites, a material marks Materials), and the drawer's menu control and the empty top-level header are gone; inner pages keep their back control, and sticky headings still stick directly below whatever header remains. A Collapse menu control (Expand menu when collapsed, its state exposed) narrows the menu to an icon rail whose items keep their names as hidden labels and hover titles, each at least 44px; the choice is remembered on this device and applied before the page paints, so a collapsed menu never opens wide on reload. `/` redirects (temporarily) to `/about-this-demo`.
+
+**Field use (2026-10-18)**
+48. Every screen shows a connection bar above its own header: the picker's last action (the stock feed's time, or "unknown") on the left, and an Online switch on the right. Online needs the browser's network flag, an answer from `GET /api/health` (asked every 30 seconds, when the network returns and when the tab is shown) and the switch left on; before the first answer the bar says Checking, never Online, and switching Online back on shows Online only after the server answers. Switched off or unreachable, it reads Offline with when the phone last heard from the server; a banner at the foot of the screen says the data is from that time and opens Offline details (last online, when this screen and the stock figures are from, what is waiting to send, Sync now and the last sync time); and decision dialogs send nothing and say so. Sync now reaches the server, refreshes the screen and stamps the sync time; when it cannot, it says nothing was sent. Only real changes are announced. A stock feed that is down still answers the check, with no time.
+49. Each site on the sites list is a card with its name as a link to the site, its crew status chip, and one main action. A clear site with an operator offers Text operator (a prepared message naming the site and its job ref, keeping "shared, not reserved") and Call operator; a blocked site offers Sort out shortages, to its Needs your decision panel, or Check data problems when it has no shortage; a site that can't be checked offers Try again; nothing planned has no action. Action names never repeat the site name. A site carries an optional operator and picker, each a name and an international number; the sample numbers are from Ofcom's drama range, so they reach no one.
+50. A blocked site screen opens with a Needs your decision panel: "Can't go yet" with its shortage and data-problem counts; each shortage with its figure and unit ("Short 2 of 10 cartridges", or "Stock unknown · needs 1 tube"), the penetrations it affects as a link to them ("4 penetrations affected"), and its Wait and Escalate; the data problems and the penetrations they affect, as a link to the filter; what each option does; the materials covered for this site alone, with the shared-stock caveat; and the picker and operator to call, listed once when one person does both. Nothing in the panel releases the crew. A clear or nothing-planned site has no panel.
+51. Body text is 18px, with headings scaled to match, and AC 31's 48px targets hold on every screen at 375px with no horizontal scrolling.
 
 ## 5. Non-functional requirements
 
@@ -125,6 +135,8 @@ Each is carried into the README as a known assumption.
 7. Approval of substitutes happens elsewhere, in a process this slice does not depend on.
 8. Site and material ids contain no `:` (the shortage id is `siteId:materialId`). Upstream data is validated at the boundary, and the domain additionally fails closed on bad numbers.
 9. The catalogue file path is trusted server configuration, never user input.
+10. The stock feed's time is the picker's last action: the warehouse changes stock when it picks. A real feed would add who and what.
+11. Each site's operator and picker come with the site from the planning system. Here they are invented.
 
 ## 7. Sample data (all invented, clearly labelled)
 
@@ -138,7 +150,7 @@ Lives in `data/sample/` with a README that says so. The CSV is the only real dat
 
 ## 8. Exclusions
 
-Real authentication, a real inventory or nomination service, approval of substitutes, stock reservation or allocation, crew scheduling, offline use, rate limiting, push notifications, install, pins and photos, other suppliers, and editing the catalogue.
+Real authentication, a real inventory or nomination service, approval of substitutes, stock reservation or allocation, crew scheduling, offline data and queued writes (the app shows the connection and holds its own sends, but it does not cache screens or queue decisions), rate limiting, push notifications (Text operator opens the leader's own messages app), install, pins and photos, other suppliers, and editing the catalogue.
 
 ## 9. Demonstration scenario
 
@@ -152,7 +164,7 @@ Real authentication, a real inventory or nomination service, approval of substit
 
 ## 10. Production gaps (carried to README)
 
-No login or role checks, no rate limiting, TLS that encrypts but does not authenticate the database server, no offline support, stub upstream systems, shared unreserved stock, and no approval workflow.
+No login or role checks, no rate limiting, TLS that encrypts but does not authenticate the database server, offline support limited to the connection state (no cached screens or queued decisions), stub upstream systems, shared unreserved stock, and no approval workflow.
 
 ## 11. Open points
 

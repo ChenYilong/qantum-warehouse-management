@@ -21,6 +21,7 @@ export {
 } from "./errors";
 
 export {
+  ContactSchema,
   IdSchema,
   MaterialSchema,
   NominatedPenetrationSchema,
@@ -40,11 +41,20 @@ export interface NominatedPenetration extends Penetration {
   readonly location: string;
 }
 
+export interface Contact {
+  readonly name: string;
+  readonly phone: string;
+}
+
 export interface Site {
   readonly id: string;
   readonly name: string;
   readonly reference: string;
   readonly address?: string;
+  /** Who installs at this site today. */
+  readonly operator?: Contact;
+  /** Who picks this site's materials in the warehouse. May be the operator too. */
+  readonly picker?: Contact;
 }
 
 export interface Material {

@@ -26,18 +26,30 @@ The app's own HTTP API, as built. Requirements are in `slice-specification.md`, 
 | `GET /api/sites/{id}/penetrations/{pid}/substitution-candidates` | Catalogue-similar substitutes | 200 |
 | `POST /api/sites/{id}/penetrations/{pid}/substitutions` | Record a proposed substitute | 201, or 200 |
 | `GET /api/sites/{id}/actions` | Recorded actions and proposals | 200 |
+| `GET /api/health` | The connection bar's check, with the stock feed's time | 200 |
 
 ### `GET /api/sites`
 
 ```ts
 { sites: Array<{ id, name, reference, address?,
+  operator?: { name, phone }, picker?: { name, phone },
   crewStatus: "clear" | "blocked" | "nothing_planned" | "unavailable",
   shortageCount: number, dataProblemCount: number }> }
 ```
 
+`operator` and `picker` come with the site from upstream (AC 49). `phone` is international, a `+` then digits and spaces. Either may be missing; the operator and the picker may be the same person.
+
 `shortageCount` and `dataProblemCount` are always present and are 0 unless `crewStatus` is `blocked`, so the list can say why a site is blocked.
 
 `unavailable` means that site's readiness could not be computed. It is logged and never shown as clear. A failure of the sites source itself is a 502.
+
+### `GET /api/health`
+
+```ts
+{ status: "ok", stockAsOf: string | null }
+```
+
+Answers whenever the app can be reached, never cached. `stockAsOf` is the stock feed's time, shown as the picker's last action, or null when the stock feed is down or invalid: a feed failure is not a failed check (AC 48).
 
 ### `GET /api/sites/{id}/readiness`
 

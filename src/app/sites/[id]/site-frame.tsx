@@ -4,6 +4,8 @@ import type { Site } from "@/ports";
 import { SiteNotFoundError } from "@/ports";
 import { getCachedSite, getCachedSiteData } from "../../_lib/cached";
 import { loadPage } from "../../_lib/load";
+import { actionNeeded } from "@/ui/action-needed";
+import { ActionNeeded } from "@/ui/ActionNeeded";
 import { AppBar } from "@/ui/AppBar";
 import { Banner } from "@/ui/Banner";
 import { UnavailablePanel } from "@/ui/UnavailablePanel";
@@ -25,6 +27,8 @@ export type SiteFrameData =
       readonly places: readonly PenetrationPlace[] | null;
       /** Nominated-solution material ids per penetration. Empty when the site's work could not be read. */
       readonly penetrationMaterialIds: Readonly<Record<string, readonly string[]>>;
+      /** Every material the planned work uses, for the covered list. Null when the site's work could not be read. */
+      readonly referencedMaterials: Readonly<Record<string, { readonly name: string; readonly unit: string }>> | null;
     };
 
 /** Loads what the site screen shows above its list: the site, its readiness banner, and the planned work. */
@@ -44,6 +48,7 @@ export async function loadSiteFrame(id: string): Promise<SiteFrameData> {
     plannedWork: loaded ? plannedWorkLine(Object.values(loaded.sitePenetrations).map((place) => place.nominatedCode)) : null,
     places: loaded ? Object.entries(loaded.sitePenetrations).map(([penetrationId, place]) => ({ id: penetrationId, ...place })) : null,
     penetrationMaterialIds: loaded ? loaded.penetrationMaterialIds : {},
+    referencedMaterials: loaded ? loaded.referencedMaterials : null,
   };
 }
 
@@ -81,6 +86,22 @@ export function SiteFrame({
         </p>
         {readiness && readiness.crewStatus !== "blocked" ? (
           <Banner status={readinessBanner(readiness.crewStatus)} />
+        ) : null}
+        {/* A blocked site has no banner: it opens with what needs a decision instead (AC 50). */}
+        {readiness && readiness.crewStatus === "blocked" ? (
+          <ActionNeeded
+            siteId={site.id}
+            operator={site.operator}
+            picker={site.picker}
+            view={actionNeeded({
+              siteId: site.id,
+              siteName: site.name,
+              shortages: readiness.shortages,
+              blockers: readiness.blockers,
+              materials: readiness.materials,
+              referenced: frame.referencedMaterials,
+            })}
+          />
         ) : null}
         {readiness ? null : <UnavailablePanel status={readinessBanner("unavailable")} />}
         {children}

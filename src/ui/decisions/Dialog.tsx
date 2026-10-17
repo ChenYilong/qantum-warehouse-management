@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode, type RefObject, type SyntheticEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useConnection } from "../ConnectionBar";
 import { characterCountLabel } from "../format";
 import { announce, postDecision } from "./api-client";
 import { sendOutcome } from "./form";
@@ -17,6 +18,7 @@ export function useDecisionDialog(success: string) {
   const [sending, setSending] = useState(false);
   const [formError, setFormError] = useState("");
   const router = useRouter();
+  const connection = useConnection();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -59,6 +61,11 @@ export function useDecisionDialog(success: string) {
 
   async function send(url: string, body: unknown): Promise<string> {
     if (sendingRef.current) return "";
+    // Working offline (by choice or not) sends nothing; the dialog stays open with the reason (AC 48).
+    if (connection.state === "offline") {
+      setFormError("offline");
+      return "offline";
+    }
     const requestKey = keyRef.current;
     sendingRef.current = true;
     setSending(true);

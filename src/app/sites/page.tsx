@@ -26,11 +26,7 @@ export default async function SitesPage() {
           <ul className={styles.list}>
             {loaded.value.sites.map((site) => (
               <li key={site.id}>
-                <SiteCard
-                  id={site.id}
-                  name={site.name}
-                  status={siteChip(site.crewStatus, site.shortageCount, site.dataProblemCount)}
-                />
+                <SiteCard site={site} status={siteChip(site.crewStatus, site.shortageCount, site.dataProblemCount)} />
               </li>
             ))}
           </ul>

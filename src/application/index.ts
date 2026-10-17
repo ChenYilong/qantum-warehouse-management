@@ -10,6 +10,7 @@ export {
   type MaterialStockList,
   type MaterialStockSummary,
 } from "./materials";
+export { checkHealth, type HealthView } from "./health";
 export { STOCK_NOTICE, getSiteReadiness, loadSiteData, type SiteData, type SiteReadinessView } from "./readiness";
 export { recordEscalation, recordWait, type RecordEscalationInput, type RecordWaitInput } from "./shortages";
 export { listSites, type ListedSite } from "./sites";

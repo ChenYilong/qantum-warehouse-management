@@ -118,7 +118,8 @@ Asking for stock and mappings by id keeps responses small and avoids fetching th
 // src/ports/schemas.ts (Zod). Shared by the stubs and any future HTTP client.
 const Id = z.string().min(1).max(64).regex(/^[A-Za-z0-9._-]+$/); // no ':' (shortage id is siteId:materialId)
 
-Site            = { id: Id, name: string, reference: string, address?: string }
+Site            = { id: Id, name: string, reference: string, address?: string,
+                    operator?: Contact, picker?: Contact }   // Contact = { name, phone: "+44 7700 900156" }
 Penetration     = { id: Id, siteId: Id, floor: string, location: string,
                     orientation: "Wall" | "Floor" | "Ceiling",
                     substrateDetail: string, serviceType: string, serviceSize: string,

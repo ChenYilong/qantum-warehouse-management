@@ -17,6 +17,7 @@ const readSpecs = [
   "**/navigation-drawer.spec.ts",
   "**/side-menu.spec.ts",
   "**/actions-log.spec.ts",
+  "**/field-ui.spec.ts",
 ];
 
 const writeSpecs = ["**/ac31-keyboard.spec.ts", "**/idempotency-key.spec.ts", "**/scenario.spec.ts"];

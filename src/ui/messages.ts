@@ -112,6 +112,30 @@ export const ANNOUNCE = {
   replay: "Already recorded",
 } as const;
 
+/** The connection bar, the offline banner and Offline details (AC 48). */
+export const CONNECTION = {
+  online: "Online",
+  offline: "Offline",
+  checking: "Checking",
+  backOnline: "Back online",
+  wentOffline: "You're offline",
+  stillOffline: "Still offline. Nothing was sent.",
+  synced: "Synced",
+  offlineRegion: "Offline",
+  details: "Offline details",
+  detailsTitle: "Offline details",
+  lastOnline: "Last online",
+  pageFrom: "This screen is from",
+  stockFrom: "Stock figures from",
+  waiting: "Waiting to send",
+  nothingWaiting: "Nothing",
+  notYet: "Not yet",
+  unknown: "Unknown",
+  syncNow: "Sync now",
+  syncing: "Syncing…",
+  close: "Close",
+} as const;
+
 const FALLBACK = "Something went wrong. Nothing was recorded.";
 
 const ERRORS: Readonly<Record<string, string>> = {
@@ -124,6 +148,7 @@ const ERRORS: Readonly<Record<string, string>> = {
   upstream_unavailable: "A system we depend on isn't available. Nothing was recorded. Try again.",
   upstream_invalid: "A system we depend on isn't available. Nothing was recorded. Try again.",
   transport_failed: "Couldn't reach the server. The decision may not have been recorded. Send again to retry; it won't be recorded twice.",
+  offline: "You're offline, so nothing was sent. Switch Online back on to send it, or phone the warehouse.",
 };
 
 const UNAVAILABLE_BANNER: StatusView = {
