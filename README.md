@@ -1,8 +1,5 @@
-# QAntum team leader: stock readiness before the crew goes
+# qantum-warehouse-management
 
-> **Attribution:** starts from [binartist/qantum-team-leader-slice](https://github.com/binartist/qantum-team-leader-slice) at commit `afb2ddc`.
->
-> **Catalogue data:** the supplied `data/solutions-excerpt.csv` is not committed. CI restores it from the `SOLUTIONS_CSV_B64` Actions secret and checks its SHA-256 before tests and deploys. To run locally, put the file at `data/solutions-excerpt.csv`.
 
 languages
 TypeScript
