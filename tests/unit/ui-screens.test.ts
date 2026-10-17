@@ -92,8 +92,8 @@ describe("navigation shell", () => {
   it("AC 37: top-level pages use MenuBar and inner pages use AppBar, never both", () => {
     for (const file of SCREEN_SOURCES) {
       const source = readFileSync(file, "utf8");
-      // AC 37: the leading control is the back control or the menu, never both. The landing page, Sites,
-      // Materials and the Actions log carry the menu; inner screens a back control; the error screens have no header.
+      // AC 37: the back control or the tab bar, never both. The landing page, Sites,
+      // Materials and the Actions log carry the tab bar (through MenuBar); inner screens a back control; the error screens have no header.
       const menu = ["src/app/about-this-demo/page.tsx", "src/app/sites/page.tsx", "src/app/materials/page.tsx", "src/app/actions/page.tsx"];
       const noHeader = ["src/app/error.tsx", "src/app/global-error.tsx"];
       if (menu.includes(file)) {
@@ -123,6 +123,7 @@ describe("navigation shell", () => {
     expect(menu).toContain("navSectionForPath");
     const bar = readFileSync("src/ui/AppBar.tsx", "utf8");
     expect(bar).toContain("data-menu-bar");
+    expect(bar).toContain("<TabBar current={current} />");
     const primitives = readFileSync("src/ui/primitives.module.css", "utf8");
     expect(primitives).toContain("grid-template-columns 150ms");
     expect(primitives).toContain(':global(:root[data-sidebar="collapsed"])');

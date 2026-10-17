@@ -670,44 +670,6 @@ section:has(> .stickyHeading) {
   border-top: 0;
 }
 
-/* A side panel. showModal puts the dialog in the top layer, so this fixed box is the viewport's. */
-.drawer {
-  position: fixed;
-  max-width: 100%;
-  height: auto;
-  max-height: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* The menu, from the left. */
-.drawerLeft {
-  inset: 0 auto 0 0;
-  width: min(85vw, 20rem);
-  border-right: 1px solid var(--border);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .drawerLeft[open] {
-    animation: navSlideIn 160ms ease-out;
-  }
-}
-
-.drawer::backdrop {
-  background: var(--backdrop);
-}
-
-.drawerPanel {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
 .drawerHeader {
   display: flex;
   flex: none;
@@ -722,26 +684,6 @@ section:has(> .stickyHeading) {
   margin: 0;
   font-size: 1.2rem;
   line-height: 1.3;
-}
-
-/* Dismiss. The accessible name stays on the button; the mark is only the X. */
-.drawerClose {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  min-width: 48px;
-  min-height: 48px;
-  margin-right: -0.25rem;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-}
-
-.drawerClose .icon {
-  margin-top: 0;
 }
 
 .tabCount {
@@ -778,6 +720,7 @@ section:has(> .stickyHeading) {
 }
 
 .srOnly,
+.menuBar .themeLegend,
 :global(:root[data-sidebar="collapsed"]) .sideMenu .navLabel {
   position: absolute;
   width: 1px;
@@ -790,40 +733,76 @@ section:has(> .stickyHeading) {
   border: 0;
 }
 
-/* The menu control on a top-level screen. A 48px target; the header keeps its height. */
-.menuButton {
-  display: inline-flex;
+/* A top-level screen's header: the app name and the theme choice. The tab bar at the foot is the menu. */
+.menuBarTitle {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuBar .themeSwitch {
   flex: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* The top-level menu below 1024px (AC 37): fixed to the foot of the screen, above the safe area. */
+.bottomTabs {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 3;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.bottomTabItems {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  max-width: 45rem;
+  height: var(--tab-bar-height);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.bottomTab {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 48px;
-  min-height: 48px;
-  margin-left: -0.5rem;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--link);
-  cursor: pointer;
+  gap: 0.125rem;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
 }
 
-.menuButton .icon {
+.bottomTab .kindIcon {
   margin-top: 0;
+  color: inherit;
 }
 
-/* Wide screens use the side menu. The trigger would otherwise sit alone in an empty header. */
+.bottomTab[aria-current="page"] {
+  color: var(--link);
+  font-weight: 600;
+}
+
+.bottomTab:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Wide screens use the side menu, which holds the tabs and the theme choice. */
 @media (min-width: 1024px) {
   .menuBar,
-  .menuButton {
+  .bottomTabs {
     display: none;
-  }
-}
-
-@keyframes navSlideIn {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: none;
   }
 }
 
@@ -964,7 +943,7 @@ section:has(> .stickyHeading) {
   margin-top: 0;
 }
 
-/* Below 1024px the drawer is the menu. From 1024px the shell is a fixed column plus the page. */
+/* Below 1024px the top-level pages' tab bar is the menu. From 1024px the shell is a fixed column plus the page. */
 .appShell {
   display: flex;
   flex: 1 0 auto;
@@ -1038,7 +1017,7 @@ section:has(> .stickyHeading) {
     width: 4rem;
   }
 
-  /* The theme row is one line in the drawer. The 15rem rail is tighter, so the pills give up a little padding. */
+  /* The 15rem rail is tight for the theme row, so the pills give up a little padding. */
   .sideMenu .navFooter {
     padding-inline: 0.25rem;
   }
@@ -1203,7 +1182,7 @@ section:has(> .stickyHeading) {
 /* Offline (AC 48): stays at the foot of the screen while the page scrolls. */
 .offlineBanner {
   position: sticky;
-  bottom: 0;
+  bottom: var(--tab-bar-space);
   z-index: 2;
   display: flex;
   flex-wrap: wrap;

@@ -43,8 +43,7 @@ test("landing page explains the demo, no screen carries a Demo tag, and there is
   await expect(main.getByRole("link", { name: "Materials", exact: true })).toHaveCount(2);
   await expect(main.getByRole("link", { name: "Actions log", exact: true }).first()).toHaveAttribute("href", "/actions");
   await expect(page.getByRole("banner").getByRole("link", { name: /^Back to / })).toHaveCount(0);
-  await page.getByRole("button", { name: "Open menu" }).click();
-  await page.getByRole("dialog", { name: "Team leader" }).getByRole("link", { name: "Sites" }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Sites" }).click();
   await expect(page).toHaveURL(/\/sites$/);
 
   await expect(page.getByRole("heading", { level: 1, name: "Sites" })).toBeVisible();

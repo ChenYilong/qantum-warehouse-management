@@ -14,7 +14,7 @@ const readSpecs = [
   "**/substitutes-empty.spec.ts",
   "**/site-tabs.spec.ts",
   "**/penetration-page.spec.ts",
-  "**/navigation-drawer.spec.ts",
+  "**/navigation-tabs.spec.ts",
   "**/side-menu.spec.ts",
   "**/actions-log.spec.ts",
   "**/field-ui.spec.ts",
