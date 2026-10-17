@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+.next-e2e*
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# Local environment files
+.env*
+!.env.example
+
+# Supabase local state
+supabase/.temp/
+
+# Vercel
+.vercel/
+
+# Tooling and operating-system files
+.DS_Store
+.idea/
+npm-debug.log*
+# Local reference material (not for the public repo)
+/docs/QAntum senior software engineer take home exercise.docx
+/docs/QAntum senior software engineer take home exercise.zh-CN.md
+/docs/~$*.docx
+/notes/
+/data/solutions-excerpt.csv
+docs_ignore/
+.docs_ignore/
+._*

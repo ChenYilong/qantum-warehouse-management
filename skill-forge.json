@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 2,
+  "extends": [],
+  "skills": {
+    "dependencies": {
+      "coding-discipline": "^0.3.1",
+      "security-baseline": "^0.1.0",
+      "code-quality": "^0.1.1",
+      "testing-strategy": "^0.1.1",
+      "external-worker-delegation": "^0.8.3",
+      "grok-build-harness": "^0.5.3",
+      "frontend-engineering": "^0.1.0",
+      "ui-portability-baseline": "^0.2.0",
+      "vercel-deploy": "^0.1.0",
+      "supabase-postgres": "^0.1.0",
+      "data-migration": "^0.1.0"
+    },
+    "shims": [
+      "claude-code"
+    ]
+  }
+}

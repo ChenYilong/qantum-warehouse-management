@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # The supplied catalogue is kept out of the public repo; restore it from a secret and check its hash.
+      - name: Restore catalogue CSV from secret
+        env:
+          SOLUTIONS_CSV_B64: ${{ secrets.SOLUTIONS_CSV_B64 }}
+        run: |
+          test -n "$SOLUTIONS_CSV_B64" || { echo "::error::Secret SOLUTIONS_CSV_B64 is missing"; exit 1; }
+          printf '%s' "$SOLUTIONS_CSV_B64" | base64 -d > data/solutions-excerpt.csv
+          echo "cc01d2ab3fd65a29d95ef42fd04648682e116b1142700300fab9074a30b5e805  data/solutions-excerpt.csv" | sha256sum -c -
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:coverage
+      - run: npm run build
+      - name: Bundle credential scan
+        run: REQUIRE_BUNDLE_SCAN=1 npx vitest run tests/api/security.test.ts
+      - name: Dependency audit (production dependencies)
+        run: npm audit --omit=dev --audit-level=high
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Database contract
+        env:
+          TEST_DB_ADMIN_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+          REQUIRE_DB_CONTRACT: "1"
+        run: npm run test:db
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Restore catalogue CSV from secret
+        env:
+          SOLUTIONS_CSV_B64: ${{ secrets.SOLUTIONS_CSV_B64 }}
+        run: |
+          test -n "$SOLUTIONS_CSV_B64" || { echo "::error::Secret SOLUTIONS_CSV_B64 is missing"; exit 1; }
+          printf '%s' "$SOLUTIONS_CSV_B64" | base64 -d > data/solutions-excerpt.csv
+          echo "cc01d2ab3fd65a29d95ef42fd04648682e116b1142700300fab9074a30b5e805  data/solutions-excerpt.csv" | sha256sum -c -
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npm run check:ac
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+
+  deploy:
+    needs: [checks, db, e2e]
+    # Deploy only from main, and only once the Vercel project is configured (repository variable VERCEL_PROJECT_ID).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.VERCEL_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Deployment secrets live in the protected "production" environment, as in qantum-stock.
+    environment: production
+    concurrency:
+      group: deploy-production
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Restore catalogue CSV from secret
+        env:
+          SOLUTIONS_CSV_B64: ${{ secrets.SOLUTIONS_CSV_B64 }}
+        run: |
+          test -n "$SOLUTIONS_CSV_B64" || { echo "::error::Secret SOLUTIONS_CSV_B64 is missing"; exit 1; }
+          printf '%s' "$SOLUTIONS_CSV_B64" | base64 -d > data/solutions-excerpt.csv
+          echo "cc01d2ab3fd65a29d95ef42fd04648682e116b1142700300fab9074a30b5e805  data/solutions-excerpt.csv" | sha256sum -c -
+      - run: npx vercel@62.2.0 pull --yes --environment=production --token "$VERCEL_TOKEN"
+      - run: npx vercel@62.2.0 build --prod --token "$VERCEL_TOKEN"
+      - run: npx vercel@62.2.0 deploy --prebuilt --prod --token "$VERCEL_TOKEN"
+      - name: Smoke
+        env:
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: node scripts/smoke.mjs
