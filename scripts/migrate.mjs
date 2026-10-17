@@ -76,7 +76,8 @@ async function main() {
     const existing = await client.query("select version from schema_migrations");
     const have = new Set(existing.rows.map((row) => String(row.version)));
     const directory = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "db", "migrations");
-    const files = (await readdir(directory)).filter((name) => name.endsWith(".sql")).sort();
+    // Skip dotfiles: macOS writes AppleDouble "._name.sql" files on exFAT and network volumes.
+    const files = (await readdir(directory)).filter((name) => name.endsWith(".sql") && !name.startsWith(".")).sort();
     for (const file of files) {
       const version = file.slice(0, -".sql".length);
       if (have.has(version)) continue;
