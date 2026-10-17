@@ -27,11 +27,12 @@ supabase/.temp/
 .DS_Store
 .idea/
 npm-debug.log*
-
 # Local reference material (not for the public repo)
 /docs/QAntum senior software engineer take home exercise.docx
 /docs/QAntum senior software engineer take home exercise.zh-CN.md
 /docs/~$*.docx
 /notes/
 /data/solutions-excerpt.csv
+docs_ignore/
+.docs_ignore/
 ._*
