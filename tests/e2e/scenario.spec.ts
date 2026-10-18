@@ -16,8 +16,7 @@ test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Kingsway stil
   });
 
   await gotoApp(page, "/");
-  await page.getByRole("button", { name: "Open menu" }).click();
-  await page.getByRole("dialog", { name: "Team leader" }).getByRole("link", { name: "Sites" }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Sites" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Sites" })).toBeVisible();
   await page.getByRole("link", { name: /Harbour Point/ }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Harbour Point, Levels 3 to 5" })).toBeVisible();
@@ -122,10 +121,9 @@ test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Kingsway stil
   await expect(proposed).toContainText("Proposed substitute");
   await expect(proposed.locator("span[aria-hidden='true']")).toHaveText("1");
 
-  // The actions log is a top-level page. This screen has no menu, so open it from the sites list.
+  // The actions log is a top-level page. This screen has no tab bar, so open it from the sites list.
   await gotoApp(page, "/sites");
-  await page.getByRole("button", { name: "Open menu" }).click();
-  await page.getByRole("dialog", { name: "Team leader" }).getByRole("link", { name: "Actions log" }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Actions log" }).click();
   await expect(page).toHaveURL(/\/actions$/);
   const log = page.locator("#site-site-b");
   // Each entry links to the work it is about, marked so its back control returns here, and a proposal names its place.
