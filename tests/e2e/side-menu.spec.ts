@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { assertAxe, assertNoOverflow, assertTargets, gotoApp } from "./support";
 
-// Read-only. The 375px drawer specs stay in navigation-drawer.spec.ts. These run wide.
+// Read-only. The 375px tab bar specs stay in navigation-tabs.spec.ts. These run wide.
 
 async function expectClean(page: Page): Promise<void> {
   await assertAxe(page);
@@ -16,7 +16,7 @@ test("AC 47: at 1280px the sites list shows the side menu and no empty header", 
   await expect(nav).toBeVisible();
   await expect(nav).toHaveCount(1);
   await expect(nav.getByRole("link", { name: "Sites", exact: true })).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("button", { name: "Open menu" })).toHaveCount(0);
+  await expect(page.locator("[data-tab-bar]")).toBeHidden();
   await expect(page.getByRole("banner")).toHaveCount(0);
 });
 

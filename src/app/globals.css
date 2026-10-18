@@ -1,6 +1,9 @@
 :root {
   /* The sticky header's fixed height, so the site tabs can stick directly below it. */
   --app-bar-height: 3.375rem;
+  /* The bottom tab bar's row, and the room it takes (row, top border, safe area) at the foot of a top-level page; 0 elsewhere. */
+  --tab-bar-height: 3.5rem;
+  --tab-bar-space: 0px;
   --text: #1a1a1a;
   --text-secondary: #55595e;
   --bg: #ffffff;
@@ -221,6 +224,18 @@ main > * {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+}
+
+/* Below 1024px a top-level page's tab bar is fixed to the foot, so the page keeps room for it. */
+@media (max-width: 1023.98px) {
+  :root:has([data-tab-bar]) {
+    --tab-bar-space: calc(var(--tab-bar-height) + 1px + env(safe-area-inset-bottom));
+  }
+
+  body:has([data-tab-bar]) {
+    box-sizing: border-box;
+    padding-bottom: var(--tab-bar-space);
   }
 }
 
