@@ -18,8 +18,10 @@ export const PENETRATION_FILTER = {
   unknown: "That material is not a shortage on this site. Showing all penetrations.",
 } as const;
 
-/** The menu: the bottom tab bar (AC 37) and the side menu (AC 47). */
+/** The drawer side menu (AC 37). */
 export const NAV = {
+  open: "Open menu",
+  close: "Close menu",
   collapse: "Collapse menu",
   expand: "Expand menu",
   title: "Team leader",

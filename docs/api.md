@@ -34,12 +34,16 @@ The app's own HTTP API, as built. Requirements are in `slice-specification.md`, 
 { sites: Array<{ id, name, reference, address?,
   operator?: { name, phone }, picker?: { name, phone },
   crewStatus: "clear" | "blocked" | "nothing_planned" | "unavailable",
-  shortageCount: number, dataProblemCount: number }> }
+  shortageCount: number, dataProblemCount: number,
+  shortages: Array<{ materialId, name, unit, kind: "short" | "unknown",
+    requiredQty: number, shortfallQty: number | null }> }> }
 ```
 
 `operator` and `picker` come with the site from upstream (AC 49). `phone` is international, a `+` then digits and spaces. Either may be missing; the operator and the picker may be the same person.
 
 `shortageCount` and `dataProblemCount` are always present and are 0 unless `crewStatus` is `blocked`, so the list can say why a site is blocked.
+
+`shortages` (AC 56) names the short materials of a blocked site, in the order of the readiness response, so the sites list and the prepared text to the operator say what is missing without a second call. It is always present, empty unless `crewStatus` is `blocked`, and its length is `shortageCount`. `name` falls back to the material id when the upstream has no name. `shortfallQty` is null, never a number, when the stock is unknown (`kind` is `unknown`). The field is additive: existing clients keep working.
 
 `unavailable` means that site's readiness could not be computed. It is logged and never shown as clear. A failure of the sites source itself is a 502.
 

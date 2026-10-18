@@ -1,17 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { KindIcon } from "./KindIcon";
-import { ABOUT_PATH } from "./format";
+import { KindIcon, type EntityKind } from "./KindIcon";
+import { ABOUT_PATH, ACTIONS_PATH, MATERIALS_PATH } from "./format";
 import { NAV } from "./messages";
-import { NAV_ITEMS, type NavSection } from "./nav-section";
+import type { NavSection } from "./nav-section";
 import { ThemeSwitch } from "./ThemeSwitch";
 import styles from "./primitives.module.css";
 
+const ITEMS: readonly { section: NavSection; href: string; label: string; kind: EntityKind }[] = [
+  { section: "sites", href: "/sites", label: NAV.sites, kind: "site" },
+  { section: "materials", href: MATERIALS_PATH, label: NAV.materials, kind: "material" },
+  { section: "actions", href: ACTIONS_PATH, label: NAV.actions, kind: "decision" },
+];
+
 /**
- * The wide side menu's entries, under its title row and Collapse control. `collapsed` hides Theme; CSS clips
- * the labels on the icon rail before paint so the links keep their names. Below 1024px the same entries are
- * the top-level pages' bottom tab bar.
+ * The entries shared by the drawer and the wide side menu. The title row stays in each shell: the drawer
+ * pairs it with Close, the side menu with Collapse. `collapsed` hides Theme; CSS clips the labels on the
+ * icon rail before paint so the links keep their names.
  */
 export function NavContent({
   current,
@@ -26,7 +32,7 @@ export function NavContent({
     <>
       <nav id={navId} aria-label={NAV.label} className={styles.navPanel}>
         <ul className={styles.navItems}>
-          {NAV_ITEMS.map((item) => (
+          {ITEMS.map((item) => (
             <li key={item.section}>
               <Link
                 className={styles.navItem}

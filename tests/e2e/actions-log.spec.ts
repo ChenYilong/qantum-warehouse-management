@@ -10,18 +10,22 @@ const SITES = [
   ["site-d", "Old Mill Annex"],
 ] as const;
 
-test("AC 43: the tab bar opens the actions log, one section per site", async ({ page }) => {
+test("AC 43: the menu opens the actions log, one section per site", async ({ page }) => {
   await gotoApp(page, "/sites");
-  const item = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Actions log" });
+  await page.getByRole("button", { name: "Open menu" }).click();
+  const drawer = page.getByRole("dialog", { name: "Team leader" });
+  const item = drawer.getByRole("link", { name: "Actions log" });
   await expect(item).toBeVisible();
   await item.click();
   await expect(page).toHaveURL(/\/actions$/);
   await expect(page.getByRole("heading", { level: 1, name: "Actions log" })).toBeVisible();
 
-  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Actions log" })).toHaveAttribute(
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(page.getByRole("dialog", { name: "Team leader" }).getByRole("link", { name: "Actions log" })).toHaveAttribute(
     "aria-current",
     "page",
   );
+  await page.keyboard.press("Escape");
 
   for (const [id, name] of SITES) {
     const section = page.locator(`#site-${id}`);

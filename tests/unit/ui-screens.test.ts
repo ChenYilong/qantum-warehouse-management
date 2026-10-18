@@ -92,8 +92,8 @@ describe("navigation shell", () => {
   it("AC 37: top-level pages use MenuBar and inner pages use AppBar, never both", () => {
     for (const file of SCREEN_SOURCES) {
       const source = readFileSync(file, "utf8");
-      // AC 37: the back control or the tab bar, never both. The landing page, Sites,
-      // Materials and the Actions log carry the tab bar (through MenuBar); inner screens a back control; the error screens have no header.
+      // AC 37: the leading control is the back control or the menu, never both. The landing page, Sites,
+      // Materials and the Actions log carry the menu; inner screens a back control; the error screens have no header.
       const menu = ["src/app/about-this-demo/page.tsx", "src/app/sites/page.tsx", "src/app/materials/page.tsx", "src/app/actions/page.tsx"];
       const noHeader = ["src/app/error.tsx", "src/app/global-error.tsx"];
       if (menu.includes(file)) {
@@ -123,7 +123,6 @@ describe("navigation shell", () => {
     expect(menu).toContain("navSectionForPath");
     const bar = readFileSync("src/ui/AppBar.tsx", "utf8");
     expect(bar).toContain("data-menu-bar");
-    expect(bar).toContain("<TabBar current={current} />");
     const primitives = readFileSync("src/ui/primitives.module.css", "utf8");
     expect(primitives).toContain("grid-template-columns 150ms");
     expect(primitives).toContain(':global(:root[data-sidebar="collapsed"])');
@@ -181,12 +180,19 @@ describe("input contrast", () => {
     expect(landing).not.toContain("Open sites");
   });
 
-  it("the site screen lists penetrations under filter chips, with no blocked banner", () => {
+  it("AC 34, AC 57: the site screen lists penetrations under filter chips, with no blocked banner, after its signal and operator row", () => {
     const page = readFileSync("src/app/sites/[id]/page.tsx", "utf8");
     expect(page).toContain("<SiteFrame");
     expect(page).toContain("<PenetrationFilters");
     const frame = readFileSync("src/app/sites/[id]/site-frame.tsx", "utf8");
-    expect(frame).toContain('crewStatus !== "blocked"');
-    expect(frame.indexOf("<Banner")).toBeLessThan(frame.indexOf("{children}"));
+    // The signal replaces the banner, and a blocked site opens with it, then its operator row, then the panel.
+    expect(frame).not.toContain("<Banner");
+    const signal = frame.indexOf("<SiteSignal");
+    const operator = frame.indexOf("<OperatorRow");
+    const panel = frame.indexOf("<ActionNeeded");
+    expect(signal).toBeGreaterThan(-1);
+    expect(signal).toBeLessThan(operator);
+    expect(operator).toBeLessThan(panel);
+    expect(panel).toBeLessThan(frame.indexOf("{children}"));
   });
 });

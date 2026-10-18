@@ -74,6 +74,45 @@ describe("site readiness over HTTP", () => {
     expect(siteB.body.stockAsOf).toBe("2026-10-03T08:00:00Z");
   });
 
+  it("AC 56: each blocked site lists its short materials, in readiness order, and no other site does", async () => {
+    const listed = await expectCache(await getSites());
+    const sites = listed.body.sites as {
+      id: string;
+      shortageCount: number;
+      shortages: {
+        materialId: string;
+        name: string;
+        unit: string;
+        kind: string;
+        requiredQty: number;
+        shortfallQty: number | null;
+      }[];
+    }[];
+    expect(sites.map((site) => [site.id, site.shortages])).toEqual([
+      ["site-a", []],
+      [
+        "site-b",
+        [
+          { materialId: "MAT-COLLAR-25", name: "Pipe collar for 25 mm pipe", unit: "each", kind: "short", requiredQty: 4, shortfallQty: 2 },
+          {
+            materialId: "MAT-SEALANT",
+            name: "Intumescent sealant, 310 ml cartridge",
+            unit: "cartridge",
+            kind: "short",
+            requiredQty: 10,
+            shortfallQty: 2,
+          },
+        ],
+      ],
+      [
+        "site-c",
+        [{ materialId: "MAT-MASTIC", name: "Fire mastic tube", unit: "tube", kind: "unknown", requiredQty: 1, shortfallQty: null }],
+      ],
+      ["site-d", []],
+    ]);
+    for (const site of sites) expect(site.shortages).toHaveLength(site.shortageCount);
+  });
+
   it("matches the sample outcomes for shortages, blockers, and candidates", async () => {
     const siteB = await expectCache(await readiness("site-b"));
     const shortages = siteB.body.shortages as {
@@ -203,13 +242,15 @@ describe("site readiness over HTTP", () => {
     expect(failed.body.crewStatus).toBeUndefined();
 
     const listed = await expectCache(await getSites());
-    const sites = listed.body.sites as { id: string; crewStatus: string; shortageCount: number; dataProblemCount: number }[];
+    const sites = listed.body.sites as { id: string; crewStatus: string; shortageCount: number; dataProblemCount: number; shortages: unknown[] }[];
     expect(sites.map((site) => [site.crewStatus, site.shortageCount, site.dataProblemCount])).toEqual([
       ["unavailable", 0, 0],
       ["unavailable", 0, 0],
       ["unavailable", 0, 0],
       ["unavailable", 0, 0],
     ]);
+    // AC 56: a site that could not be checked lists no shortages, so nothing reads as short or as covered.
+    expect(sites.map((site) => site.shortages)).toEqual([[], [], [], []]);
 
     setDependenciesForTests(testDependencies({ stock: "malformed" }));
     const invalid = await expectCache(await readiness("site-b"));

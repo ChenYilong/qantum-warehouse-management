@@ -345,6 +345,161 @@
   font-weight: 700;
 }
 
+/* The operator row: who to tell, then Text operator and Call operator, 56px tall for gloved hands (AC 55, 57). */
+.operatorRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.operatorButtons > * {
+  min-height: 3.5rem;
+}
+
+/* What a blocked site is short of: up to three materials, then a count (AC 57). */
+.shortFacts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: 100%;
+}
+
+.shortFacts ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * The site signal (AC 52 to 57): a big switch in the style of an I/O toggle. The track's colour, the knob's shape
+ * and mark, and the knob's side each say the state, so it reads in sunlight, with gloves and in greyscale. The label
+ * and the knob use the tone's ink on its fill, at least 7:1 (AC 53). The same box is a link (calls the operator), a
+ * button (checks again) or a plain box (nothing to tap).
+ */
+.signal {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 5.5rem;
+  padding: 0.5rem 0.75rem 0.5rem 0.625rem;
+  border: 4px solid var(--signal-edge);
+  border-radius: 2.75rem;
+  background: var(--signal-fill);
+  color: var(--signal-ink);
+  font: inherit;
+  line-height: 1.2;
+  text-align: left;
+  text-decoration: none;
+}
+
+a.signal,
+button.signal {
+  cursor: pointer;
+}
+
+a.signal:active,
+button.signal:active {
+  transform: translateY(2px);
+}
+
+.signalGo {
+  --signal-fill: var(--signal-go-fill);
+  --signal-ink: var(--signal-go-ink);
+  --signal-edge: var(--signal-go-edge);
+}
+
+.signalStop {
+  --signal-fill: var(--signal-stop-fill);
+  --signal-ink: var(--signal-stop-ink);
+  --signal-edge: var(--signal-stop-edge);
+}
+
+.signalUnknown {
+  --signal-fill: var(--signal-unknown-fill);
+  --signal-ink: var(--signal-unknown-ink);
+  --signal-edge: var(--signal-unknown-edge);
+}
+
+.signalIdle {
+  --signal-fill: var(--signal-idle-fill);
+  --signal-ink: var(--signal-idle-ink);
+  --signal-edge: var(--signal-idle-edge);
+}
+
+.signalText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.signalLabel {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.signalHint {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.signalKnob {
+  flex: none;
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.signalMark {
+  flex: none;
+  width: 1.25rem;
+  height: 2.25rem;
+}
+
+.knobBody {
+  fill: var(--signal-ink);
+}
+
+.knobRounded {
+  stroke: var(--signal-ink);
+  stroke-width: 8;
+  stroke-linejoin: round;
+}
+
+.knobGlyph {
+  fill: none;
+  stroke: var(--signal-fill);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.knobBar,
+.knobDot {
+  fill: var(--signal-fill);
+}
+
+.knobRing {
+  fill: none;
+  stroke: var(--signal-ink);
+  stroke-width: 7;
+  stroke-dasharray: 1.2 0.8;
+}
+
+.markBar {
+  fill: var(--signal-ink);
+}
+
+.markRing {
+  fill: none;
+  stroke: var(--signal-ink);
+  stroke-width: 5;
+}
+
 .list {
   display: flex;
   flex-direction: column;
@@ -670,6 +825,44 @@ section:has(> .stickyHeading) {
   border-top: 0;
 }
 
+/* A side panel. showModal puts the dialog in the top layer, so this fixed box is the viewport's. */
+.drawer {
+  position: fixed;
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* The menu, from the left. */
+.drawerLeft {
+  inset: 0 auto 0 0;
+  width: min(85vw, 20rem);
+  border-right: 1px solid var(--border);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drawerLeft[open] {
+    animation: navSlideIn 160ms ease-out;
+  }
+}
+
+.drawer::backdrop {
+  background: var(--backdrop);
+}
+
+.drawerPanel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
 .drawerHeader {
   display: flex;
   flex: none;
@@ -684,6 +877,26 @@ section:has(> .stickyHeading) {
   margin: 0;
   font-size: 1.2rem;
   line-height: 1.3;
+}
+
+/* Dismiss. The accessible name stays on the button; the mark is only the X. */
+.drawerClose {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  margin-right: -0.25rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.drawerClose .icon {
+  margin-top: 0;
 }
 
 .tabCount {
@@ -720,7 +933,6 @@ section:has(> .stickyHeading) {
 }
 
 .srOnly,
-.menuBar .themeLegend,
 :global(:root[data-sidebar="collapsed"]) .sideMenu .navLabel {
   position: absolute;
   width: 1px;
@@ -733,76 +945,40 @@ section:has(> .stickyHeading) {
   border: 0;
 }
 
-/* A top-level screen's header: the app name and the theme choice. The tab bar at the foot is the menu. */
-.menuBarTitle {
-  overflow: hidden;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.menuBar .themeSwitch {
+/* The menu control on a top-level screen. A 48px target; the header keeps its height. */
+.menuButton {
+  display: inline-flex;
   flex: none;
-  margin: 0;
-  padding: 0;
-}
-
-/* The top-level menu below 1024px (AC 37): fixed to the foot of the screen, above the safe area. */
-.bottomTabs {
-  position: fixed;
-  inset: auto 0 0;
-  z-index: 3;
-  padding-bottom: env(safe-area-inset-bottom);
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-}
-
-.bottomTabItems {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  max-width: 45rem;
-  height: var(--tab-bar-height);
-  margin: 0 auto;
-  padding: 0;
-  list-style: none;
-}
-
-.bottomTab {
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.125rem;
-  box-sizing: border-box;
-  height: 100%;
-  padding: 0.25rem;
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  line-height: 1.2;
-  text-align: center;
-  text-decoration: none;
-}
-
-.bottomTab .kindIcon {
-  margin-top: 0;
-  color: inherit;
-}
-
-.bottomTab[aria-current="page"] {
+  min-width: 48px;
+  min-height: 48px;
+  margin-left: -0.5rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
   color: var(--link);
-  font-weight: 600;
+  cursor: pointer;
 }
 
-.bottomTab:focus-visible {
-  outline-offset: -2px;
+.menuButton .icon {
+  margin-top: 0;
 }
 
-/* Wide screens use the side menu, which holds the tabs and the theme choice. */
+/* Wide screens use the side menu. The trigger would otherwise sit alone in an empty header. */
 @media (min-width: 1024px) {
   .menuBar,
-  .bottomTabs {
+  .menuButton {
     display: none;
+  }
+}
+
+@keyframes navSlideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
   }
 }
 
@@ -943,7 +1119,7 @@ section:has(> .stickyHeading) {
   margin-top: 0;
 }
 
-/* Below 1024px the top-level pages' tab bar is the menu. From 1024px the shell is a fixed column plus the page. */
+/* Below 1024px the drawer is the menu. From 1024px the shell is a fixed column plus the page. */
 .appShell {
   display: flex;
   flex: 1 0 auto;
@@ -1017,7 +1193,7 @@ section:has(> .stickyHeading) {
     width: 4rem;
   }
 
-  /* The 15rem rail is tight for the theme row, so the pills give up a little padding. */
+  /* The theme row is one line in the drawer. The 15rem rail is tighter, so the pills give up a little padding. */
   .sideMenu .navFooter {
     padding-inline: 0.25rem;
   }
@@ -1182,7 +1358,7 @@ section:has(> .stickyHeading) {
 /* Offline (AC 48): stays at the foot of the screen while the page scrolls. */
 .offlineBanner {
   position: sticky;
-  bottom: var(--tab-bar-space);
+  bottom: 0;
   z-index: 2;
   display: flex;
   flex-wrap: wrap;
