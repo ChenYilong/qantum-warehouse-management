@@ -5,11 +5,21 @@ export const IdSchema = z.string().min(1).max(64).regex(/^[A-Za-z0-9._-]+$/);
 
 const finiteNumber = z.number().refine((value) => Number.isFinite(value));
 
+/** A person the team leader can call or text. Numbers are international ("+44 7700 900156"), digits and spaces only. */
+export const ContactSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  phone: z.string().regex(/^\+[0-9][0-9 ]{5,19}$/),
+});
+
 export const SiteSchema = z.object({
   id: IdSchema,
   name: z.string(),
   reference: z.string(),
   address: z.string().optional(),
+  /** Who installs at this site today. Optional: a site without one shows no notify action. */
+  operator: ContactSchema.optional(),
+  /** Who picks this site's materials in the warehouse. May be the same person as the operator. */
+  picker: ContactSchema.optional(),
 });
 
 export const SitesFileSchema = z.object({
@@ -68,6 +78,7 @@ export const SolutionMaterialsFileSchema = z.object({
 });
 
 export type SiteRecord = z.infer<typeof SiteSchema>;
+export type ContactRecord = z.infer<typeof ContactSchema>;
 export type NominatedPenetrationRecord = z.infer<typeof NominatedPenetrationSchema>;
 export type StockBalanceRecord = z.infer<typeof StockBalanceSchema>;
 export type MaterialRecord = z.infer<typeof MaterialSchema>;

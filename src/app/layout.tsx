@@ -1,5 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 import { Announcer } from "@/ui/Announcer";
+import { ConnectionBar, OfflineBanner } from "@/ui/ConnectionBar";
 import { NavHistory } from "@/ui/NavHistory";
 import { SideMenu } from "@/ui/SideMenu";
 import { HEAD_SCRIPT } from "@/ui/sidebar";
@@ -28,7 +29,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </Suspense>
         <div className={styles.appShell}>
           <SideMenu />
-          <div className={styles.appContent}>{children}</div>
+          <div className={styles.appContent}>
+            {/* Above every screen's own header: the picker's last action and the Online switch (AC 48). */}
+            <ConnectionBar />
+            {children}
+            <OfflineBanner />
+          </div>
         </div>
       </body>
     </html>

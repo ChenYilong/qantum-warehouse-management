@@ -9,6 +9,8 @@ function distDirectory(): string {
 const nextConfig: NextConfig = {
   distDir: distDirectory(),
   poweredByHeader: false,
+  // The dev indicator sits bottom-left, over the top-level pages' tab bar. Errors still surface without it.
+  devIndicators: false,
   // The catalogue CSV is read at runtime, so the serverless trace must include it for pages and API routes alike.
   outputFileTracingIncludes: {
     "/**/*": ["./data/solutions-excerpt.csv"],

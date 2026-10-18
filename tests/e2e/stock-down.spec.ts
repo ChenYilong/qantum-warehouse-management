@@ -7,11 +7,25 @@ test("AC 9: stock down shows can't check and never crew can go", async ({ page }
   await expect(page.getByText("Can't check")).toHaveCount(4);
   await expect(page.getByText("Crew can go")).toHaveCount(0);
 
+  // AC 52, AC 54: every signal is amber and checks again when tapped. None is a link, so none can call or text.
+  await expect(page.locator('[data-signal="unknown"]')).toHaveCount(4);
+  await expect(page.locator('[data-signal="go"], [data-signal="stop"]')).toHaveCount(0);
+  await expect(page.locator("a[data-signal]")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Can't check/ })).toHaveCount(4);
+  // AC 55: the operator can still be told to hold, and the text never says go.
+  const hold = page.getByRole("listitem").filter({ hasText: "Riverside Plaza, Block A" }).getByRole("link", { name: "Text operator" });
+  const holdText = decodeURIComponent(((await hold.getAttribute("href")) ?? "").split("body=")[1] ?? "");
+  expect(holdText).toBe("Riverside Plaza, Block A, Job ref RP-A2: I can't check the materials right now. Don't go until I confirm. From your team leader.");
+
   await gotoApp(page, "/sites/site-b");
   await expect(page.getByRole("main").getByText("Can't check this site right now. Don't assume it's clear. Try again.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Back to sites" })).toBeVisible();
   await expect(page.getByText("Crew can go")).toHaveCount(0);
+  // AC 57: no signal on a site that can't be checked; its banner and Try again stay, and the operator is told to hold.
+  await expect(page.locator("[data-signal]")).toHaveCount(0);
+  const siteHold = page.getByRole("main").getByRole("link", { name: "Text operator" });
+  expect(decodeURIComponent(((await siteHold.getAttribute("href")) ?? "").split("body=")[1] ?? "")).toContain("Don't go until I confirm.");
 
   // No filter counts when readiness is unknown, and this page has no actions log control.
   await expect(page.getByRole("navigation", { name: "Filter penetrations" })).toHaveCount(0);

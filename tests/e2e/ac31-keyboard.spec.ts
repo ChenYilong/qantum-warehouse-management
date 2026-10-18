@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { assertTargets, gotoApp, screens, tabTo } from "./support";
 
-test("AC 31: escalate with the keyboard only, and targets are at least 44 by 44", async ({ page }) => {
+test("AC 31: escalate with the keyboard only, and targets are at least 48 by 48", async ({ page }) => {
   // Writes the collar shortage (site-b:MAT-COLLAR-25) only. Sealant stays for the scenario spec.
   await gotoApp(page, "/materials/MAT-COLLAR-25");
   await expect(page.getByRole("button", { name: "Escalate Pipe collar for 25 mm pipe at Harbour Point, Levels 3 to 5" })).toBeVisible();

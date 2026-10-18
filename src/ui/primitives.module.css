@@ -120,7 +120,7 @@
   min-width: 0;
 }
 
-/* A title that is a link is a padded 44px target, so centre the icon on it rather than on its top edge. */
+/* A title that is a link is a padded 48px target, so centre the icon on it rather than on its top edge. */
 .kindTitle:has(> .blockLink) {
   align-items: center;
 }
@@ -130,8 +130,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.375rem;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -231,7 +231,7 @@
 
 .switchControl {
   width: 100%;
-  min-width: 44px;
+  min-width: 48px;
   min-height: 48px;
   padding: 0.5rem 2.75rem;
   border: 1px solid var(--input-border);
@@ -309,15 +309,195 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.35rem;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0.75rem 1rem;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
+}
+
+/* The card's name opens the site: a full-width 48px row, the chevron says it opens. */
+.siteCardTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 48px;
+  color: var(--text);
+  font-size: 1.125rem;
+  font-weight: 700;
   text-decoration: none;
+}
+
+/* One main action, with at most one alternative beside it. */
+.siteCardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.siteCardActions > * {
+  flex: 1 1 9rem;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+/* The operator row: who to tell, then Text operator and Call operator, 56px tall for gloved hands (AC 55, 57). */
+.operatorRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.operatorButtons > * {
+  min-height: 3.5rem;
+}
+
+/* What a blocked site is short of: up to three materials, then a count (AC 57). */
+.shortFacts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: 100%;
+}
+
+.shortFacts ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * The site signal (AC 52 to 57): a big switch in the style of an I/O toggle. The track's colour, the knob's shape
+ * and mark, and the knob's side each say the state, so it reads in sunlight, with gloves and in greyscale. The label
+ * and the knob use the tone's ink on its fill, at least 7:1 (AC 53). The same box is a link (calls the operator), a
+ * button (checks again) or a plain box (nothing to tap).
+ */
+.signal {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 5.5rem;
+  padding: 0.5rem 0.75rem 0.5rem 0.625rem;
+  border: 4px solid var(--signal-edge);
+  border-radius: 2.75rem;
+  background: var(--signal-fill);
+  color: var(--signal-ink);
+  font: inherit;
+  line-height: 1.2;
+  text-align: left;
+  text-decoration: none;
+}
+
+a.signal,
+button.signal {
+  cursor: pointer;
+}
+
+a.signal:active,
+button.signal:active {
+  transform: translateY(2px);
+}
+
+.signalGo {
+  --signal-fill: var(--signal-go-fill);
+  --signal-ink: var(--signal-go-ink);
+  --signal-edge: var(--signal-go-edge);
+}
+
+.signalStop {
+  --signal-fill: var(--signal-stop-fill);
+  --signal-ink: var(--signal-stop-ink);
+  --signal-edge: var(--signal-stop-edge);
+}
+
+.signalUnknown {
+  --signal-fill: var(--signal-unknown-fill);
+  --signal-ink: var(--signal-unknown-ink);
+  --signal-edge: var(--signal-unknown-edge);
+}
+
+.signalIdle {
+  --signal-fill: var(--signal-idle-fill);
+  --signal-ink: var(--signal-idle-ink);
+  --signal-edge: var(--signal-idle-edge);
+}
+
+.signalText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.signalLabel {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.signalHint {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.signalKnob {
+  flex: none;
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.signalMark {
+  flex: none;
+  width: 1.25rem;
+  height: 2.25rem;
+}
+
+.knobBody {
+  fill: var(--signal-ink);
+}
+
+.knobRounded {
+  stroke: var(--signal-ink);
+  stroke-width: 8;
+  stroke-linejoin: round;
+}
+
+.knobGlyph {
+  fill: none;
+  stroke: var(--signal-fill);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.knobBar,
+.knobDot {
+  fill: var(--signal-fill);
+}
+
+.knobRing {
+  fill: none;
+  stroke: var(--signal-ink);
+  stroke-width: 7;
+  stroke-dasharray: 1.2 0.8;
+}
+
+.markBar {
+  fill: var(--signal-ink);
+}
+
+.markRing {
+  fill: none;
+  stroke: var(--signal-ink);
+  stroke-width: 5;
 }
 
 .list {
@@ -342,8 +522,8 @@
 .blockLink {
   display: flex;
   align-items: center;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   padding: 0.5rem 0.25rem;
   color: var(--link);
   overflow-wrap: anywhere;
@@ -362,8 +542,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   padding: 0.5rem 0.25rem;
   border-top: 1px solid var(--border);
   color: var(--text);
@@ -403,7 +583,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
-  min-height: 44px;
+  min-height: 48px;
   color: var(--link);
 }
 
@@ -468,7 +648,7 @@
   gap: 0.15rem;
   align-self: flex-start;
   max-width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   color: var(--link);
 }
 
@@ -575,7 +755,7 @@ section:has(> .stickyHeading) {
   align-items: center;
   gap: 0.3rem;
   max-width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   padding: 0.25rem 0.5rem;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -592,7 +772,7 @@ section:has(> .stickyHeading) {
   font-weight: 600;
 }
 
-/* Penetration page: Solution and Actions log. Same shape as the filter chips, and each is a 44px target. */
+/* Penetration page: Solution and Actions log. Same shape as the filter chips, and each is a 48px target. */
 /* The penetration page's two tabs: equal halves on one rule, the current one underlined in the link colour.
    They are links (each tab has its own URL), so the current one is aria-current, not a selected tab. */
 .tabBar {
@@ -606,7 +786,7 @@ section:has(> .stickyHeading) {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  min-width: 44px;
+  min-width: 48px;
   min-height: 48px;
   margin-bottom: -1px;
   padding: 0.5rem 0.75rem;
@@ -645,44 +825,6 @@ section:has(> .stickyHeading) {
   border-top: 0;
 }
 
-/* A side panel. showModal puts the dialog in the top layer, so this fixed box is the viewport's. */
-.drawer {
-  position: fixed;
-  max-width: 100%;
-  height: auto;
-  max-height: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* The menu, from the left. */
-.drawerLeft {
-  inset: 0 auto 0 0;
-  width: min(85vw, 20rem);
-  border-right: 1px solid var(--border);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .drawerLeft[open] {
-    animation: navSlideIn 160ms ease-out;
-  }
-}
-
-.drawer::backdrop {
-  background: var(--backdrop);
-}
-
-.drawerPanel {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
 .drawerHeader {
   display: flex;
   flex: none;
@@ -697,26 +839,6 @@ section:has(> .stickyHeading) {
   margin: 0;
   font-size: 1.2rem;
   line-height: 1.3;
-}
-
-/* Dismiss. The accessible name stays on the button; the mark is only the X. */
-.drawerClose {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  margin-right: -0.25rem;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-}
-
-.drawerClose .icon {
-  margin-top: 0;
 }
 
 .tabCount {
@@ -734,9 +856,9 @@ section:has(> .stickyHeading) {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  min-width: 44px;
+  min-width: 48px;
   max-width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   margin-left: -0.5rem;
   padding-inline: 0.5rem;
   border-radius: var(--radius);
@@ -753,6 +875,7 @@ section:has(> .stickyHeading) {
 }
 
 .srOnly,
+.menuBar .themeLegend,
 :global(:root[data-sidebar="collapsed"]) .sideMenu .navLabel {
   position: absolute;
   width: 1px;
@@ -765,40 +888,76 @@ section:has(> .stickyHeading) {
   border: 0;
 }
 
-/* The menu control on a top-level screen. A 44px target; the header keeps its height. */
-.menuButton {
-  display: inline-flex;
+/* A top-level screen's header: the app name and the theme choice. The tab bar at the foot is the menu. */
+.menuBarTitle {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuBar .themeSwitch {
   flex: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* The top-level menu below 1024px (AC 37): fixed to the foot of the screen, above the safe area. */
+.bottomTabs {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 3;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.bottomTabItems {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  max-width: 45rem;
+  height: var(--tab-bar-height);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.bottomTab {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  margin-left: -0.5rem;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--link);
-  cursor: pointer;
+  gap: 0.125rem;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
 }
 
-.menuButton .icon {
+.bottomTab .kindIcon {
   margin-top: 0;
+  color: inherit;
 }
 
-/* Wide screens use the side menu. The trigger would otherwise sit alone in an empty header. */
+.bottomTab[aria-current="page"] {
+  color: var(--link);
+  font-weight: 600;
+}
+
+.bottomTab:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Wide screens use the side menu, which holds the tabs and the theme choice. */
 @media (min-width: 1024px) {
   .menuBar,
-  .menuButton {
+  .bottomTabs {
     display: none;
-  }
-}
-
-@keyframes navSlideIn {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: none;
   }
 }
 
@@ -823,7 +982,7 @@ section:has(> .stickyHeading) {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  min-height: 44px;
+  min-height: 48px;
   padding: 0 0.75rem;
   border-radius: var(--radius);
   color: var(--text);
@@ -854,7 +1013,7 @@ section:has(> .stickyHeading) {
 
 /* The theme choice: one slim row, the legend on the left and a compact segmented switch on the right. The
    native radios stay (visually hidden) so arrow keys, the radio role and the group name come from the browser.
-   Each radio reaches 6px above and below its pill, so the tap target stays 44px while the pill is 32px. */
+   Each radio reaches 8px above and below its pill, so the tap target is 48px while the pill is 32px. */
 .themeSwitch {
   display: flex;
   align-items: center;
@@ -898,7 +1057,7 @@ section:has(> .stickyHeading) {
 
 .themeOption input {
   position: absolute;
-  inset: -6px 0;
+  inset: -8px 0;
   margin: 0;
   opacity: 0;
   cursor: pointer;
@@ -920,12 +1079,12 @@ section:has(> .stickyHeading) {
   font-weight: 600;
 }
 
-/* A section heading that goes up to its site: a 44px target, the chevron says it opens. */
+/* A section heading that goes up to its site: a 48px target, the chevron says it opens. */
 .headingLink {
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
-  min-height: 44px;
+  min-height: 48px;
   color: var(--link);
   text-decoration: none;
 }
@@ -939,7 +1098,7 @@ section:has(> .stickyHeading) {
   margin-top: 0;
 }
 
-/* Below 1024px the drawer is the menu. From 1024px the shell is a fixed column plus the page. */
+/* Below 1024px the top-level pages' tab bar is the menu. From 1024px the shell is a fixed column plus the page. */
 .appShell {
   display: flex;
   flex: 1 0 auto;
@@ -965,8 +1124,8 @@ section:has(> .stickyHeading) {
   flex: none;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 48px;
+  min-height: 48px;
   border: 0;
   border-radius: var(--radius);
   background: transparent;
@@ -1013,7 +1172,7 @@ section:has(> .stickyHeading) {
     width: 4rem;
   }
 
-  /* The theme row is one line in the drawer. The 15rem rail is tighter, so the pills give up a little padding. */
+  /* The 15rem rail is tight for the theme row, so the pills give up a little padding. */
   .sideMenu .navFooter {
     padding-inline: 0.25rem;
   }
@@ -1046,8 +1205,8 @@ section:has(> .stickyHeading) {
   :global(:root[data-sidebar="collapsed"]) .sideMenu .navItem {
     justify-content: center;
     gap: 0;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 48px;
+    min-height: 48px;
     padding-inline: 0;
   }
 
@@ -1073,4 +1232,260 @@ section:has(> .stickyHeading) {
   .sideMenu {
     transition: width 150ms ease;
   }
+}
+
+/* Connection bar (AC 48): a slim light-grey row above every screen's own header. Not sticky, so the sticky
+   header and chips keep their offsets; the offline banner at the foot keeps an offline state in view. */
+.connectionBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  align-self: center;
+  box-sizing: border-box;
+  width: min(100%, 45rem);
+  padding: 0.25rem var(--space);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.connectionPicker {
+  flex: 1 1 10rem;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.connectionStatus {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  margin-inline-start: auto;
+}
+
+.connectionText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.connectionLabel {
+  font-weight: 700;
+}
+
+.connectionUpdated {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--warning-text);
+}
+
+/* A 76 by 48 target around a 52 by 30 capsule. On: dark capsule, knob right. Off: grey capsule, knob left. */
+.connectionSwitch {
+  position: relative;
+  flex: none;
+  width: 76px;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.connectionSwitch::before {
+  content: "";
+  position: absolute;
+  inset: 9px 12px;
+  border-radius: 999px;
+  background: var(--input-border);
+}
+
+.connectionSwitch[aria-checked="true"]::before {
+  background: var(--text);
+}
+
+.connectionKnob {
+  position: absolute;
+  top: 13px;
+  left: 16px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg);
+  transition: transform 150ms ease;
+}
+
+.connectionSwitch[aria-checked="true"] .connectionKnob {
+  transform: translateX(22px);
+}
+
+.connectionSwitch:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connectionKnob {
+    transition: none;
+  }
+}
+
+/* Offline (AC 48): stays at the foot of the screen while the page scrolls. */
+.offlineBanner {
+  position: sticky;
+  bottom: var(--tab-bar-space);
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  align-self: center;
+  box-sizing: border-box;
+  width: min(100%, 45rem);
+  margin-top: auto;
+  padding: 0.75rem var(--space);
+  border-top: 2px solid var(--warning-text);
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-weight: 600;
+}
+
+.offlineBanner > p {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.connectionFacts {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.connectionFacts > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.connectionFacts dt {
+  color: var(--text-secondary);
+}
+
+.connectionFacts dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+/* Needs your decision (AC 50): the top of a blocked site. A red rule says it stops the crew; the content stays
+   on the page surface so every chip and link keeps its contrast. */
+.actionPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--danger-text);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.actionHeading {
+  font-size: 1.25rem;
+}
+
+.actionSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--danger-text);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.actionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.actionItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* The material and its figure: colour, icon and words together, never colour alone. */
+.actionMaterial {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+}
+
+.actionMaterial > svg {
+  flex: none;
+  margin-top: 0.15rem;
+}
+
+.actionMaterialName {
+  display: block;
+  font-weight: 600;
+}
+
+.actionFigure {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.actionItem .button,
+.contactRow .button {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* A 48px row link with the unit said out loud: "Affects 3 penetrations". */
+.actionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 48px;
+  color: var(--link);
+  font-weight: 600;
+}
+
+.optionList {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.optionList dt {
+  font-weight: 700;
+}
+
+.optionList dd {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.contactRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }

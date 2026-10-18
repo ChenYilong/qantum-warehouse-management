@@ -63,7 +63,8 @@ export async function assertTargets(page: Page): Promise<void> {
       const details = element.closest("details");
       if (details !== null && !details.open && element.closest("summary") === null) continue;
       const box = element.getBoundingClientRect();
-      if (box.width >= 44 && box.height >= 44) continue;
+      // 48 by 48 for gloved hands (AC 31, raised from 44 with the field UI round, AC 51).
+      if (box.width >= 48 && box.height >= 48) continue;
       const text = (element.innerText ?? "").replace(/\s+/g, " ").trim().slice(0, 80);
       const label = text || `<${element.tagName.toLowerCase()} id="${element.id}" aria-label="${element.getAttribute("aria-label") ?? ""}">`;
       found.push(`${box.width.toFixed(1)}x${box.height.toFixed(1)} ${label} on ${location.pathname}`);

@@ -16,7 +16,7 @@ function subscribe(onChange: () => void): () => void {
   return () => window.removeEventListener(CHANGED, onChange);
 }
 
-/** Persistent menu at 1024px and wider. Hidden below that, where the drawer is the only menu. */
+/** Persistent menu at 1024px and wider. Hidden below that, where the top-level pages' tab bar is the menu. */
 export function SideMenu() {
   const pathname = usePathname();
   const collapsed = useSyncExternalStore(
