@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { gotoApp } from "./support";
+import { appText, gotoApp } from "./support";
 
 test("AC 9: stock down shows can't check and never crew can go", async ({ page }) => {
   // Runs on the stock-down server (STUB_STOCK_MODE=down), not the main server.
@@ -38,7 +38,7 @@ test("AC 9: stock down shows can't check and never crew can go", async ({ page }
   await expect(page.getByText("Can't check this site right now. Don't assume it's clear. Try again.")).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Penetration" })).toHaveCount(0);
   await expect(page.getByText("Nothing recorded")).toHaveCount(0);
-  await expect(page.getByText("0", { exact: true })).toHaveCount(0);
+  await expect(appText(page, "0")).toHaveCount(0);
   await expect(page.getByText("Crew can go")).toHaveCount(0);
 
   // Stock down makes every site's log unreadable, so the page says it cannot be loaded.
@@ -61,7 +61,7 @@ test("AC 38, AC 39: with the stock down, the materials pages say they can't chec
   await expect(page.getByRole("button", { name: /Wait|Escalate/ })).toHaveCount(0);
   await expect(page.getByText(/Needs \d/)).toHaveCount(0);
   await expect(page.getByText("Nothing recorded")).toHaveCount(0);
-  await expect(page.getByText("0", { exact: true })).toHaveCount(0);
+  await expect(appText(page, "0")).toHaveCount(0);
   const tabs = page.getByRole("navigation", { name: "Material" });
   await expect(tabs.getByRole("link", { name: "Stock" })).toHaveAttribute("aria-current", "page");
   await expect(tabs.getByRole("link", { name: "Actions log" })).not.toContainText(/\d/);
@@ -69,6 +69,6 @@ test("AC 38, AC 39: with the stock down, the materials pages say they can't chec
   await gotoApp(page, "/materials/MAT-SEALANT?tab=log");
   await expect(page.getByText("We can't load this material's actions right now. Try again shortly.")).toBeVisible();
   await expect(page.getByText("Nothing recorded")).toHaveCount(0);
-  await expect(page.getByText("0", { exact: true })).toHaveCount(0);
+  await expect(appText(page, "0")).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Material" }).getByRole("link", { name: "Actions log" })).not.toContainText(/\d/);
 });

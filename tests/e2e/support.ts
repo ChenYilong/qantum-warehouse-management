@@ -28,6 +28,14 @@ export const screens = [
   "/sites/nope",
 ];
 
+/**
+ * Text the app itself renders, exactly. The Next.js dev overlay is left out: it mounts in a `<script>` under body,
+ * never ships, and with the dev indicator off it keeps a hidden issue count of "0" in its shadow DOM.
+ */
+export function appText(page: Page, text: string) {
+  return page.locator("body > :not(script)").getByText(text, { exact: true });
+}
+
 export async function gotoApp(page: Page, path: string): Promise<void> {
   await page.goto(path);
   // A redirect route paints the loading shell, hydrates it, then navigates. Evaluating in that
