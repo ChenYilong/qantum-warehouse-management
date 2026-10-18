@@ -181,12 +181,19 @@ describe("input contrast", () => {
     expect(landing).not.toContain("Open sites");
   });
 
-  it("the site screen lists penetrations under filter chips, with no blocked banner", () => {
+  it("AC 34, AC 57: the site screen lists penetrations under filter chips, with no blocked banner, after its signal and operator row", () => {
     const page = readFileSync("src/app/sites/[id]/page.tsx", "utf8");
     expect(page).toContain("<SiteFrame");
     expect(page).toContain("<PenetrationFilters");
     const frame = readFileSync("src/app/sites/[id]/site-frame.tsx", "utf8");
-    expect(frame).toContain('crewStatus !== "blocked"');
-    expect(frame.indexOf("<Banner")).toBeLessThan(frame.indexOf("{children}"));
+    // The signal replaces the banner, and a blocked site opens with it, then its operator row, then the panel.
+    expect(frame).not.toContain("<Banner");
+    const signal = frame.indexOf("<SiteSignal");
+    const operator = frame.indexOf("<OperatorRow");
+    const panel = frame.indexOf("<ActionNeeded");
+    expect(signal).toBeGreaterThan(-1);
+    expect(signal).toBeLessThan(operator);
+    expect(operator).toBeLessThan(panel);
+    expect(panel).toBeLessThan(frame.indexOf("{children}"));
   });
 });

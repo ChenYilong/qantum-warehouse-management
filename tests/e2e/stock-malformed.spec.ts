@@ -6,6 +6,9 @@ test("AC 9: malformed stock shows can't check and never crew can go", async ({ p
   await gotoApp(page, "/sites");
   await expect(page.getByText("Can't check")).toHaveCount(4);
   await expect(page.getByText("Crew can go")).toHaveCount(0);
+  // AC 52, AC 54: the same amber signal, which checks again and never calls.
+  await expect(page.locator('[data-signal="unknown"]')).toHaveCount(4);
+  await expect(page.locator("a[data-signal]")).toHaveCount(0);
 
   await gotoApp(page, "/sites/site-b");
   await expect(page.getByRole("main").getByText("Can't check this site right now. Don't assume it's clear. Try again.")).toBeVisible();

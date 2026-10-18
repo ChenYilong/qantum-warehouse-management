@@ -27,6 +27,23 @@
   --info-text: #0b4f9e;
   --escalation-bg: #f3ecfb;
   --escalation-text: #6b2fa3;
+  /* The site signal (AC 52, 53): a big I/O switch. Fill, the ink of its label and knob, and its edge.
+     Colour is never alone: the knob's shape, mark and side say the state too. Go is a bright green with dark
+     ink and stop a deep red with white ink in both themes, so they also differ in lightness: a leader who
+     cannot tell red from green, or whose screen is washed out by the sun, still sees a light switch and a dark
+     one. Can't check is amber and nothing planned is a quiet grey, so only a state that needs a decision shouts. */
+  --signal-go-fill: #3ddc6c;
+  --signal-go-ink: #04130a;
+  --signal-go-edge: #006618;
+  --signal-stop-fill: #b3001b;
+  --signal-stop-ink: #ffffff;
+  --signal-stop-edge: #7a0012;
+  --signal-unknown-fill: #ffc107;
+  --signal-unknown-ink: #1a1a1a;
+  --signal-unknown-edge: #1a1a1a;
+  --signal-idle-fill: #e3e5e8;
+  --signal-idle-ink: #1a1a1a;
+  --signal-idle-edge: #5c6570;
   --backdrop: rgb(18 19 22 / 55%);
   --shadow: 0 8px 24px rgb(18 19 22 / 18%);
   --space: 1rem;
@@ -60,6 +77,18 @@
     --info-text: #9ec5ff;
     --escalation-bg: #2e1a45;
     --escalation-text: #d3b4f5;
+    --signal-go-fill: #3ddc6c;
+    --signal-go-ink: #04130a;
+    --signal-go-edge: #3ddc6c;
+    --signal-stop-fill: #b3001b;
+    --signal-stop-ink: #ffffff;
+    --signal-stop-edge: #ff6b5e;
+    --signal-unknown-fill: #ffca3a;
+    --signal-unknown-ink: #1a1200;
+    --signal-unknown-edge: #ffca3a;
+    --signal-idle-fill: #3a3f46;
+    --signal-idle-ink: #ececec;
+    --signal-idle-edge: #8b939e;
     --backdrop: rgb(0 0 0 / 65%);
     --shadow: 0 8px 24px rgb(0 0 0 / 45%);
     color-scheme: dark;
@@ -89,6 +118,18 @@
   --info-text: #9ec5ff;
   --escalation-bg: #2e1a45;
   --escalation-text: #d3b4f5;
+  --signal-go-fill: #3ddc6c;
+  --signal-go-ink: #04130a;
+  --signal-go-edge: #3ddc6c;
+  --signal-stop-fill: #b3001b;
+  --signal-stop-ink: #ffffff;
+  --signal-stop-edge: #ff6b5e;
+  --signal-unknown-fill: #ffca3a;
+  --signal-unknown-ink: #1a1200;
+  --signal-unknown-edge: #ffca3a;
+  --signal-idle-fill: #3a3f46;
+  --signal-idle-ink: #ececec;
+  --signal-idle-edge: #8b939e;
   --backdrop: rgb(0 0 0 / 65%);
   --shadow: 0 8px 24px rgb(0 0 0 / 45%);
   color-scheme: dark;
