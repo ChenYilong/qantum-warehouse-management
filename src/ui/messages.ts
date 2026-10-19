@@ -79,9 +79,8 @@ export const NO_FILTER_MATCH = "No penetrations match these filters.";
 /** Project maps (AC 74, 75). The trip lines themselves come from `travel.ts`. */
 export const MAP = {
   directions: "Directions",
-  showDistance: "Show distance and time",
-  updateDistance: "Update distance and time",
-  distanceHint: "Uses this phone's location once. Only Mapbox sees it, to work out the drive.",
+  useLocation: "Use my location",
+  updateLocation: "Update my location",
 } as const;
 
 /** The projects list's filter (AC 72, 73). The readiness labels are qantum-stock's. */

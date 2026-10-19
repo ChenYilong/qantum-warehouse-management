@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  cardTrip,
+  DEFAULT_ORIGIN,
   directionsUrl,
   formatDistance,
   formatDuration,
@@ -8,10 +10,12 @@ import {
   MATRIX_MAX_DESTINATIONS,
   matrixBatches,
   matrixUrl,
+  originNote,
   parseMatrix,
   publicMapboxToken,
   straightLineMetres,
   travelLabel,
+  tripOrigin,
   validLocation,
 } from "@/ui/travel";
 
@@ -83,14 +87,15 @@ describe("AC 75: how far and how long", () => {
     expect(formatDuration(7_200)).toBe("2 h");
   });
 
-  it("says the drive when there is a route, the straight line and no time when there isn't, and why when there is no fix", () => {
-    expect(travelLabel({ kind: "idle" })).toBeNull();
-    expect(travelLabel({ kind: "locating" })).toBe("Finding where you are…");
+  it("says the drive when there is a route, the straight line and no time when there isn't, and names the default start", () => {
+    const phone = { kind: "phone", point: OFFICE } as const;
+    const fallback = { kind: "default", point: DEFAULT_ORIGIN.point } as const;
     expect(travelLabel({ kind: "routing" })).toBe("Working out the drive…");
-    expect(travelLabel({ kind: "denied" })).toBe("Location is off, so no distance.");
-    expect(travelLabel({ kind: "unavailable" })).toBe("Can't find where you are right now.");
-    expect(travelLabel({ kind: "ready", origin: OFFICE, to: CEDAR, route: { metres: 12_340, seconds: 1_070 } })).toBe("12.3 km · 18 min drive");
-    expect(travelLabel({ kind: "ready", origin: OFFICE, to: CEDAR, route: null })).toBe("1.8 km in a straight line · no drive time");
+    expect(travelLabel({ kind: "ready", origin: phone, to: CEDAR, route: { metres: 12_340, seconds: 1_070 } })).toBe("12.3 km · 18 min drive");
+    expect(travelLabel({ kind: "ready", origin: phone, to: CEDAR, route: null })).toBe("1.8 km in a straight line · no drive time");
+    expect(travelLabel({ kind: "ready", origin: fallback, to: CEDAR, route: { metres: 2_300, seconds: 420 } })).toBe("2.3 km · 7 min drive from 5\u00a0Arawa Street");
+    // 2,228 m from 5 Arawa Street to Cedar Court, worked out independently of this code.
+    expect(travelLabel({ kind: "ready", origin: fallback, to: CEDAR, route: null })).toBe("2.2 km in a straight line from 5\u00a0Arawa Street · no drive time");
   });
 
   it("asks the driving matrix for at most nine places per request, from the phone to each project", () => {
@@ -117,6 +122,49 @@ describe("AC 75: how far and how long", () => {
     for (const bad of [null, "Ok", {}, { code: "NoRoute", distances: [[1]], durations: [[1]] }, { code: "Ok", distances: [[1, 2]], durations: [[1]] }, { code: "Ok", distances: [], durations: [] }]) {
       expect(parseMatrix(bad, 2), JSON.stringify(bad)).toEqual([null, null]);
     }
+  });
+});
+
+describe("AC 75: until the phone shares where it is, trips start from 5 Arawa Street", () => {
+  it("is a real point in Grafton (OpenStreetMap), with its address; a no-break space keeps the number with the street", () => {
+    expect(DEFAULT_ORIGIN.address).toBe("5\u00a0Arawa Street, Grafton, Auckland 1023");
+    expect(DEFAULT_ORIGIN.name).toBe("5\u00a0Arawa Street");
+    expect(validLocation(DEFAULT_ORIGIN.point)).toEqual({ lat: -36.8643, lng: 174.7661 });
+  });
+
+  it("starts from the phone only once it has a fix, and from the default in every other case", () => {
+    for (const status of ["idle", "locating", "denied", "unavailable"] as const) {
+      expect(tripOrigin({ status }), status).toEqual({ kind: "default", point: DEFAULT_ORIGIN.point });
+    }
+    expect(tripOrigin({ status: "ready", origin: OFFICE })).toEqual({ kind: "phone", point: OFFICE });
+  });
+
+  it("says above the list where distances are from, and why when the phone's location is missing", () => {
+    expect(originNote("idle")).toBe(
+      "Distances are from 5\u00a0Arawa Street, Grafton, Auckland 1023 until you use this phone's location. Only Mapbox sees it, to work out the drive.",
+    );
+    expect(originNote("locating")).toBe("Finding where you are… Until then, distances are from 5\u00a0Arawa Street, Grafton, Auckland 1023.");
+    expect(originNote("denied")).toBe("Location is off, so distances are from 5\u00a0Arawa Street, Grafton, Auckland 1023.");
+    expect(originNote("unavailable")).toBe("Can't find where you are right now, so distances are from 5\u00a0Arawa Street, Grafton, Auckland 1023.");
+    expect(originNote("ready")).toBe("Distances are from where this phone is. Only Mapbox sees its location, to work out the drive.");
+  });
+
+  it("keeps the shown answer until the new start's answer arrives, and gives the straight line when there is nothing to ask", () => {
+    const fallback = { kind: "default", point: DEFAULT_ORIGIN.point } as const;
+    const phone = { kind: "phone", point: OFFICE } as const;
+    const drive = { metres: 2_300, seconds: 420 };
+    const fromDefault = { key: "default", origin: fallback, byId: { "site-a": drive, "site-b": null } };
+    // No token, or offline: nothing to ask, so the straight line from the current start.
+    expect(cardTrip({ key: "", origin: phone }, fromDefault, "site-a", CEDAR)).toEqual({ kind: "ready", origin: phone, to: CEDAR, route: null });
+    // Before any answer.
+    expect(cardTrip({ key: "default", origin: fallback }, null, "site-a", CEDAR)).toEqual({ kind: "routing" });
+    // The answer for this start.
+    expect(cardTrip({ key: "default", origin: fallback }, fromDefault, "site-a", CEDAR)).toEqual({ kind: "ready", origin: fallback, to: CEDAR, route: drive });
+    // The phone's fix is in but not its answer: the default's answer stays, still saying where it is from.
+    expect(cardTrip({ key: "phone", origin: phone }, fromDefault, "site-a", CEDAR)).toEqual({ kind: "ready", origin: fallback, to: CEDAR, route: drive });
+    // No road, or a project the answer does not cover: the straight line from the answer's start.
+    expect(cardTrip({ key: "default", origin: fallback }, fromDefault, "site-b", CEDAR)).toEqual({ kind: "ready", origin: fallback, to: CEDAR, route: null });
+    expect(cardTrip({ key: "default", origin: fallback }, fromDefault, "site-z", CEDAR)).toEqual({ kind: "ready", origin: fallback, to: CEDAR, route: null });
   });
 });
 
