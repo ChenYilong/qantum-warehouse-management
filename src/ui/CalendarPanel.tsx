@@ -18,6 +18,8 @@ import {
 } from "./calendar";
 import dialogStyles from "./decisions/decisions.module.css";
 import { Icon } from "./Icon";
+import { NAV } from "./messages";
+import { TodayLabel } from "./TodayLabel";
 import type { KnobShape, SignalTone } from "./signal";
 import { inTab, nextTab, segmentLit, TODAY, TODAY_TABS, type TodayTabId } from "./today";
 import styles from "./primitives.module.css";
@@ -83,7 +85,7 @@ export function CalendarPanel({ calendar, cards }: { calendar: CalendarModel; ca
     <div className={styles.today} data-today={calendar.tone} data-calendar-panel="">
       <section className={styles.verdict} aria-labelledby="calendar-verdict" data-calendar-verdict="">
         <div className={styles.verdictTop}>
-          <span className={styles.verdictToday}>{TODAY.today}</span>
+          <TodayLabel tab={NAV.calendar} />
           <span className={styles.verdictTotals}>{calendar.totals}</span>
         </div>
         <h2 id="calendar-verdict" className={styles.verdictHeadline}>

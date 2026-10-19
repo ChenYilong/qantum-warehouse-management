@@ -3,6 +3,8 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Fragment, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { firstProject, inTab, nextTab, schematicPositions, segmentLit, TODAY, TODAY_TABS, type Today, type TodayProject, type TodayTabId } from "./today";
+import { NAV } from "./messages";
+import { TodayLabel } from "./TodayLabel";
 import { DEFAULT_ORIGIN, MAP_STYLE, type LatLng } from "./travel";
 import styles from "./primitives.module.css";
 
@@ -59,7 +61,7 @@ export function TodayPanel({ today, token, cards }: { today: Today; token: strin
     <div className={styles.today} data-today={today.tone}>
       <section className={styles.verdict} aria-labelledby="today-verdict" data-verdict="">
         <div className={styles.verdictTop}>
-          <span className={styles.verdictToday}>{TODAY.today}</span>
+          <TodayLabel tab={NAV.map} />
           <span className={styles.verdictTotals}>{today.totals}</span>
         </div>
         <h2 id="today-verdict" className={styles.verdictHeadline}>

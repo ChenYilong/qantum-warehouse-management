@@ -60,7 +60,7 @@ export interface Today {
 }
 
 export const TODAY = {
-  today: "Today",
+  todayIs: "today is",
   tabsLabel: "Projects by status",
   mapLabel: "Map of projects",
   cardLabel: "Selected project",
@@ -68,6 +68,11 @@ export const TODAY = {
   allProjects: "All projects",
   tabs: { all: "All", blocked: "Blocked", go: "Crew can go", idle: "Other" },
 } as const;
+
+/** The day as the browser has it, in English whatever its language: "Tuesday 20 October 2026". */
+export function todayText(at: Date): string {
+  return `${at.toLocaleDateString("en-GB", { weekday: "long" })} ${at.getDate()} ${at.toLocaleDateString("en-GB", { month: "long" })} ${at.getFullYear()}`;
+}
 
 /** The tabs in order: All first, then the design's three groups. */
 export const TODAY_TABS: readonly TodayTabId[] = ["all", "blocked", "go", "idle"];
