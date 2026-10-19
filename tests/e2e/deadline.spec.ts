@@ -21,9 +21,10 @@ test("AC 80: every project's card ends with its deadline in English, the card un
     // Appended: the last line of the card.
     await expect(card.locator(":scope > div > :last-child"), name).toHaveAttribute("data-deadline", id);
   }
-  // The card under today's map is the same card, so it ends with the same line (Crew can go opens on Cedar Court).
-  await expect(page.getByRole("region", { name: "Selected project" }).locator('[data-deadline="site-a"]')).toHaveText("Deadline · Fri 23 Oct 2026");
   await assertAxe(page);
   await assertTargets(page);
   await assertNoOverflow(page);
+  // The card under the Map tab's map is the same card, so it ends with the same line (Crew can go opens on Cedar Court).
+  await gotoApp(page, "/map");
+  await expect(page.getByRole("region", { name: "Selected project" }).locator('[data-deadline="site-a"]')).toHaveText("Deadline · Fri 23 Oct 2026");
 });

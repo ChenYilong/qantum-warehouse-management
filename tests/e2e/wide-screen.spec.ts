@@ -29,11 +29,11 @@ test("AC 47: at 1280px the projects list has the phone's header and tab bar, and
   await expectClean(page);
 });
 
-test("AC 47: the tab bar marks Inventory, Decisions and Guide on their pages at 1280px", async ({ page }) => {
+test("AC 47, AC 83: the tab bar marks Map, Calendar and Guide on their pages at 1280px", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   for (const [path, name] of [
-    ["/materials", "Inventory"],
-    ["/actions", "Decisions"],
+    ["/map", "Map"],
+    ["/calendar", "Calendar"],
     ["/about-this-demo", "Guide"],
   ] as const) {
     await gotoApp(page, path);

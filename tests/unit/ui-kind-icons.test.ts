@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 // Kind icons say what a thing is. They must never be mistaken for a status (can go, blocked, warning, no decision).
-const KINDS = ["site", "material", "solution", "decision", "penetration", "about"] as const;
+const KINDS = ["site", "material", "solution", "decision", "penetration", "about", "map", "calendar"] as const;
 const STATUS_SHAPES = ["check", "stop", "warning", "dashed-circle"];
 
 function rule(css: string, selector: string): string {
@@ -37,7 +37,8 @@ describe("kind icons", () => {
       ["src/app/materials/[materialId]/page.tsx", 'kind="penetration"'],
       ["src/app/materials/page.tsx", 'kind="material"'],
       ["src/ui/SubstituteSwitcher.tsx", 'kind="solution"'],
-      ["src/ui/nav-section.ts", 'kind: "decision"'],
+      ["src/ui/nav-section.ts", 'kind: "map"'],
+      ["src/ui/nav-section.ts", 'kind: "calendar"'],
       ["src/ui/TabBar.tsx", 'kind: "about"'],
       ["src/app/sites/[id]/penetrations/[pid]/page.tsx", 'kind="solution"'],
       ["src/ui/PenetrationGroups.tsx", 'kind="penetration"'],
