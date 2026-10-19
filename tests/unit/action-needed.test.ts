@@ -26,7 +26,7 @@ describe("AC 50: a blocked site says what needs a decision", () => {
   it("lists the shortages with links to their penetrations, and what is covered apart from them", () => {
     const view = actionNeeded({
       siteId: "site-b",
-      siteName: "Harbour Point, Levels 3 to 5",
+      siteName: "Quayside House, Levels 3 to 5",
       shortages: [
         { id: "site-b:MAT-SEALANT", materialId: "MAT-SEALANT", kind: "short", requiredQty: 10, shortfallQty: 2, penetrationIds: ["p1", "p2", "p2"] },
       ],
@@ -42,7 +42,7 @@ describe("AC 50: a blocked site says what needs a decision", () => {
         line: "Short 2 of 10 cartridges",
         affected: "2 penetrations affected",
         href: "/sites/site-b?material=MAT-SEALANT#penetrations-heading",
-        target: "Intumescent sealant, 310 ml cartridge at Harbour Point, Levels 3 to 5",
+        target: "Intumescent sealant, 310 ml cartridge at Quayside House, Levels 3 to 5",
         tone: "danger",
       },
     ]);
@@ -53,7 +53,7 @@ describe("AC 50: a blocked site says what needs a decision", () => {
   it("names data problems by penetration, warns on unknown stock, and never lists covered when the work is unknown", () => {
     const view = actionNeeded({
       siteId: "site-c",
-      siteName: "Kingsway Works, Phase 2",
+      siteName: "Northgate Depot, Phase 2",
       shortages: [{ id: "site-c:MAT-MASTIC", materialId: "MAT-MASTIC", kind: "unknown", requiredQty: 1, shortfallQty: null, penetrationIds: ["c4"] }],
       blockers: [{ penetrationId: "c1" }, { penetrationId: "c2" }, { penetrationId: "c2" }],
       materials: {},

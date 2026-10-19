@@ -24,10 +24,10 @@ export const NAV = {
   expand: "Expand menu",
   title: "Team leader",
   label: "Main",
-  sites: "Sites",
-  materials: "Materials",
-  actions: "Actions log",
-  about: "About this demo",
+  sites: "Projects",
+  materials: "Inventory",
+  actions: "Decisions",
+  about: "Guide",
 } as const;
 
 export const THEME = {
@@ -38,7 +38,7 @@ export const THEME = {
 } as const;
 
 export const ACTIONS_LOG = {
-  unavailable: "We can't load the actions log right now. Try again shortly.",
+  unavailable: "We can't load the decisions right now. Try again shortly.",
   siteUnavailable: "We can't check this site's actions right now.",
   empty: "No sites to show.",
 } as const;
@@ -67,7 +67,7 @@ export function appliesToPenetrations(count: number): string {
 }
 
 export const MATERIALS = {
-  title: "Materials",
+  title: NAV.materials,
   detailTitle: "Material",
   empty: "No materials planned at any site.",
   emptyChecked: "No materials planned at the sites that could be checked.",

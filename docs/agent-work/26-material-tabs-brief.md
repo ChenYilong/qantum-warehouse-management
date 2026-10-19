@@ -46,8 +46,8 @@ This brief outranks any per-turn instruction that contradicts it. Do not keep a 
 - **API contracts:** the HTTP API responses (`docs/api.md`, `src/app/api/**`) must not change. In particular, the readiness response's `penetrations` map must not gain fields.
 - **Safety:** missing data is never zero and never "nothing recorded". Anything that cannot be read says so.
 - **Sample data:**
-  - Kingsway Works (site-c) has a stock-unknown mastic shortage at pen-c-05.
-  - Harbour Point (site-b) pen-b-01 is "L3, Riser 2", with sealant and collar shortages.
+  - Northgate Depot (site-c) has a stock-unknown mastic shortage at pen-c-05.
+  - Quayside House (site-b) pen-b-01 is "L3, Riser 2", with sealant and collar shortages.
   - The e2e write project escalates the collar (ac31), escalates the sealant and proposes 0451 on pen-b-01 (scenario). Read-only specs must not depend on a write.
 - **Your sandbox cannot launch Chromium.** Update and add e2e specs carefully. Make sure they typecheck and lint, and state that they were not run. `npx playwright test --list` must succeed.
 
@@ -137,7 +137,7 @@ This brief outranks any per-turn instruction that contradicts it. Do not keep a 
 **E2E specs.** Do not weaken any assertion; rewrite it.
 
 - `tests/e2e/ac31-keyboard.spec.ts`
-  - Line 27 asserts "Escalated" on the material page after escalating. Replace it: open the material page's `?tab=log`, then assert that the log shows "Escalated to purchasing: Pipe collar for 25 mm pipe", "At Harbour Point, Levels 3 to 5" and "Noted from the keyboard", and that the Stock tab has no "Escalated" label in Harbour Point's section.
+  - Line 27 asserts "Escalated" on the material page after escalating. Replace it: open the material page's `?tab=log`, then assert that the log shows "Escalated to purchasing: Pipe collar for 25 mm pipe", "At Quayside House, Levels 3 to 5" and "Noted from the keyboard", and that the Stock tab has no "Escalated" label in Quayside House's section.
   - On the site list, the pen-b-01 row link has an escalation mark whose hidden label is "Escalated" and whose visible count is 1.
 - `tests/e2e/scenario.spec.ts`
   - Line 58 has the same "Escalated" assertion. Rewrite it the same way.
@@ -148,7 +148,7 @@ This brief outranks any per-turn instruction that contradicts it. Do not keep a 
   - `?tab=junk` shows Stock.
   - With `?from=pen-c-05`, the tab links keep `from=pen-c-05`, and the back control still reads "Back to L2, Plant room" on both tabs.
   - `assertTargets`, `assertNoOverflow` and `assertAxe` pass on the log tab at 375 px.
-  - Kingsway's section on the Stock tab has no "No decision yet" label.
+  - Northgate's section on the Stock tab has no "No decision yet" label.
 - `tests/e2e/stock-down.spec.ts`: with stock down, assert what the material page actually shows. It must never show "Nothing recorded" or a 0 count. Record it in the notes.
 - `tests/e2e/support.ts`: add `/materials/MAT-SEALANT?tab=log` to `screens`.
 

@@ -15,4 +15,4 @@ The scenario, the numbers and why they were chosen are in `docs/sample-data-and-
 
 Each site in `sites.json` also names its operator and picker (invented people). The phone numbers are from Ofcom's
 range reserved for drama (07700 900000 to 07700 900999, written `+44 7700 900156`), so the Call and Text links
-in the app reach no one. At Kingsway Works one person picks and installs, so the site lists them once.
+in the app reach no one. At Northgate Depot one person picks and installs, so the site lists them once.

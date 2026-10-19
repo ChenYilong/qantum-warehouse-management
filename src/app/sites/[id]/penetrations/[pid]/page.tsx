@@ -53,7 +53,7 @@ export default async function PenetrationPage({ params, searchParams }: PageProp
     if (!site) throw new SiteNotFoundError();
     return site;
   });
-  if (siteLoad.status === "unavailable") return unavailable("This site", "/sites", "Sites");
+  if (siteLoad.status === "unavailable") return unavailable("This site", "/sites", NAV.sites);
   // Back to the actions log when it opened this page, else up to the site.
   const back = origin ? logBack(id) : { href: sitePath(id), name: siteLoad.value.name };
 

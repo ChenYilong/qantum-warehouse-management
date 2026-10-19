@@ -125,6 +125,25 @@
   align-items: center;
 }
 
+/* The chrome, black in both themes (the company's black and yellow): the page tokens are swapped inside it, so
+   everything within reads light on black, and the yellow marks the current entry, the chosen theme and focus. */
+.connectionBar,
+.appBar,
+.bottomTabs,
+.sideMenu {
+  --bg: var(--chrome-bg);
+  --text: var(--chrome-text);
+  --text-secondary: var(--chrome-text-secondary);
+  --surface: var(--chrome-surface);
+  --border: var(--chrome-border);
+  --input-border: #9a9a9a;
+  --link: var(--brand-yellow);
+  --focus: var(--brand-yellow);
+  --warning-text: #ffd98a;
+  background: var(--bg);
+  color: var(--text);
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -138,6 +157,8 @@
   background: var(--surface);
   color: var(--text);
   font: inherit;
+  /* Every button reads like the site cards' buttons: a bold label. */
+  font-weight: 700;
   line-height: 1.2;
   text-align: center;
   text-decoration: none;
@@ -342,7 +363,6 @@
 .siteCardActions > * {
   flex: 1 1 9rem;
   min-height: 48px;
-  font-weight: 700;
 }
 
 /* The operator row: who to tell, then Text operator and Call operator, 56px tall for gloved hands (AC 55, 57). */
@@ -509,6 +529,30 @@ button.signal:active {
   list-style: none;
 }
 
+/* The sites feed as a waterfall: each card keeps its own height and the cards fill the columns top to bottom.
+   Two columns only from 672px, where a column still leaves the signal its 280px (AC 52); one on a phone. */
+.feed {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feed > li {
+  margin-bottom: 0.75rem;
+  break-inside: avoid;
+}
+
+.feed .siteCard {
+  border-radius: 1rem;
+}
+
+@media (min-width: 672px) {
+  .feed {
+    columns: 2;
+    column-gap: 0.75rem;
+  }
+}
+
 .muted {
   color: var(--text-secondary);
 }
@@ -570,7 +614,7 @@ button.signal:active {
   gap: 0.5rem;
 }
 
-/* "Job ref HP-345" then "12 penetrations, 5 solutions". The list is this page, so the counts are text. */
+/* "Job ref QH-345" then "12 penetrations, 5 solutions". The list is this page, so the counts are text. */
 /* No separator dot: on a narrow screen the second part wraps under the job ref without leaving one dangling. */
 .plannedWork {
   display: flex;
@@ -691,9 +735,10 @@ button.signal:active {
   gap: 0.5rem;
   align-self: center;
   box-sizing: border-box;
-  width: min(100%, 45rem);
+  /* The black runs across the column; the content lines up with the 45rem page. */
+  width: 100%;
   height: var(--app-bar-height);
-  padding: 0 var(--space);
+  padding: 0 max(var(--space), calc((100% - 45rem) / 2 + var(--space)));
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
@@ -1064,9 +1109,9 @@ section:has(> .stickyHeading) {
 }
 
 .themeOption:has(input:checked) {
-  background: var(--bg);
-  box-shadow: 0 0 0 1px var(--border);
-  color: var(--text);
+  background: var(--button-bg);
+  box-shadow: 0 0 0 1px var(--button-bg);
+  color: var(--button-text);
   font-weight: 600;
 }
 
@@ -1244,11 +1289,9 @@ section:has(> .stickyHeading) {
   gap: 0.25rem 0.75rem;
   align-self: center;
   box-sizing: border-box;
-  width: min(100%, 45rem);
-  padding: 0.25rem var(--space);
+  width: 100%;
+  padding: 0.25rem max(var(--space), calc((100% - 45rem) / 2 + var(--space)));
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
 }
 
 .connectionPicker {
@@ -1305,7 +1348,7 @@ section:has(> .stickyHeading) {
 }
 
 .connectionSwitch[aria-checked="true"]::before {
-  background: var(--text);
+  background: var(--brand-yellow);
 }
 
 .connectionKnob {

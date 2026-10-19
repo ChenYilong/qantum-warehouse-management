@@ -15,7 +15,7 @@ test("AC 47: at 1280px the sites list shows the side menu and no empty header", 
   const nav = page.getByRole("navigation", { name: "Main" });
   await expect(nav).toBeVisible();
   await expect(nav).toHaveCount(1);
-  await expect(nav.getByRole("link", { name: "Sites", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "Projects", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(page.locator("[data-tab-bar]")).toBeHidden();
   await expect(page.getByRole("banner")).toHaveCount(0);
 });
@@ -24,26 +24,26 @@ test("AC 47: a penetration keeps its back control and the side menu marks Sites"
   await page.setViewportSize({ width: 1280, height: 800 });
   await gotoApp(page, "/sites/site-b/penetrations/pen-b-01");
   const nav = page.getByRole("navigation", { name: "Main" });
-  await expect(nav.getByRole("link", { name: "Sites", exact: true })).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("banner").getByRole("link", { name: "Back to Harbour Point, Levels 3 to 5" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Projects", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("banner").getByRole("link", { name: "Back to Quayside House, Levels 3 to 5" })).toBeVisible();
 });
 
 test("AC 47: the side menu marks Materials, Actions log and About from the path", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await gotoApp(page, "/materials/MAT-SEALANT");
-  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Materials", exact: true })).toHaveAttribute(
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Inventory", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
 
   await gotoApp(page, "/actions");
-  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Actions log", exact: true })).toHaveAttribute(
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Decisions", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
 
   await gotoApp(page, "/about-this-demo");
-  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "About this demo", exact: true })).toHaveAttribute(
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Guide", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
@@ -58,7 +58,7 @@ test("AC 47: collapse is remembered across a reload and expand clears it", async
   await expect(expand).toHaveAttribute("aria-controls", /.+/);
   await expect(page.locator("html")).toHaveAttribute("data-sidebar", "collapsed");
 
-  const sites = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Sites", exact: true });
+  const sites = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Projects", exact: true });
   const box = await sites.boundingBox();
   expect(box?.width ?? 0).toBeGreaterThanOrEqual(48);
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(48);
@@ -74,7 +74,7 @@ test("AC 47: the actions log site heading sticks at the top when the wide header
   await page.setViewportSize({ width: 1280, height: 800 });
   await gotoApp(page, "/actions");
   // Nothing is recorded yet, so the log is too short to scroll. Give the page room below (style only, no data),
-  // then scroll just past Harbour Point's heading: stuck, it sits at 0; under a leftover header offset or not stuck, it does not.
+  // then scroll just past Quayside House's heading: stuck, it sits at 0; under a leftover header offset or not stuck, it does not.
   const top = await page.evaluate(() => {
     document.querySelector("main")?.style.setProperty("padding-bottom", "100vh");
     const heading = document.querySelector("#site-site-b h2");
