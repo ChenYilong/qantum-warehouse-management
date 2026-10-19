@@ -2618,3 +2618,145 @@ section:has(> .stickyHeading) {
     white-space: nowrap;
   }
 }
+
+/*
+ * The Guide as a brochure (AC 83): a big headline and lead, the four tabs as cards, a colour key, and numbered
+ * steps with large figures. Plain page tokens, so both themes keep their contrast.
+ */
+.guideTitle {
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.guideLead {
+  max-width: 36rem;
+  margin: 0 0 1.5rem;
+  font-size: 1.1875rem;
+  line-height: 1.5;
+}
+
+.guideSection {
+  margin-bottom: 2rem;
+}
+
+.guideTabs {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 30rem) {
+  .guideTabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.guideTab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.guideTab p {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.guideTabName {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.guideColours {
+  display: grid;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guideColours li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.guideSwatch {
+  flex: none;
+  width: 2.75rem;
+  height: 1.5rem;
+  margin-top: 0.125rem;
+  border: 2px solid var(--signal-edge);
+  border-radius: 999px;
+}
+
+.guideSwatch[data-tone="go"] {
+  --signal-edge: var(--signal-go-edge);
+  background: var(--signal-go-fill);
+}
+
+.guideSwatch[data-tone="stop"] {
+  --signal-edge: var(--signal-stop-edge);
+  background: var(--signal-stop-fill);
+}
+
+.guideSwatch[data-tone="unknown"] {
+  --signal-edge: var(--signal-unknown-edge);
+  background: var(--signal-unknown-fill);
+}
+
+.guideSwatch[data-tone="idle"] {
+  --signal-edge: var(--signal-idle-edge);
+  background: var(--signal-idle-fill);
+}
+
+.guideSteps {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: guide-step;
+}
+
+.guideSteps > li {
+  position: relative;
+  min-height: 2.5rem;
+  padding-left: 3.25rem;
+  counter-increment: guide-step;
+}
+
+.guideSteps > li::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: var(--brand-black);
+  color: var(--brand-yellow);
+  font-weight: 800;
+  content: counter(guide-step);
+}
+
+.guideSteps p {
+  margin: 0;
+}
+
+.guideNote {
+  margin: 1rem 0 0;
+  color: var(--text-secondary);
+}
