@@ -107,7 +107,7 @@ The sandbox cannot launch Chromium (SIGSEGV). Playwright specs were typechecked,
 
 Orchestrator should check on a phone-width viewport, light and dark:
 
-- Home chips: Harbour Point `Blocked · 2 shortages`; Kingsway `Blocked · 1 shortage, 2 data problems`. Riverside stays clear. Old Mill stays nothing planned.
+- Home chips: Quayside House `Blocked · 2 shortages`; Northgate `Blocked · 1 shortage, 2 data problems`. Cedar Court stays clear. Foundry Lane stays nothing planned.
 - Site-b: stale warning sentence, age line `Stock figures from 3 Oct 2026, 08:00 UTC (N days old)` (1 day before 08:00 UTC on 5 Oct, 2 days from 08:00 UTC). Collar disclosure `Penetrations and substitutes (4)` with no solution subheading; its four rows still read the same. Sealant disclosure `(12)` with `Solution 0438 · 4` and `Solution 0434 · 3`, and pen-b-01 vs pen-b-05 differing (`PEX Pipe Ø25mm` vs `KELOX Pipe  - 13mm PE Ø32mm`). Chevron rotates when open; no transition under reduced motion. `Open a penetration to see possible substitutes.` Whole row is the link, visible word Substitutes.
 - Site-d: no stock notice, no as-of line, no stock-figures line, no stale warning.
 - `/sites/site-b/penetrations/pen-b-01`: `Fire rating:`, `Supplier ref V21.27-22SFR00053-158-E`, `Meets the required rating`.

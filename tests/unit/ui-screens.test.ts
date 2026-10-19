@@ -44,7 +44,7 @@ describe("fixed screen copy", () => {
   it("a site tab whose site did not resolve still links back to sites", () => {
     const frame = readFileSync("src/app/sites/[id]/site-frame.tsx", "utf8");
     expect(frame).toContain('href: "/sites"');
-    expect(frame).toContain('name: "Sites"');
+    expect(frame).toContain("name: NAV.sites");
   });
 
   it("error.tsx copy does not include error.message or the digest value", () => {

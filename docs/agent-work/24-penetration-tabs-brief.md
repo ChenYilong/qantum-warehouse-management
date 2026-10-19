@@ -36,7 +36,7 @@ You are the **worker** for this brief. Execute it. Do not engage another externa
   - `BackControl` pops history when the page it names is the one underneath (`src/ui/nav-history.ts`). Otherwise it follows its link.
   - A material page opened with `?from=<penetrationId>` goes back to that penetration.
   - Pages opened from the actions log carry `?fromLog=<siteId>`, and the penetration page honours it (look at `logOrigin` / `logBack`).
-- **Sample data:** site-b (Harbour Point) pen-b-01 is "L3, Riser 2", nominating 0438, with the sealant and collar shortages. Site-c (Kingsway) has data problems (for example pen-c-03, with an unknown code).
+- **Sample data:** site-b (Quayside House) pen-b-01 is "L3, Riser 2", nominating 0438, with the sealant and collar shortages. Site-c (Northgate) has data problems (for example pen-c-03, with an unknown code).
 - **E2E store:** the e2e write project escalates the collar (ac31) and the sealant, and proposes 0451 on pen-b-01 (scenario). Read-only specs must not depend on a write.
 - **Your sandbox cannot launch Chromium.** Update and add e2e specs carefully, make sure they typecheck and lint, and state that they were not run. `npx playwright test --list` must succeed.
 

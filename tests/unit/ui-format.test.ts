@@ -260,8 +260,8 @@ describe("planned work", () => {
 
 describe("site reference", () => {
   it("labels the code as a job reference", () => {
-    expect(formatReference("RP-A2")).toBe("Job ref RP-A2");
-    expect(formatReference("HP-345")).toBe("Job ref HP-345");
+    expect(formatReference("CC-A2")).toBe("Job ref CC-A2");
+    expect(formatReference("QH-345")).toBe("Job ref QH-345");
   });
 });
 
@@ -275,7 +275,7 @@ describe("forbidden words", () => {
       siteMaterialLine(2, null, "each"),
       shortageBrief("Pad", { kind: "short", requiredQty: 4, shortfallQty: 2 }),
       materialStockLine(5, 6, "each"),
-      formatReference("RP-A2"),
+      formatReference("CC-A2"),
     ];
     for (const text of texts) expect(text).not.toMatch(/compatible|approved/i);
   });

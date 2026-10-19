@@ -23,10 +23,10 @@ describe("AC 43: the actions log lists every site", () => {
     const listed = await listAllActions(testDependencies());
     expect(listed.sites.map((site) => site.siteId)).toEqual(["site-a", "site-b", "site-c", "site-d"]);
     expect(listed.sites.map((site) => site.siteName)).toEqual([
-      "Riverside Plaza, Block A",
-      "Harbour Point, Levels 3 to 5",
-      "Kingsway Works, Phase 2",
-      "Old Mill Annex",
+      "Cedar Court, Block A",
+      "Quayside House, Levels 3 to 5",
+      "Northgate Depot, Phase 2",
+      "Foundry Lane Annex",
     ]);
     for (const site of listed.sites) {
       expect(site.status).toBe("ready");
@@ -56,7 +56,7 @@ describe("AC 43: the actions log lists every site", () => {
         expect(listed.sites[1]).toEqual({
           status: "unavailable",
           siteId: "site-b",
-          siteName: "Harbour Point, Levels 3 to 5",
+          siteName: "Quayside House, Levels 3 to 5",
         });
       } finally {
         spy.mockRestore();

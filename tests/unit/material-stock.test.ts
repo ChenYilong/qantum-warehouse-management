@@ -103,7 +103,7 @@ describe("AC 39: one material across sites", () => {
     expect(detail.material).toMatchObject({ name: "Pipe collar for 25 mm pipe", onHandQty: 2, plannedQty: 6, shortSiteCount: 1 });
     expect(detail.sites.map((site) => site.siteId)).toEqual(["site-a", "site-b"]);
     const [riverside, harbour] = detail.sites;
-    expect(riverside).toMatchObject({ status: "ready", siteName: "Riverside Plaza, Block A", requiredQty: 2, shortage: null });
+    expect(riverside).toMatchObject({ status: "ready", siteName: "Cedar Court, Block A", requiredQty: 2, shortage: null });
     expect(harbour).toMatchObject({
       status: "ready",
       requiredQty: 4,
@@ -152,7 +152,7 @@ describe("AC 42: where a material page's back control returns", () => {
       floor: "L3",
       location: "Riser 2",
     });
-    // pen-b-10 nominates 0344 (no collar), but Harbour Point plans the collar, so a substitute line there could open it.
+    // pen-b-10 nominates 0344 (no collar), but Quayside House plans the collar, so a substitute line there could open it.
     expect((await describeMaterialStock(testDependencies(), "MAT-COLLAR-25", "pen-b-10")).back).toMatchObject({ penetrationId: "pen-b-10" });
     expect((await describeMaterialStock(testDependencies(), "MAT-MASTIC", "pen-c-05")).back).toMatchObject({ siteId: "site-c" });
   });

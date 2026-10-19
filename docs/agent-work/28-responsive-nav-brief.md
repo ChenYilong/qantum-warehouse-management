@@ -138,7 +138,7 @@ Add to `NAV` in `messages.ts`: `collapse: "Collapse menu"` and `expand: "Expand 
   - There is no `banner` containing only the menu button. Assert `page.getByRole("banner")` has count 0 on `/sites`.
 - `/sites/site-b/penetrations/pen-b-01`:
   - The side menu marks Sites.
-  - The header shows "Back to Harbour Point, Levels 3 to 5".
+  - The header shows "Back to Quayside House, Levels 3 to 5".
 - `/materials/MAT-SEALANT` marks Materials. `/actions` marks Actions log. `/` marks About this demo.
 - Collapse and reload:
   - Click "Collapse menu". The button becomes "Expand menu" with `aria-expanded="false"`, and `<html>` has `data-sidebar="collapsed"`.
@@ -147,7 +147,7 @@ Add to `NAV` in `messages.ts`: `collapse: "Collapse menu"` and `expand: "Expand 
   - Reload. The page is still collapsed before any interaction: check the attribute right after `goto`.
   - Expand again, and the attribute is removed.
 - On `/actions` at 1280 px:
-  - Scroll so that Harbour Point's section is mid-page.
+  - Scroll so that Quayside House's section is mid-page.
   - Its h2's `getBoundingClientRect().top` is about 0, within 2 px, while it sticks.
 - `assertAxe`, `assertTargets` and `assertNoOverflow` pass:
   - at 1280 px, both expanded and collapsed, on `/sites` and on `/sites/site-b`

@@ -75,7 +75,7 @@ Labels stay in the accessibility tree via the clipped `.navLabel` rule (not the 
 - `NavContent` is the shared list, the About divider and Theme. The "Team leader" title stays in each shell. Putting Close into a `children(close)` render prop tripped `react-hooks/refs`. The drawer DOM and focus order are the original ones. The side menu has its own `h2` plus the collapse button (`aria-controls` points at the nav). That `h2` is before the page `h1` in document order. Axe heading-order is not in the serious/critical filter. Worth a look in the browser.
 - `title={label}` is set in both states so the rail has a hover title before hydration.
 - Theme pills are slightly tighter only inside `.sideMenu` (footer and option padding) so the row fits 15rem and stays at least 44px. Drawer padding is unchanged.
-- The `/actions` sticky spec starts at 1280×800, then shrinks the height (width stays 1280) until Harbour Point can scroll. The empty log is shorter than 800px, so a heading cannot stick at that height. The 2px tolerance is unchanged.
+- The `/actions` sticky spec starts at 1280×800, then shrinks the height (width stays 1280) until Quayside House can scroll. The empty log is shorter than 800px, so a heading cannot stick at that height. The 2px tolerance is unchanged.
 - Docs were not updated. The brief forbids `docs/`. `docs/ui-design.md` still says the menu is off-canvas at every width and that theme storage is the app's only browser storage. There are now two keys (`team-leader:theme`, `team-leader:sidebar`). The orchestrator should update the Navigation and Theme rows, and the slice spec if AC 47 is added. `npm run check:ac` still reports 46 criteria.
 
 ## Existing tests changed
@@ -106,7 +106,7 @@ Playwright was not run. This sandbox cannot launch Chromium. The new specs were 
 
 - 375px: drawer, "Open menu" on top-level pages, back control on inner pages. Existing 375px specs, including the theme test in `navigation-drawer.spec.ts`.
 - 1024px and 1280px, expanded and collapsed: one navigation named "Main", no empty banner on `/sites`, back control still on inner pages, no horizontal scroll, targets at least 44px, axe serious/critical clean.
-- `/actions` at 1280px: Harbour Point's `h2` sticks at the top of the viewport (within 2px). The log may need a short viewport before it scrolls.
+- `/actions` at 1280px: Quayside House's `h2` sticks at the top of the viewport (within 2px). The log may need a short viewport before it scrolls.
 - A site page: the filter dock sticks directly under the `AppBar`, not under a second offset.
 - Reload while collapsed: the rail is already narrow before interaction (no jump back to 15rem). The button name may read "Collapse menu" until hydration, then "Expand menu".
 - `tests/e2e/penetration-page.spec.ts` and `tests/e2e/site-tabs.spec.ts` at 1280×800, left unchanged.

@@ -10,7 +10,7 @@ import { AppBar } from "@/ui/AppBar";
 import { siteAction } from "@/ui/contacts";
 import { UnavailablePanel } from "@/ui/UnavailablePanel";
 import { formatReference, plannedWorkLine } from "@/ui/format";
-import { readinessBanner } from "@/ui/messages";
+import { NAV, readinessBanner } from "@/ui/messages";
 import { OperatorRow } from "@/ui/OperatorRow";
 import type { PenetrationPlace } from "@/ui/PenetrationGroups";
 import styles from "@/ui/primitives.module.css";
@@ -65,7 +65,7 @@ export async function loadSiteFrame(id: string): Promise<SiteFrameData> {
  */
 export function SiteFrame({
   frame,
-  back = { href: "/sites", name: "Sites" },
+  back = { href: "/sites", name: NAV.sites },
   children,
 }: {
   frame: SiteFrameData;

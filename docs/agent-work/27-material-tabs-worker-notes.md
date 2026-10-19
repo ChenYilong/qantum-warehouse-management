@@ -76,7 +76,7 @@ Row counts use `logCounts(penetrationLog(...))` with those ids, so they match th
 - `materialTabHref(materialId, tab, from?, fromLog?)` keeps `fromLog` as well as `from`, so a page opened from the actions log still returns there after a tab click. The brief's example had three arguments.
 - Tab links do not keep a hash. Clicking a tab drops `#site-site-b`. Back still uses `from`.
 - Only a `from` the material use case accepted (`detail.back.penetrationId`) is put on the tab links. When the detail read is unavailable, the tabs omit `from` and `fromLog`.
-- `tests/e2e/ac30-status-text.spec.ts` was not in the brief. It asserted "No decision yet" on the collar and Kingsway sections. Those assertions now expect a count of 0. Need, scope, and Wait/Escalate stay. The test title still says "and its state as text".
+- `tests/e2e/ac30-status-text.spec.ts` was not in the brief. It asserted "No decision yet" on the collar and Northgate sections. Those assertions now expect a count of 0. Need, scope, and Wait/Escalate stay. The test title still says "and its state as text".
 - `docs/` was not edited. Spec AC 39 still describes the state labels, and AC 44 does not mention proposal counts. `check:ac` still requires AC 1–45 only.
 - `tests/e2e/stock-malformed.spec.ts` was left as it was. It still expects the stock unavailable panel on `/materials/MAT-SEALANT` and does not visit `?tab=log`.
 

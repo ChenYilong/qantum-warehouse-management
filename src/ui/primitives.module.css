@@ -138,6 +138,8 @@
   background: var(--surface);
   color: var(--text);
   font: inherit;
+  /* Every button reads like the site cards' buttons: a bold label. */
+  font-weight: 700;
   line-height: 1.2;
   text-align: center;
   text-decoration: none;
@@ -342,7 +344,6 @@
 .siteCardActions > * {
   flex: 1 1 9rem;
   min-height: 48px;
-  font-weight: 700;
 }
 
 /* The operator row: who to tell, then Text operator and Call operator, 56px tall for gloved hands (AC 55, 57). */
@@ -509,6 +510,30 @@ button.signal:active {
   list-style: none;
 }
 
+/* The sites feed as a waterfall: each card keeps its own height and the cards fill the columns top to bottom.
+   Two columns only from 672px, where a column still leaves the signal its 280px (AC 52); one on a phone. */
+.feed {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feed > li {
+  margin-bottom: 0.75rem;
+  break-inside: avoid;
+}
+
+.feed .siteCard {
+  border-radius: 1rem;
+}
+
+@media (min-width: 672px) {
+  .feed {
+    columns: 2;
+    column-gap: 0.75rem;
+  }
+}
+
 .muted {
   color: var(--text-secondary);
 }
@@ -570,7 +595,7 @@ button.signal:active {
   gap: 0.5rem;
 }
 
-/* "Job ref HP-345" then "12 penetrations, 5 solutions". The list is this page, so the counts are text. */
+/* "Job ref QH-345" then "12 penetrations, 5 solutions". The list is this page, so the counts are text. */
 /* No separator dot: on a narrow screen the second part wraps under the job ref without leaving one dangling. */
 .plannedWork {
   display: flex;

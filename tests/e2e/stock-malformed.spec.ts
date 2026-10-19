@@ -13,7 +13,7 @@ test("AC 9: malformed stock shows can't check and never crew can go", async ({ p
   await gotoApp(page, "/sites/site-b");
   await expect(page.getByRole("main").getByText("Can't check this site right now. Don't assume it's clear. Try again.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Back to sites" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to projects" })).toBeVisible();
   await expect(page.getByText("Crew can go")).toHaveCount(0);
 });
 
