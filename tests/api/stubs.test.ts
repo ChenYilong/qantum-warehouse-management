@@ -7,7 +7,7 @@ describe("sample stubs", () => {
     const stubs = makeStubs();
     const sites = await stubs.sites.listSites();
     expect(sites.map((site) => site.id)).toEqual(["site-a", "site-b", "site-c", "site-d"]);
-    expect(await stubs.sites.getSite("site-d")).toMatchObject({ id: "site-d", name: "Old Mill Annex" });
+    expect(await stubs.sites.getSite("site-d")).toMatchObject({ id: "site-d", name: "Foundry Lane Annex" });
     expect(await stubs.sites.getSite("missing")).toBeNull();
 
     const nominations = await stubs.nominations.getNominations("site-d");

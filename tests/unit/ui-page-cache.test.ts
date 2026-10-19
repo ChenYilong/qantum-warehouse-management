@@ -4,7 +4,7 @@ import { getCachedCandidates, getCachedReadiness, getCachedSite } from "@/app/_l
 describe("page cache", () => {
   it("returns the same site, readiness, and candidate list the pages render", async () => {
     const site = await getCachedSite("site-a");
-    expect(site?.name).toBe("Riverside Plaza, Block A");
+    expect(site?.name).toBe("Cedar Court, Block A");
     const readiness = await getCachedReadiness("site-a");
     expect(readiness.crewStatus).toBe("clear");
     const listed = await getCachedCandidates("site-b", "pen-b-01");

@@ -29,7 +29,7 @@ You are the **worker** for this brief. Execute it. Do not engage another externa
   - The chips come from `listFactChips` in `src/ui/penetrations.ts`: problem chips first, then an "Escalated" chip (`shortageState("escalated")`) and/or a "Waiting" chip. The site page `src/app/sites/[id]/page.tsx` passes `readiness.shortages` and `readiness.blockers`.
   - Each `Shortage` and blocker in `readiness` carries `actions: ShortageActionView[]`, newest first. A `ShortageActionView` has `kind: "wait" | "escalate"`, `escalateTo`, `note`, `createdBy`, `createdAt` and `current: boolean`. Its `state` is "open", "waiting" or "escalated".
   - `readiness.materials` (names) and `readiness.penetrations` (places) let `actionTarget` and `actionSentence` in `src/ui/format.ts` build "Escalated to purchasing: Pipe collar for 25 mm pipe".
-- **Sample data, e2e:** site-b (Harbour Point, Levels 3 to 5) has shortages on pen-b-01. The e2e write project records an escalation on `site-b:MAT-COLLAR-25` (ac31) and on sealant (scenario). Tests share one memory store per server, so read-only specs must not depend on a write.
+- **Sample data, e2e:** site-b (Quayside House, Levels 3 to 5) has shortages on pen-b-01. The e2e write project records an escalation on `site-b:MAT-COLLAR-25` (ac31) and on sealant (scenario). Tests share one memory store per server, so read-only specs must not depend on a write.
 - **Your sandbox cannot launch Chromium.** Update and add e2e specs carefully, make sure they typecheck and lint, and say they are unrun. `npx playwright test --list` must succeed.
 
 ## Decisions already made (approved spec, do not relitigate)

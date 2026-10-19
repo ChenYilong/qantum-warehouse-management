@@ -10,6 +10,6 @@ describe("AC 43: returning to the actions log", () => {
   });
 
   it("names the log and returns to that site's section", () => {
-    expect(logBack("site-b")).toEqual({ href: "/actions#site-site-b", name: "Actions log" });
+    expect(logBack("site-b")).toEqual({ href: "/actions#site-site-b", name: "Decisions" });
   });
 });

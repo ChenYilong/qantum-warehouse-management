@@ -63,6 +63,6 @@ No dev server was left running.
 
 ## What the orchestrator should check
 
-- Run `npm run test:e2e` outside this sandbox. Expect axe (`wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa`) in light and dark, including an open escalate dialog; 44×44 targets via `boundingBox`; no horizontal scroll at 375px; the write scenario (sealant escalate, replay "Already recorded", propose `0451`, Kingsway data problems).
+- Run `npm run test:e2e` outside this sandbox. Expect axe (`wcag2a`, `wcag2aa`, `wcag21aa`, `wcag22aa`) in light and dark, including an open escalate dialog; 44×44 targets via `boundingBox`; no horizontal scroll at 375px; the write scenario (sealant escalate, replay "Already recorded", propose `0451`, Northgate data problems).
 - Update `docs/api.md` for `penetration`, `materials`, and `penetrations`. `docs/agent-work/reviews/findings-quality.md` still quotes the old top-level catalogue `new URL`.
 - `next.config.ts` traces `./data/solutions-excerpt.csv` only for `/api`. Page routes call `getDependencies()` and were not given a trace include, because that file was not to be edited. `next dev` reads the CSV from the repo. A deployed page bundle may not.

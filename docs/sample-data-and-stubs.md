@@ -10,10 +10,10 @@ Four sites, each chosen so that one screen state of the demonstration scenario h
 
 | Site | Crew status | What it shows |
 | --- | --- | --- |
-| `site-a` Riverside Plaza, Block A | clear | The happy path. Also uses stock that site B is short of, which makes "shared, not reserved" visible |
-| `site-b` Harbour Point, Levels 3 to 5 | blocked | Two shortages, a multi-location sum, substitutes with and without stock, and every kind of empty state |
-| `site-c` Kingsway Works, Phase 2 | blocked | Missing data and solutions that do not fit: unknown solution code (`9999`), no material mapping (`0393`), a cut-off catalogue substrate (`0943`, never fits, AC 35), a rating below the requirement (pen-c-02 needs 90 min insulation, `0435` claims 60; invented), and a material with no stock record (fire mastic on pen-c-05, `0348`) |
-| `site-d` Old Mill Annex | nothing planned | The case that must never read as clear |
+| `site-a` Cedar Court, Block A | clear | The happy path. Also uses stock that site B is short of, which makes "shared, not reserved" visible |
+| `site-b` Quayside House, Levels 3 to 5 | blocked | Two shortages, a multi-location sum, substitutes with and without stock, and every kind of empty state |
+| `site-c` Northgate Depot, Phase 2 | blocked | Missing data and solutions that do not fit: unknown solution code (`9999`), no material mapping (`0393`), a cut-off catalogue substrate (`0943`, never fits, AC 35), a rating below the requirement (pen-c-02 needs 90 min insulation, `0435` claims 60; invented), and a material with no stock record (fire mastic on pen-c-05, `0348`) |
+| `site-d` Foundry Lane Annex | nothing planned | The case that must never read as clear |
 
 ## 2. The data
 
@@ -49,7 +49,7 @@ Names are generic on purpose. They are not claims about what Ryanfire actually s
 | `0334` | Copper Ø100, 60/not claimed | batt 2, sealant 1 |
 | `0347` | Copper Ø100, 60/60 (candidate for 0334) | batt 2, putty 2 |
 | `0943` | Blank 50mm, incomplete substrate | sealant 1, mastic 1 (never counted: pen-c-01 is a data problem, AC 35) |
-| `0348` | Copper Ø40, 60/60 | mastic 1 (pen-c-05's need creates Kingsway's stock-unknown shortage) |
+| `0348` | Copper Ø40, 60/60 | mastic 1 (pen-c-05's need creates Northgate's stock-unknown shortage) |
 | `0393` | HVAC bundle, floor | **no mapping, deliberately** |
 
 Quantities include fractions (0.25, 0.5, 1.5) so that round-up is visible in the totals.

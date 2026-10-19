@@ -10,8 +10,8 @@ const mastic = { name: "Fire mastic tube", kind: "unknown" as const };
 
 const clear: SiteActionInput = {
   id: "site-a",
-  name: "Riverside Plaza, Block A",
-  reference: "RP-A2",
+  name: "Cedar Court, Block A",
+  reference: "CC-A2",
   crewStatus: "clear",
   shortageCount: 0,
   dataProblemCount: 0,
@@ -19,8 +19,8 @@ const clear: SiteActionInput = {
 };
 const blocked: SiteActionInput = {
   id: "site-b",
-  name: "Harbour Point, Levels 3 to 5",
-  reference: "HP-345",
+  name: "Quayside House, Levels 3 to 5",
+  reference: "QH-345",
   crewStatus: "blocked",
   shortageCount: 2,
   dataProblemCount: 0,
@@ -105,17 +105,17 @@ describe("AC 49, AC 54: a tap on the signal calls the operator, like Call operat
 describe("AC 55: the text to the operator says what the state is", () => {
   it("a clear site's text keeps the shared-stock wording and says the crew can go", () => {
     const text = body(siteAction(clear).operator?.textHref ?? "");
-    expect(text).toBe(readyText("Riverside Plaza, Block A", "RP-A2"));
+    expect(text).toBe(readyText("Cedar Court, Block A", "CC-A2"));
     expect(text).toBe(
-      "Riverside Plaza, Block A, Job ref RP-A2: materials for the planned work are on hand (shared, not reserved). You can go. From your team leader.",
+      "Cedar Court, Block A, Job ref CC-A2: materials for the planned work are on hand (shared, not reserved). You can go. From your team leader.",
     );
   });
 
   it("a blocked site's text says the parts are NOT complete, to hold, what is short and that word will follow", () => {
     const text = body(siteAction(blocked).operator?.textHref ?? "");
-    expect(text).toBe(blockedText("Harbour Point, Levels 3 to 5", "HP-345", [collar, sealant], 0));
+    expect(text).toBe(blockedText("Quayside House, Levels 3 to 5", "QH-345", [collar, sealant], 0));
     expect(text).toBe(
-      "Harbour Point, Levels 3 to 5, Job ref HP-345: parts are NOT complete. Don't go yet. Short: Pipe collar for 25 mm pipe; Intumescent sealant, 310 ml cartridge. I'll message you when it's sorted. From your team leader.",
+      "Quayside House, Levels 3 to 5, Job ref QH-345: parts are NOT complete. Don't go yet. Short: Pipe collar for 25 mm pipe; Intumescent sealant, 310 ml cartridge. I'll message you when it's sorted. From your team leader.",
     );
     expect(text).not.toMatch(/can go/i);
     expect(text).not.toMatch(/on hand/i);
@@ -129,16 +129,16 @@ describe("AC 55: the text to the operator says what the state is", () => {
   });
 
   it("unknown stock is said as unknown, never as a number, and data problems are counted", () => {
-    expect(blockedText("Kingsway Works, Phase 2", "KW-P2", [mastic], 4)).toBe(
-      "Kingsway Works, Phase 2, Job ref KW-P2: parts are NOT complete. Don't go yet. Short: Fire mastic tube (stock unknown). Also 4 data problems to check. I'll message you when it's sorted. From your team leader.",
+    expect(blockedText("Northgate Depot, Phase 2", "ND-P2", [mastic], 4)).toBe(
+      "Northgate Depot, Phase 2, Job ref ND-P2: parts are NOT complete. Don't go yet. Short: Fire mastic tube (stock unknown). Also 4 data problems to check. I'll message you when it's sorted. From your team leader.",
     );
-    expect(blockedText("Kingsway Works, Phase 2", "KW-P2", [mastic], 1)).toContain("Also 1 data problem to check.");
+    expect(blockedText("Northgate Depot, Phase 2", "ND-P2", [mastic], 1)).toContain("Also 1 data problem to check.");
   });
 
   it("a site with only data problems says the materials can't be confirmed, and still holds the crew", () => {
-    const text = blockedText("Kingsway Works, Phase 2", "KW-P2", [], 4);
+    const text = blockedText("Northgate Depot, Phase 2", "ND-P2", [], 4);
     expect(text).toBe(
-      "Kingsway Works, Phase 2, Job ref KW-P2: I can't confirm the materials yet. Don't go yet. 4 data problems to check. I'll message you when it's sorted. From your team leader.",
+      "Northgate Depot, Phase 2, Job ref ND-P2: I can't confirm the materials yet. Don't go yet. 4 data problems to check. I'll message you when it's sorted. From your team leader.",
     );
     expect(text).not.toMatch(/can go/i);
   });
@@ -147,15 +147,15 @@ describe("AC 55: the text to the operator says what the state is", () => {
     const action = siteAction({ ...blocked, shortages: undefined, shortageCount: 0, dataProblemCount: 0 });
     expect(action.short).toEqual({ items: [], more: 0 });
     expect(body(action.operator?.textHref ?? "")).toBe(
-      "Harbour Point, Levels 3 to 5, Job ref HP-345: I can't confirm the materials yet. Don't go yet. I'll message you when it's sorted. From your team leader.",
+      "Quayside House, Levels 3 to 5, Job ref QH-345: I can't confirm the materials yet. Don't go yet. I'll message you when it's sorted. From your team leader.",
     );
     expect(action.decide?.label).toBe("Check data problems");
   });
 
   it("a site that can't be checked gets a hold text that never says go", () => {
     const text = body(siteAction({ ...clear, crewStatus: "unavailable" }).operator?.textHref ?? "");
-    expect(text).toBe(holdText("Riverside Plaza, Block A", "RP-A2"));
-    expect(text).toBe("Riverside Plaza, Block A, Job ref RP-A2: I can't check the materials right now. Don't go until I confirm. From your team leader.");
+    expect(text).toBe(holdText("Cedar Court, Block A", "CC-A2"));
+    expect(text).toBe("Cedar Court, Block A, Job ref CC-A2: I can't check the materials right now. Don't go until I confirm. From your team leader.");
     expect(text).not.toMatch(/can go|you can/i);
   });
 

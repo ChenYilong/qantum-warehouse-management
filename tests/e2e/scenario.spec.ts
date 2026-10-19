@@ -1,7 +1,7 @@
 import { expect, test, type Request } from "@playwright/test";
 import { gotoApp } from "./support";
 
-test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Kingsway still cannot go", async ({ page }) => {
+test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Northgate still cannot go", async ({ page }) => {
   // Writes site-b sealant (site-b:MAT-SEALANT) and a proposal on pen-b-01.
   let releaseFirst: (() => void) | undefined;
   let held = false;
@@ -16,10 +16,10 @@ test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Kingsway stil
   });
 
   await gotoApp(page, "/");
-  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Sites" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Sites" })).toBeVisible();
-  await page.getByRole("link", { name: /Harbour Point/ }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Harbour Point, Levels 3 to 5" })).toBeVisible();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Projects" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Projects" })).toBeVisible();
+  await page.getByRole("link", { name: /Quayside House/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Quayside House, Levels 3 to 5" })).toBeVisible();
   await expect(page.getByText("On hand, shared, not reserved")).toBeVisible();
   await expect(page.getByText("Blocked: hold the crew.")).toHaveCount(0);
   await expect(page.locator("a[href$='/penetrations/pen-b-01']")).toContainText("Short material");
@@ -29,7 +29,7 @@ test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Kingsway stil
   await page.locator("a[href$='/penetrations/pen-b-01']").click();
   await page.getByRole("link", { name: /^Short material: Intumescent sealant, 310 ml cartridge · this site short/ }).first().click();
   await expect(page).toHaveURL(/\/materials\/MAT-SEALANT\?from=pen-b-01#site-site-b$/);
-  await page.getByRole("button", { name: "Escalate Intumescent sealant, 310 ml cartridge at Harbour Point, Levels 3 to 5" }).click();
+  await page.getByRole("button", { name: "Escalate Intumescent sealant, 310 ml cartridge at Quayside House, Levels 3 to 5" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByText("This does not release the crew.")).toBeVisible();
   await expect(dialog.getByText("This records your decision here. Nobody is notified automatically yet.")).toBeVisible();
@@ -54,18 +54,18 @@ test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Kingsway stil
   expect(key).toBeTruthy();
 
   await expect(page.locator("[data-announcer]")).toHaveText("Escalation recorded");
-  await page.getByRole("navigation", { name: "Material" }).getByRole("link", { name: /Actions log/ }).click();
+  await page.getByRole("navigation", { name: "Material" }).getByRole("link", { name: /Decisions/ }).click();
   await expect(page).toHaveURL(/tab=log/);
   await expect(page).toHaveURL(/from=pen-b-01/);
   await expect(page.getByText("Escalated to purchasing: Intumescent sealant, 310 ml cartridge")).toBeVisible();
-  await expect(page.getByText("At Harbour Point, Levels 3 to 5")).toBeVisible();
+  await expect(page.getByText("At Quayside House, Levels 3 to 5")).toBeVisible();
   await expect(page.getByText("Order more sealant")).toBeVisible();
   await page.getByRole("navigation", { name: "Material" }).getByRole("link", { name: "Stock" }).click();
   await expect(page.locator("#site-site-b").getByText("Escalated", { exact: true })).toHaveCount(0);
   // Back returns to the penetration that opened the material page, then up to the site.
   await page.getByRole("link", { name: "Back to L3, Riser 2" }).click();
   await expect(page).toHaveURL(/\/sites\/site-b\/penetrations\/pen-b-01$/);
-  await page.getByRole("link", { name: "Back to Harbour Point, Levels 3 to 5" }).click();
+  await page.getByRole("link", { name: "Back to Quayside House, Levels 3 to 5" }).click();
   await expect(page.getByText("Blocked: hold the crew.")).toHaveCount(0);
   await expect(page.locator("a[href$='/penetrations/pen-b-01']")).toContainText("Short material");
   await expect(page.getByText("Crew can go")).toHaveCount(0);
@@ -123,7 +123,7 @@ test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Kingsway stil
 
   // The actions log is a top-level page. This screen has no tab bar, so open it from the sites list.
   await gotoApp(page, "/sites");
-  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Actions log" }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Decisions" }).click();
   await expect(page).toHaveURL(/\/actions$/);
   const log = page.locator("#site-site-b");
   // Each entry links to the work it is about, marked so its back control returns here, and a proposal names its place.
@@ -143,9 +143,9 @@ test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Kingsway stil
 
   await gotoApp(page, "/sites");
   // A decision records intent; it creates no stock, so both sites are still blocked, for the same reasons.
-  await expect(page.getByRole("listitem").filter({ hasText: "Harbour Point, Levels 3 to 5" }).getByText("Blocked · 2 shortages")).toBeVisible();
-  await expect(page.getByRole("listitem").filter({ hasText: "Kingsway Works, Phase 2" }).getByText("Blocked · 1 shortage, 4 data problems")).toBeVisible();
-  await page.getByRole("link", { name: /Kingsway Works/ }).click();
+  await expect(page.getByRole("listitem").filter({ hasText: "Quayside House, Levels 3 to 5" }).getByText("Blocked · 2 shortages")).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: "Northgate Depot, Phase 2" }).getByText("Blocked · 1 shortage, 4 data problems")).toBeVisible();
+  await page.getByRole("link", { name: /Northgate Depot/ }).click();
   await expect(page.getByText("Blocked: hold the crew.")).toHaveCount(0);
   await page.getByRole("navigation", { name: "Filter penetrations" }).getByRole("link", { name: "Data problems 4" }).click();
   await expect(page).toHaveURL(/show=data-problems/);

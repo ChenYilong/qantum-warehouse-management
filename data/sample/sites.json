@@ -3,8 +3,8 @@
   "sites": [
     {
       "id": "site-a",
-      "name": "Riverside Plaza, Block A",
-      "reference": "RP-A2",
+      "name": "Cedar Court, Block A",
+      "reference": "CC-A2",
       "address": "12 Quay Road",
       "operator": {
         "name": "Mere Tane",
@@ -17,8 +17,8 @@
     },
     {
       "id": "site-b",
-      "name": "Harbour Point, Levels 3 to 5",
-      "reference": "HP-345",
+      "name": "Quayside House, Levels 3 to 5",
+      "reference": "QH-345",
       "address": "4 Dock Street",
       "operator": {
         "name": "Wiremu Ngata",
@@ -31,9 +31,9 @@
     },
     {
       "id": "site-c",
-      "name": "Kingsway Works, Phase 2",
-      "reference": "KW-P2",
-      "address": "88 Kingsway",
+      "name": "Northgate Depot, Phase 2",
+      "reference": "ND-P2",
+      "address": "88 Northgate",
       "operator": {
         "name": "Tama Rewi",
         "phone": "+44 7700 900159"
@@ -45,9 +45,9 @@
     },
     {
       "id": "site-d",
-      "name": "Old Mill Annex",
-      "reference": "OM-01",
-      "address": "1 Mill Lane",
+      "name": "Foundry Lane Annex",
+      "reference": "FL-01",
+      "address": "1 Foundry Lane",
       "operator": {
         "name": "Mere Tane",
         "phone": "+44 7700 900156"

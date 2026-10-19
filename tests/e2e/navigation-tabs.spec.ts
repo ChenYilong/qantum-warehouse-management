@@ -12,12 +12,12 @@ test("AC 37: the landing page shows the same tab bar, and About this demo is cur
   await expect(page.getByRole("banner").getByRole("link", { name: /^Back to / })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Open sites" })).toHaveCount(0);
   const tabs = tabsOf(page);
-  await expect(tabs.getByRole("link", { name: "About this demo" })).toHaveAttribute("aria-current", "page");
-  await expect(tabs.getByRole("link", { name: "Sites" })).not.toHaveAttribute("aria-current", "page");
-  await expect(tabs.getByRole("link", { name: "Materials" })).not.toHaveAttribute("aria-current", "page");
-  await tabs.getByRole("link", { name: "Sites" }).click();
+  await expect(tabs.getByRole("link", { name: "Guide" })).toHaveAttribute("aria-current", "page");
+  await expect(tabs.getByRole("link", { name: "Projects" })).not.toHaveAttribute("aria-current", "page");
+  await expect(tabs.getByRole("link", { name: "Inventory" })).not.toHaveAttribute("aria-current", "page");
+  await tabs.getByRole("link", { name: "Projects" }).click();
   await expect(page).toHaveURL(/\/sites$/);
-  await expect(tabsOf(page).getByRole("link", { name: "Sites" })).toHaveAttribute("aria-current", "page");
+  await expect(tabsOf(page).getByRole("link", { name: "Projects" })).toHaveAttribute("aria-current", "page");
 });
 
 test("AC 37: the tab bar is fixed to the foot of the screen with every entry, the current one marked", async ({ page }) => {
@@ -26,10 +26,10 @@ test("AC 37: the tab bar is fixed to the foot of the screen with every entry, th
   await expect(page.getByRole("banner").getByRole("link", { name: /^Back to / })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /menu/i })).toHaveCount(0);
   const tabs = tabsOf(page);
-  await expect(tabs.getByRole("link")).toHaveText(["Sites", "Materials", "Actions log", "About this demo"]);
-  await expect(tabs.getByRole("link", { name: "Sites" })).toHaveAttribute("aria-current", "page");
-  await expect(tabs.getByRole("link", { name: "Materials" })).not.toHaveAttribute("aria-current", "page");
-  await expect(tabs.getByRole("link", { name: "About this demo" })).toHaveAttribute("href", "/about-this-demo");
+  await expect(tabs.getByRole("link")).toHaveText(["Projects", "Inventory", "Decisions", "Guide"]);
+  await expect(tabs.getByRole("link", { name: "Projects" })).toHaveAttribute("aria-current", "page");
+  await expect(tabs.getByRole("link", { name: "Inventory" })).not.toHaveAttribute("aria-current", "page");
+  await expect(tabs.getByRole("link", { name: "Guide" })).toHaveAttribute("href", "/about-this-demo");
 
   // Pinned to the bottom of the viewport, full width, and it stays there while the page scrolls.
   const viewport = page.viewportSize();
@@ -47,16 +47,16 @@ test("AC 37: the tab bar is fixed to the foot of the screen with every entry, th
   await assertAxe(page);
   await assertNoOverflow(page);
 
-  await tabTo(page, /^Materials\s*$/);
+  await tabTo(page, /^Inventory\s*$/);
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/materials$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Materials" })).toBeVisible();
-  await expect(tabsOf(page).getByRole("link", { name: "Materials" })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { level: 1, name: "Inventory" })).toBeVisible();
+  await expect(tabsOf(page).getByRole("link", { name: "Inventory" })).toHaveAttribute("aria-current", "page");
 });
 
 test("AC 37: inner screens drop the tab bar and lead with the back control", async ({ page }) => {
   await gotoApp(page, "/sites");
-  await tabsOf(page).getByRole("link", { name: "Actions log" }).click();
+  await tabsOf(page).getByRole("link", { name: "Decisions" }).click();
   await expect(page).toHaveURL(/\/actions$/);
   await expect(page.getByRole("banner").getByRole("link", { name: /^Back to / })).toHaveCount(0);
 
@@ -68,7 +68,7 @@ test("AC 37: inner screens drop the tab bar and lead with the back control", asy
     expect(room, path).toBe(0);
   }
   // Back on a top-level page, it returns.
-  await page.getByRole("link", { name: "Back to Materials" }).click();
+  await page.getByRole("link", { name: "Back to Inventory" }).click();
   await expect(page).toHaveURL(/\/materials$/);
   await expect(tabsOf(page)).toBeVisible();
 });
@@ -99,7 +99,7 @@ test("AC 38: the materials list shows each planned material against the shared s
 
   await collar.click();
   await expect(page).toHaveURL(/\/materials\/MAT-COLLAR-25$/);
-  await expect(page.getByRole("link", { name: "Back to Materials" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to Inventory" })).toBeVisible();
 });
 
 test("AC 37: the header's theme choice pins light or dark, is remembered on this device, and System follows the device", async ({ page }) => {
