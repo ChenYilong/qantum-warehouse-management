@@ -14,6 +14,6 @@ Everything in this folder is **invented** for the exercise. Only `../solutions-e
 
 The scenario, the numbers and why they were chosen are in `docs/sample-data-and-stubs.md`.
 
-Each site in `sites.json` also names its operator and picker (invented people). The phone numbers are from Ofcom's
+Each site in `sites.json` also has a `date`, its deadline (a calendar date, `YYYY-MM-DD`, invented; the projects list shows it as "Deadline · Fri 23 Oct 2026"), a `location` (invented points in Auckland), and names its operator and picker (invented people). The phone numbers are from Ofcom's
 range reserved for drama (07700 900000 to 07700 900999, written `+44 7700 900156`), so the Call and Text links
 in the app reach no one. At Northgate Depot one person picks and installs, so the site lists them once.

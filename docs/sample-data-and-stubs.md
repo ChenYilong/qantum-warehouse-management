@@ -120,7 +120,9 @@ Asking for stock and mappings by id keeps responses small and avoids fetching th
 const Id = z.string().min(1).max(64).regex(/^[A-Za-z0-9._-]+$/); // no ':' (shortage id is siteId:materialId)
 
 Site            = { id: Id, name: string, reference: string, address?: string,
-                    operator?: Contact, picker?: Contact }   // Contact = { name, phone: "+44 7700 900156" }
+                    operator?: Contact, picker?: Contact,    // Contact = { name, phone: "+44 7700 900156" }
+                    location?: { lat: number, lng: number }, // the project map (AC 74)
+                    date?: string }                          // the deadline, YYYY-MM-DD (AC 80)
 Penetration     = { id: Id, siteId: Id, floor: string, location: string,
                     orientation: "Wall" | "Floor" | "Ceiling",
                     substrateDetail: string, serviceType: string, serviceSize: string,
@@ -137,7 +139,7 @@ Contract rules:
 - **Structure is strict, values are lenient.** A missing field, wrong type or bad id rejects the whole response and the API returns 502 with an `upstream_invalid` code. A negative quantity is a legal number, so it passes through and the domain turns it into an `invalid_quantity` blocker or an unknown material. Failing the whole page for one bad row would hide the other sites' good data, and it would make the domain's fail-closed rules unreachable.
 - **Unknown extra fields are ignored**, so a real system can add fields without breaking the app.
 - **Numbers must be finite.** `JSON.parse("1e999")` gives `Infinity`, so the schema checks finiteness explicitly.
-- **Display fields** (`floor`, `location`, `reference`, `address`) are for the screen only. The domain does not read them.
+- **Display fields** (`floor`, `location`, `reference`, `address`, a site's `date`) are for the screen only. The domain does not read them.
 
 ## 6. Stub implementation
 

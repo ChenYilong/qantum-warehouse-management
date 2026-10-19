@@ -63,6 +63,8 @@ export interface Site {
   readonly picker?: Contact;
   /** Where the site is (AC 74): latitude and longitude in degrees. */
   readonly location?: { readonly lat: number; readonly lng: number };
+  /** The project's deadline (AC 80): a calendar date, YYYY-MM-DD. */
+  readonly date?: string;
 }
 
 export interface Material {
