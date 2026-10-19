@@ -247,7 +247,6 @@ export const PICKS = {
   crewNotClear: "Unlocks when the site is clear too.",
   crewOffline: "Needs a live check. Never decided from saved data.",
   crewTell: "Texts the operator to send the crew.",
-  waiting: (count: number) => `${count} ${count === 1 ? "report" : "reports"} waiting to send`,
   waitingText: "Saved on this phone · sends automatically",
   // The Pick check page (AC 64).
   checkTitle: (count: number) => (count === 0 ? "Pick check" : `Pick check · ${count} ${count === 1 ? "issue" : "issues"}`),
@@ -270,7 +269,58 @@ export const PICKS = {
     wrong_spec: "Wrong spec or rating",
     missing_parts: "Marked picked, parts missing",
     part_picked: "Partly picked, accessory missing",
+    unsuitable: "Doesn't fit on site",
+    wrong_item: "Wrong item",
+    damaged: "Damaged, on the way or during the work",
     other: "Something else",
+  },
+  // The site review (AC 67 to 71).
+  /** Short names for what was found, on a row and a card. */
+  foundKinds: {
+    wrong_spec: "Wrong spec",
+    missing_parts: "Parts missing",
+    part_picked: "Partly picked",
+    unsuitable: "Doesn't fit",
+    wrong_item: "Wrong item",
+    damaged: "Damaged",
+    other: "Something else",
+  },
+  requests: { repick: "Re-pick for the next delivery", same_day: "Same-day delivery" },
+  requestAsked: { repick: "re-pick asked", same_day: "same-day delivery asked" },
+  affected: (count: number) => `${count} affected`,
+  whatsFound: "What did the site find?",
+  chooseKind: "Choose what's wrong.",
+  affectedQty: "How many are affected?",
+  whatsNeeded: "What's needed?",
+  reviewButton: "Review",
+  reviewTitle: "Review on site",
+  reviewQuestion: "Is it right on site?",
+  reviewIntro: "The warehouse marked it Picked. Check it yourself: the right item, the right amount, nothing damaged.",
+  reviewRight: "Yes, it's right",
+  reviewRightHint: "Records it as checked on site.",
+  reviewWrong: "No, something's wrong",
+  reviewWrongHint: "Report it to the warehouse for a re-pick or a same-day delivery.",
+  reviewFooter: "A line reported from site stays Not ready until a review on site says it's right.",
+  reviewSending: "Saving…",
+  reviewSent: "Checked on site.",
+  reviewQueued: "Saved on this phone. It sends by itself when you're back online.",
+  reviewOffline: "You can still review it. Your answer is saved on this phone and sent when you're back online.",
+  reviewFailed: "The review could not be saved. Try again.",
+  reviewNoLine: "That line is not on this site's pick list.",
+  backToSite: "Back to the site",
+  reportFromSite: "Report to warehouse",
+  reportFromSiteFooter: "The line reads Reported on site until a review on site says it's right.",
+  checkedOnSite: (at: string) => `Checked on site ${at}`,
+  reportedOnSite: (at: string, finding: string) => `Reported ${at} · ${finding}`,
+  reportedCard: (at: string, finding: string) =>
+    `Reported from site ${at}: ${finding}. It stays Reported until a review on site says it's right.`,
+  notReadyReportedText: "The warehouse marked every line Picked, but the pick list or the site found problems. Fix them before the crew goes.",
+  checkReportedIntro: "Reports from site count too: a reported line stays an issue until a review on site says it's right.",
+  waitingAll: (reports: number, reviews: number) => {
+    const parts: string[] = [];
+    if (reports > 0) parts.push(`${reports} ${reports === 1 ? "report" : "reports"}`);
+    if (reviews > 0) parts.push(`${reviews} ${reviews === 1 ? "review" : "reviews"}`);
+    return `${parts.join(" and ")} waiting to send`;
   },
   material: "Material",
   plannedQty: "Plan needs",
@@ -293,5 +343,10 @@ export const PICKS = {
   queued: "Saved on this phone. It sends by itself when you're back online.",
   failed: "The report could not be sent. Check it and try again.",
   backToCheck: "Back to the pick check",
-  outboxSent: (count: number) => `${count} pick ${count === 1 ? "report" : "reports"} sent`,
+  outboxSentAll: (reports: number, reviews: number) => {
+    const parts: string[] = [];
+    if (reports > 0) parts.push(`${reports} pick ${reports === 1 ? "report" : "reports"}`);
+    if (reviews > 0) parts.push(`${reviews} ${reviews === 1 ? "review" : "reviews"}`);
+    return `${parts.join(" and ")} sent`;
+  },
 } as const;

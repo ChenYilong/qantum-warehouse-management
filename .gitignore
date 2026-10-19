@@ -16,7 +16,6 @@ test-results/
 # Local environment files
 .env*
 !.env.example
-
 # Supabase local state
 supabase/.temp/
 
@@ -25,6 +24,8 @@ supabase/.temp/
 
 # Tooling and operating-system files
 .DS_Store
+.git/
+._*
 .idea/
 npm-debug.log*
 # Local reference material (not for the public repo)

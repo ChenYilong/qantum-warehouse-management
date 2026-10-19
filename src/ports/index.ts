@@ -1,4 +1,4 @@
-import type { ActionKind, EscalateTo, Penetration, PickList, PickReport, PickReportKind, ShortageAction, SubstitutionProposal } from "@/domain";
+import type { ActionKind, EscalateTo, Penetration, PickList, PickReport, PickReportKind, PickRequest, PickReview, ShortageAction, SubstitutionProposal } from "@/domain";
 import type { SolutionMaterialRecord, StockBalanceRecord } from "./schemas";
 
 export type { InternalReason, UpstreamCode } from "./errors";
@@ -119,11 +119,21 @@ export interface NewPickReport {
   readonly kind: PickReportKind;
   readonly plannedQty: number | null;
   readonly pickedQty: number | null;
+  readonly affectedQty: number | null;
+  readonly request: PickRequest;
   readonly missingPart: string | null;
   readonly note: string | null;
   readonly sendToPicker: boolean;
   readonly sendToPurchasing: boolean;
   readonly photoAttached: boolean;
+  readonly createdBy: string;
+  readonly idempotencyKey: string;
+}
+
+/** A review on site that says a pick line is right (AC 68). */
+export interface NewPickReview {
+  readonly siteId: string;
+  readonly lineId: string;
   readonly createdBy: string;
   readonly idempotencyKey: string;
 }
@@ -139,6 +149,10 @@ export interface ActionsRepository {
   appendPickReport(input: NewPickReport): Promise<{ record: PickReport; created: boolean }>;
   findPickReportByKey(createdBy: string, idempotencyKey: string): Promise<PickReport | null>;
   listPickReports(siteId: string): Promise<PickReport[]>;
+  /** Reviews on site (AC 68): idempotent the same way, append-only, newest first. */
+  appendPickReview(input: NewPickReview): Promise<{ record: PickReview; created: boolean }>;
+  findPickReviewByKey(createdBy: string, idempotencyKey: string): Promise<PickReview | null>;
+  listPickReviews(siteId: string): Promise<PickReview[]>;
 }
 
 export type { SubstitutionProposal };

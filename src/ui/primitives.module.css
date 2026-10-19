@@ -1922,6 +1922,149 @@ section:has(> .stickyHeading) {
   font-size: 0.875rem;
 }
 
+/* One material row (AC 62, 67, 70): the name opens its card; under it, what the site found, then the line's label and
+   its own Review button side by side, so every line can be checked on site, the ones that match the plan too. */
+.pickRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+}
+
+.pickRow > .pickLine {
+  min-height: 48px;
+  padding-bottom: 0;
+}
+
+.pickRow > .pickRowNote,
+.pickRow > .pickRowActions {
+  margin: 0 1rem;
+}
+
+.pickRowNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* An open report from site: the stop mark and the danger tone, with a bar on the left, never colour alone. */
+.pickRowReported {
+  padding: 0.5rem 0.75rem;
+  border-left: 4px solid var(--danger-text);
+  border-radius: var(--radius);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.pickRowActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pickRowActions .chip {
+  font-size: 0.875rem;
+}
+
+/* Review: the same 56px button on every line, with a heavy edge so it reads as a button in sunlight. */
+.pickReview {
+  min-width: 8rem;
+  min-height: 56px;
+  border: 2px solid var(--text);
+  font-size: 1.125rem;
+}
+
+/* The review's two answers (AC 67, 68): full width, at least 88px, colour and mark together. Yes is the signal's go
+   green with dark ink, No its stop red with white ink (at least 7:1, AC 53), so they read in sunlight, with gloves
+   and in greyscale. */
+.reviewChoices {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reviewChoice {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  width: 100%;
+  min-height: 5.5rem;
+  padding: 0.875rem 1rem;
+  border: 4px solid var(--choice-edge);
+  border-radius: 1.25rem;
+  background: var(--choice-fill);
+  color: var(--choice-ink);
+  font: inherit;
+  line-height: 1.2;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.reviewChoice:focus-visible {
+  outline-offset: 3px;
+}
+
+.reviewChoice:active {
+  transform: translateY(2px);
+}
+
+.reviewChoice:disabled {
+  cursor: progress;
+}
+
+.reviewChoice .icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-top: 0;
+}
+
+.reviewRight {
+  --choice-fill: var(--signal-go-fill);
+  --choice-ink: var(--signal-go-ink);
+  --choice-edge: var(--signal-go-edge);
+}
+
+.reviewWrong {
+  --choice-fill: var(--signal-stop-fill);
+  --choice-ink: var(--signal-stop-ink);
+  --choice-edge: var(--signal-stop-edge);
+}
+
+.reviewChoiceText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.reviewChoiceLabel {
+  font-size: 1.375rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.reviewChoiceHint {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.reviewError {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 4px solid var(--danger-text);
+  border-radius: var(--radius);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-weight: 700;
+}
+
 .crewGate {
   display: flex;
   flex-direction: column;
@@ -1947,6 +2090,15 @@ section:has(> .stickyHeading) {
 
 .pickCard p {
   margin: 0;
+}
+
+/* A card for a line that matches the plan (the review page, AC 67): the top edge in the success tone. */
+.pickCardMatched {
+  border-top-color: var(--success-text);
+}
+
+.pickCard > .chip {
+  align-self: flex-start;
 }
 
 .pickCardTop {

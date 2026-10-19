@@ -35,16 +35,27 @@ export const SubstitutionBodySchema = z.strictObject({
 });
 
 /** A pick-error report (AC 65). Amounts are whole, non-negative and finite; text is trimmed and capped. */
+const PickLineIdSchema = z.string().regex(/^[A-Za-z0-9._-]{1,64}$/);
+
 export const PickReportBodySchema = z.strictObject({
-  kind: z.enum(["wrong_spec", "missing_parts", "part_picked", "other"]),
-  lineId: z.string().regex(/^[A-Za-z0-9._-]{1,64}$/),
+  kind: z.enum(["wrong_spec", "missing_parts", "part_picked", "unsuitable", "wrong_item", "damaged", "other"]),
+  lineId: PickLineIdSchema,
   plannedQty: z.number().int().min(0).max(100_000).nullable().optional(),
   pickedQty: z.number().int().min(0).max(100_000).nullable().optional(),
+  /** How many the site found wrong, unfit or damaged (AC 69). */
+  affectedQty: z.number().int().min(0).max(100_000).nullable().optional(),
+  /** What the site needs: a re-pick for the next delivery (the default) or a same-day delivery (AC 69). */
+  request: z.enum(["repick", "same_day"]).optional(),
   missingPart: z.string().trim().max(120).optional(),
   note: z.string().trim().max(500).optional(),
   sendToPicker: z.boolean(),
   sendToPurchasing: z.boolean(),
   photoAttached: z.boolean().optional(),
+});
+
+/** A review on site that says a line is right (AC 68): the line, and nothing else. */
+export const PickReviewBodySchema = z.strictObject({
+  lineId: PickLineIdSchema,
 });
 
 export function json(body: unknown, status = 200): Response {

@@ -36,7 +36,7 @@ if (!adminUrl) {
       try {
         await runSetup(admin, database, appPassword);
         const first = migrate(admin, database);
-        expect(visible(first.stdout, secrets)).toContain(`applied 0001_actions 0002_pick_reports host ${admin.host} database ${database}`);
+        expect(visible(first.stdout, secrets)).toContain(`applied 0001_actions 0002_pick_reports 0003_site_review host ${admin.host} database ${database}`);
         expect(visible(`${first.stdout}\n${first.stderr}`, secrets)).not.toContain("[redacted]");
         const second = migrate(admin, database);
         expect(visible(second.stdout, secrets)).toContain(`applied (none) host ${admin.host} database ${database}`);
@@ -202,6 +202,48 @@ if (!adminUrl) {
       await expectState("delete from public.pick_report", [], "42501");
     });
 
+    it("AC 69: a pick report keeps what the site found, how many and the request; old-style reports read as a re-pick", async () => {
+      const actions = repository();
+      const siteId = id("site");
+      const found = await actions.appendPickReport(
+        reportInput(siteId, { idempotencyKey: `${siteId}-found`, kind: "damaged", affectedQty: 2, request: "same_day" }),
+      );
+      expect(found.record).toMatchObject({ kind: "damaged", affectedQty: 2, request: "same_day" });
+      for (const kind of ["unsuitable", "wrong_item"] as const) {
+        expect((await actions.appendPickReport(reportInput(siteId, { idempotencyKey: `${siteId}-${kind}`, kind }))).record.kind).toBe(kind);
+      }
+      // A row written without the new columns, as before this migration, is a re-pick with nothing said about how many.
+      await queryPool().query(
+        `insert into public.pick_report (site_id, line_id, kind, send_to_picker, send_to_purchasing, created_by, idempotency_key)
+         values ($1, 'b-batt', 'wrong_spec', true, false, 'demo-leader', $2)`,
+        [siteId, `${siteId}-old`],
+      );
+      expect(await actions.findPickReportByKey("demo-leader", `${siteId}-old`)).toMatchObject({ request: "repick", affectedQty: null });
+      const insert = `insert into public.pick_report (site_id, line_id, kind, affected_qty, request, send_to_picker, send_to_purchasing, created_by, idempotency_key)
+        values ($1, 'line', $2, $3, $4, true, false, 'demo-leader', $5)`;
+      await expectState(insert, [siteId, "broken", 1, "repick", `${siteId}-badkind`], "23514");
+      await expectState(insert, [siteId, "damaged", -1, "repick", `${siteId}-badqty`], "23514");
+      await expectState(insert, [siteId, "damaged", 1, "tomorrow", `${siteId}-badrequest`], "23514");
+    });
+
+    it("AC 68, AC 71: appends a pick review, replays the same key as one row, lists newest first, and is append-only", async () => {
+      const actions = repository();
+      const siteId = id("site");
+      const input = { siteId, lineId: "a-collar", createdBy: "demo-leader", idempotencyKey: `${siteId}-review` };
+      const first = await actions.appendPickReview(input);
+      const resend = await actions.appendPickReview(input);
+      await delay(30);
+      const later = await actions.appendPickReview({ ...input, lineId: "a-sealant", idempotencyKey: `${siteId}-review-2` });
+      expect(first.created).toBe(true);
+      expect(first.record).toMatchObject({ siteId, lineId: "a-collar", createdBy: "demo-leader" });
+      expect(resend).toEqual({ record: first.record, created: false });
+      expect((await actions.listPickReviews(siteId)).map((row) => row.id)).toEqual([later.record.id, first.record.id]);
+      expect(await actions.findPickReviewByKey("demo-leader", input.idempotencyKey)).toEqual(first.record);
+      await expectState("update public.pick_review set line_id = 'changed'", [], "42501");
+      await expectState("delete from public.pick_review", [], "42501");
+      await expectState("truncate public.pick_review", [], "42501");
+    });
+
     it("refuses update, delete, truncate, and create table for the app role", async () => {
       const siteId = id("site");
       await repository().appendShortageAction(actionInput(siteId, { idempotencyKey: `${siteId}-priv` }));
@@ -229,6 +271,8 @@ if (!adminUrl) {
       kind: "part_picked",
       plannedQty: 10,
       pickedQty: 6,
+      affectedQty: null,
+      request: "repick",
       missingPart: "Nozzle × 1",
       note: "Crew goes Thursday",
       sendToPicker: true,

@@ -308,3 +308,24 @@ Not built, with reasons:
 | A real toggle that dispatches or holds the crew | Nothing here releases the crew (AC 50); a switch that looked settable would invite that. The signal reports the state and the knob never moves |
 | Sending the text from the app | There is no messaging service. The leader's own messages app opens with the text ready, which also works on a weak signal |
 | A longer message with quantities | A text of two or three lines is read; the figures are one tap away on the Needs your decision panel |
+
+## 12. Review on site (2026-10-19)
+
+From the author: the warehouse can mark a line Picked, and the pick list can even match the plan, yet the site finds it wrong: an item that doesn't fit, the wrong item altogether, or damage on the way or during the work. The picker then has to pick again, sometimes as a same-day delivery. So every material gets a double check on site, the lines that match the plan too. Requirements are FR28 and AC 67 to 71; the report form is the canvas's "Report to warehouse" (artboard 4), extended.
+
+| Topic | As built |
+| --- | --- |
+| A Review on every line | Each row of "Materials · planned vs picked" keeps its name link (to its Pick check card) and gains a second line: the label (Matches plan, Part-picked, Missing parts, Wrong spec, Reported on site) and a Review button beside it. Review is 56px tall with a 2px dark edge, named "Review" and described by the material, so a screen reader hears which line. It is there online and offline, on every line whatever its label, and on each Pick check card |
+| What a row says | Under the amounts: an open report from site in the danger tone with the stop mark and a bar on the left ("Reported 14:32 · Damaged · 2 affected · same-day delivery asked"), or, after a review, "Checked on site 14:32" with a tick. A reported line that also fails the pick check keeps its own label and adds the line |
+| The review page | `/sites/<id>/picks/review?line=<line>`: the line's card (amounts, where it is used, its label, any open report, the picker), "Is it right on site?", then two answers as big as the site signal: "Yes, it's right" in the signal's go green with dark ink and a tick, "No, something's wrong" in its stop red with white ink and the stop mark, each at least 88px tall and full width. The card's top edge is green for a line that matches the plan and red for an issue |
+| Yes, it's right | Records the review at once with a new idempotency key ("Checked on site."). Offline, or when the send gets no answer, it waits on the phone with that key like a report; the site screen counts "1 review waiting to send", apart from reports, and it sends by itself once online |
+| No, something's wrong | Opens the report form on that line, titled "Report to warehouse", with no kind chosen: the leader must say what the site found ("Choose what's wrong."). The site's kinds come first (Doesn't fit on site, Wrong item, Damaged, on the way or during the work), then the pick check's. New fields: "How many are affected?" (optional, a whole number) and "What's needed?" (Re-pick for the next delivery, the default, or Same-day delivery). Back returns to the review |
+| After a report | The line is an issue, "Reported on site", so the Picks section reads "Not ready", says the pick list or the site found problems, and Send the crew stays locked. A later "Yes, it's right" closes it. Offline the label reads "Was reported on site" in amber |
+
+Not built, with reasons:
+
+| Idea | Why not now |
+| --- | --- |
+| The warehouse closing the report | The warehouse's systems are read-only here, and only the site can see that the new delivery is right |
+| The big site signal turning red on a report | The signal reads stock (AC 52 to 57) on the list and the site screen alike; the pick gate is Send the crew. Folding picks into the signal needs a pick read per site on the sites list: a next step |
+| A photo sent with the report | There is no upload service; as in AC 65, the photo stays on the phone |
