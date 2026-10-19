@@ -15,18 +15,21 @@ import styles from "./primitives.module.css";
  * calls the operator when tapped, a blocked site lists what is short, and the operator can be texted or called.
  * Action names never repeat the site name: the card's title already says it. A project with a location has its map
  * under its name, above the signal and as wide as it, and ends with the trip there and Directions (AC 74, 75).
+ * `idPrefix` keeps its ids unique when today's panel shows the same card again above the list (AC 79).
  */
 export function SiteCard({
   site,
   status,
   place,
+  idPrefix = "site-card",
 }: {
   site: SiteActionInput;
   status: StatusView;
   place?: { readonly location: LatLng; readonly token: string; readonly colour: string };
+  idPrefix?: string;
 }) {
   const action = siteAction(site);
-  const titleId = `site-card-${site.id}`;
+  const titleId = `${idPrefix}-${site.id}`;
   const operatorId = `${titleId}-operator`;
   const { short } = action;
   return (

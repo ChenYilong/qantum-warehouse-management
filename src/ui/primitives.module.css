@@ -2199,8 +2199,9 @@ section:has(> .stickyHeading) {
 
 /*
  * Today's panel on the projects list (AC 77 to 79), after the author's design "I · Verdict + tabs + map (B+D+E)":
- * the verdict with its bar and tabs, then the chosen tab's map and the drawer over its foot. Full bleed on a phone,
- * as in the design; a rounded block in the column on a wider screen. The colours are the project's signal tokens.
+ * the verdict with its bar and tabs, then the chosen tab's map and, right under it, the chosen project's card. Full
+ * bleed on a phone, as in the design; a rounded block in the column on a wider screen. The colours are the project's
+ * signal tokens.
  */
 .today {
   --verdict-bg: var(--signal-stop-fill);
@@ -2210,7 +2211,7 @@ section:has(> .stickyHeading) {
   --verdict-tab: #ffe5e5;
   --verdict-tab-on-bg: #ffffff;
   --verdict-tab-on-ink: var(--signal-stop-fill);
-  /* Its own stacking context: the pins and the drawer stay under the sticky header and the tab bar. */
+  /* Its own stacking context: the pins and the card stay under the sticky header and the tab bar. */
   isolation: isolate;
   /* Full bleed: the main column's max-width would otherwise keep the panel off the screen's right edge. */
   max-width: none;
@@ -2320,7 +2321,7 @@ section:has(> .stickyHeading) {
 
 .verdictTabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
   border-radius: 10px;
@@ -2336,8 +2337,11 @@ section:has(> .stickyHeading) {
   background: transparent;
   color: var(--verdict-tab);
   font: inherit;
-  font-size: 1rem;
+  /* Four tabs share a phone's width, so a long label ("Crew can go 1") takes two even lines. */
+  font-size: 0.9375rem;
   font-weight: 600;
+  line-height: 1.15;
+  text-wrap: balance;
   cursor: pointer;
 }
 
@@ -2368,12 +2372,6 @@ section:has(> .stickyHeading) {
 
 .projectsMap[data-projects-map="failed"] .projectsMapCanvas {
   display: none;
-}
-
-/* Mapbox's credits, required on every map, sit above the drawer that covers the map's foot. */
-.projectsMap :global(.mapboxgl-ctrl-bottom-left),
-.projectsMap :global(.mapboxgl-ctrl-bottom-right) {
-  bottom: 1.5rem;
 }
 
 /* A pin: a 48px button whose dot sits on the project's point, with the short name beside it. */
@@ -2440,50 +2438,15 @@ section:has(> .stickyHeading) {
   outline: 2px solid #16181d;
 }
 
-/* The drawer: the chosen project, over the map's foot like a sheet. */
-.drawer {
-  position: relative;
-  z-index: 4;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.625rem;
-  margin-top: -1.25rem;
-  padding: 0.625rem 1.25rem 1.5rem;
-  border-radius: 1.25rem 1.25rem 0 0;
-  background: var(--bg);
-  color: var(--text);
+/* The chosen project's card, right under the map (AC 79): the list's own card, as wide as the map, rounded as in the
+   list. */
+.todayCard .siteCard {
+  border-radius: 1rem;
 }
 
-.drawerHandle {
-  align-self: center;
-  width: 40px;
-  height: 5px;
-  border-radius: 3px;
-  background: var(--border);
-}
-
-.drawerTitle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  width: 100%;
-  min-height: 48px;
-  color: var(--text);
-  font-size: 1.25rem;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.drawerDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.drawerDetails p {
+.todayEmpty {
   margin: 0;
+  padding: 1rem var(--space);
 }
 
 /* The list's own heading, under today's panel. */

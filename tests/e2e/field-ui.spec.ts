@@ -177,14 +177,16 @@ test("AC 52, AC 57: each site's signal differs by colour, knob shape and knob si
     expect(box.width).toBeGreaterThanOrEqual(280);
   }
 
-  // Very green means ready and very red means parts are missing (AC 53 pins the exact contrast).
-  const [goR, goG, goB] = await fillOf(page.locator('[data-signal="go"]'));
+  // Very green means ready and very red means parts are missing (AC 53 pins the exact contrast). On the list's cards:
+  // today's panel shows one of them again above the list (AC 79).
+  const cards = page.getByRole("list", { name: "Projects" });
+  const [goR, goG, goB] = await fillOf(cards.locator('[data-signal="go"]'));
   expect(goG).toBeGreaterThan(goR + 60);
   expect(goG).toBeGreaterThan(goB + 60);
-  const [stopR, stopG, stopB] = await fillOf(page.locator('[data-signal="stop"]').first());
+  const [stopR, stopG, stopB] = await fillOf(cards.locator('[data-signal="stop"]').first());
   expect(stopR).toBeGreaterThan(stopG + 100);
   expect(stopR).toBeGreaterThan(stopB + 100);
-  const [idleR, idleG, idleB] = await fillOf(page.locator('[data-signal="idle"]'));
+  const [idleR, idleG, idleB] = await fillOf(cards.locator('[data-signal="idle"]'));
   expect(Math.max(idleR, idleG, idleB) - Math.min(idleR, idleG, idleB)).toBeLessThan(30);
 
   // The labels are the status wording, one per card.
@@ -200,9 +202,9 @@ test("AC 52, AC 57: each site's signal differs by colour, knob shape and knob si
 
   // The same tokens turn bright on the dark theme, still green, red and grey.
   await page.emulateMedia({ colorScheme: "dark" });
-  const [darkGoR, darkGoG] = await fillOf(page.locator('[data-signal="go"]'));
+  const [darkGoR, darkGoG] = await fillOf(cards.locator('[data-signal="go"]'));
   expect(darkGoG).toBeGreaterThan(darkGoR + 60);
-  const [darkStopR, darkStopG] = await fillOf(page.locator('[data-signal="stop"]').first());
+  const [darkStopR, darkStopG] = await fillOf(cards.locator('[data-signal="stop"]').first());
   expect(darkStopR).toBeGreaterThan(darkStopG + 100);
   await assertAxe(page);
 });
