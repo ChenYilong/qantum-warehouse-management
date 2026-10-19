@@ -4,7 +4,8 @@ import { gotoApp } from "./support";
 test("AC 9: malformed stock shows can't check and never crew can go", async ({ page }) => {
   // Runs on the malformed-stock server (STUB_STOCK_MODE=malformed), not the main server.
   await gotoApp(page, "/sites");
-  await expect(page.getByText("Can't check")).toHaveCount(4);
+  // The list's cards; today's panel above them says the same in its own words (AC 77).
+  await expect(page.getByRole("list", { name: "Projects" }).getByText("Can't check")).toHaveCount(4);
   await expect(page.getByText("Crew can go")).toHaveCount(0);
   // AC 52, AC 54: the same amber signal, which checks again and never calls.
   await expect(page.locator('[data-signal="unknown"]')).toHaveCount(4);

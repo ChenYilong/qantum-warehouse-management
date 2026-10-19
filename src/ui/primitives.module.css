@@ -2196,3 +2196,297 @@ section:has(> .stickyHeading) {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+
+/*
+ * Today's panel on the projects list (AC 77 to 79), after the author's design "I · Verdict + tabs + map (B+D+E)":
+ * the verdict with its bar and tabs, then the chosen tab's map and the drawer over its foot. Full bleed on a phone,
+ * as in the design; a rounded block in the column on a wider screen. The colours are the project's signal tokens.
+ */
+.today {
+  --verdict-bg: var(--signal-stop-fill);
+  --verdict-ink: var(--signal-stop-ink);
+  --verdict-soft: #ffd6d6;
+  --verdict-track: rgb(0 0 0 / 0.28);
+  --verdict-tab: #ffe5e5;
+  --verdict-tab-on-bg: #ffffff;
+  --verdict-tab-on-ink: var(--signal-stop-fill);
+  /* Its own stacking context: the pins and the drawer stay under the sticky header and the tab bar. */
+  isolation: isolate;
+  /* Full bleed: the main column's max-width would otherwise keep the panel off the screen's right edge. */
+  max-width: none;
+  margin: 0 calc(-1 * var(--space)) 1.5rem;
+}
+
+.today[data-today="go"] {
+  --verdict-bg: var(--signal-go-fill);
+  --verdict-ink: var(--signal-go-ink);
+  --verdict-soft: var(--signal-go-ink);
+  --verdict-track: rgb(0 0 0 / 0.16);
+  --verdict-tab: var(--signal-go-ink);
+  --verdict-tab-on-ink: var(--signal-go-ink);
+}
+
+.today[data-today="none"] {
+  --verdict-bg: var(--surface);
+  --verdict-ink: var(--text);
+  --verdict-soft: var(--text-secondary);
+  --verdict-track: var(--neutral-bg);
+  --verdict-tab: var(--text);
+  --verdict-tab-on-bg: var(--brand-black);
+  --verdict-tab-on-ink: var(--brand-yellow);
+}
+
+@media (min-width: 48rem) {
+  .today {
+    margin-inline: 0;
+    overflow: hidden;
+    border-radius: 1rem;
+  }
+}
+
+.verdict {
+  --focus: var(--verdict-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.125rem var(--space) 1rem;
+  background: var(--verdict-bg);
+  color: var(--verdict-ink);
+}
+
+.today[data-today="none"] .verdict {
+  border-block: 1px solid var(--border);
+}
+
+.verdictTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  color: var(--verdict-soft);
+  font-size: 0.875rem;
+}
+
+.verdictToday {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.verdictHeadline {
+  max-width: none;
+  margin: 0;
+  color: var(--verdict-ink);
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+/* One segment per crew, can go first. Lit for the chosen tab, faded otherwise; the text says the same. */
+.verdictBar {
+  display: flex;
+  gap: 4px;
+}
+
+.verdictSegment {
+  flex: 1 1 0;
+  height: 10px;
+  border-radius: 5px;
+  opacity: 0.35;
+}
+
+.verdictSegment[data-lit] {
+  opacity: 1;
+}
+
+.verdictSegment[data-segment="go"] {
+  background: var(--signal-go-fill);
+}
+
+.verdictSegment[data-segment="blocked"] {
+  background: #ffb3b3;
+}
+
+.verdictSegment[data-segment="unchecked"] {
+  background: var(--signal-unknown-fill);
+}
+
+/* On the go green every segment is a crew that can go: dark, so it shows. */
+.today[data-today="go"] .verdictSegment {
+  background: var(--signal-go-ink);
+}
+
+.verdictTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--verdict-track);
+}
+
+.verdictTab {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--verdict-tab);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.verdictTab[aria-selected="true"] {
+  background: var(--verdict-tab-on-bg);
+  color: var(--verdict-tab-on-ink);
+  font-weight: 700;
+}
+
+.todayTabPanel {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The map: Mapbox under the pins with a token, a plain panel without. */
+.projectsMap {
+  position: relative;
+  height: 18rem;
+  overflow: hidden;
+  background: var(--neutral-bg);
+}
+
+/* Sized, not positioned: Mapbox's own stylesheet makes its container relative. */
+.projectsMapCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.projectsMap[data-projects-map="failed"] .projectsMapCanvas {
+  display: none;
+}
+
+/* Mapbox's credits, required on every map, sit above the drawer that covers the map's foot. */
+.projectsMap :global(.mapboxgl-ctrl-bottom-left),
+.projectsMap :global(.mapboxgl-ctrl-bottom-right) {
+  bottom: 1.5rem;
+}
+
+/* A pin: a 48px button whose dot sits on the project's point, with the short name beside it. */
+.pin {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 0.25rem 0 0;
+  border: 0;
+  background: transparent;
+  color: #16181d;
+  font: inherit;
+  cursor: pointer;
+  transform: translate(-24px, -50%);
+}
+
+.pin[data-side="left"] {
+  flex-direction: row-reverse;
+  padding: 0 0 0 0.25rem;
+  transform: translate(calc(-100% + 24px), -50%);
+}
+
+.pin[aria-pressed="true"] {
+  z-index: 3;
+}
+
+.pinSpot {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+}
+
+.pinDot {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+}
+
+.pin[aria-pressed="true"] .pinDot {
+  width: 26px;
+  height: 26px;
+}
+
+.pinLabel {
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #16181d;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+
+.pin[aria-pressed="true"] .pinLabel {
+  outline: 2px solid #16181d;
+}
+
+/* The drawer: the chosen project, over the map's foot like a sheet. */
+.drawer {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin-top: -1.25rem;
+  padding: 0.625rem 1.25rem 1.5rem;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.drawerHandle {
+  align-self: center;
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--border);
+}
+
+.drawerTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 48px;
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.drawerDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.drawerDetails p {
+  margin: 0;
+}
+
+/* The list's own heading, under today's panel. */
+.allProjects {
+  margin-top: 0;
+}
