@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import { E2E_MAPBOX_TOKEN } from "./tests/e2e/mapbox-fake";
 
 const port = 3100;
 const externalBase = process.env.E2E_BASE_URL;
@@ -37,14 +38,16 @@ const readSpecs = [
   "**/sign-in.spec.ts",
   "**/pick-check.spec.ts",
   "**/sites-filter.spec.ts",
+  "**/site-maps.spec.ts",
 ];
 
 const writeSpecs = ["**/ac31-keyboard.spec.ts", "**/idempotency-key.spec.ts", "**/scenario.spec.ts", "**/pick-report.spec.ts", "**/pick-review.spec.ts"];
 
-function devServer(portNumber: number, distDir: string, stockMode?: string) {
+function devServer(portNumber: number, distDir: string, stockMode?: string, mapboxToken = "") {
   const stock = stockMode ? `STUB_STOCK_MODE=${stockMode} ` : "";
+  // An explicit empty token overrides a developer's .env.local, so the other servers never reach Mapbox.
   return {
-    command: `ACTIONS_STORE=memory NEXT_DIST_DIR=${distDir} ${stock}npx next dev -p ${portNumber} -H 127.0.0.1`,
+    command: `ACTIONS_STORE=memory NEXT_DIST_DIR=${distDir} MAPBOX_PUBLIC_TOKEN=${mapboxToken} ${stock}npx next dev -p ${portNumber} -H 127.0.0.1`,
     url: `http://127.0.0.1:${portNumber}`,
     reuseExistingServer: false,
     timeout: 180_000,
@@ -84,6 +87,19 @@ export default defineConfig({
       use: { baseURL: "http://127.0.0.1:3101", storageState: signedIn("http://127.0.0.1:3101"), browserName: "chromium", viewport },
     },
     {
+      // Mapbox GL JS on a server with a (fake) public token; the spec answers every Mapbox request itself. SwiftShader
+      // gives WebGL on CI runners without a GPU.
+      name: "maps",
+      testMatch: "**/site-maps-token.spec.ts",
+      use: {
+        baseURL: "http://127.0.0.1:3103",
+        storageState: signedIn("http://127.0.0.1:3103"),
+        browserName: "chromium",
+        viewport,
+        launchOptions: { args: ["--enable-unsafe-swiftshader"] },
+      },
+    },
+    {
       name: "stock-malformed",
       testMatch: "**/stock-malformed.spec.ts",
       use: { baseURL: "http://127.0.0.1:3102", storageState: signedIn("http://127.0.0.1:3102"), browserName: "chromium", viewport },
@@ -96,5 +112,6 @@ export default defineConfig({
         devServer(port, ".next-e2e"),
         devServer(3101, ".next-e2e-stock-down", "down"),
         devServer(3102, ".next-e2e-stock-malformed", "malformed"),
+        devServer(3103, ".next-e2e-maps", undefined, E2E_MAPBOX_TOKEN),
       ],
 });

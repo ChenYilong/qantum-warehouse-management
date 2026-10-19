@@ -44,7 +44,9 @@
     ".next-e2e-stock-down/types/**/*.ts",
     ".next-e2e-stock-down/dev/types/**/*.ts",
     ".next-e2e-stock-malformed/types/**/*.ts",
-    ".next-e2e-stock-malformed/dev/types/**/*.ts"
+    ".next-e2e-stock-malformed/dev/types/**/*.ts",
+    ".next-e2e-maps/types/**/*.ts",
+    ".next-e2e-maps/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

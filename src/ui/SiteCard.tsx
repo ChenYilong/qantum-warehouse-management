@@ -4,16 +4,27 @@ import { sitePath } from "./format";
 import { Icon } from "./Icon";
 import { KindIcon } from "./KindIcon";
 import { OperatorRow } from "./OperatorRow";
+import { SitePlace } from "./SitePlace";
 import { SiteSignal } from "./SiteSignal";
 import type { StatusView } from "./status";
+import type { LatLng } from "./travel";
 import styles from "./primitives.module.css";
 
 /**
  * One site as a large card (AC 49): its name opens the site, the big signal says whether the crew can go and
  * calls the operator when tapped, a blocked site lists what is short, and the operator can be texted or called.
- * Action names never repeat the site name: the card's title already says it.
+ * Action names never repeat the site name: the card's title already says it. A project with a location ends with
+ * its map, the trip there and Directions (AC 74, 75).
  */
-export function SiteCard({ site, status }: { site: SiteActionInput; status: StatusView }) {
+export function SiteCard({
+  site,
+  status,
+  place,
+}: {
+  site: SiteActionInput;
+  status: StatusView;
+  place?: { readonly location: LatLng; readonly token: string; readonly colour: string };
+}) {
   const action = siteAction(site);
   const titleId = `site-card-${site.id}`;
   const operatorId = `${titleId}-operator`;
@@ -50,6 +61,7 @@ export function SiteCard({ site, status }: { site: SiteActionInput; status: Stat
           </Link>
         </div>
       ) : null}
+      {place ? <SitePlace siteId={site.id} titleId={titleId} location={place.location} token={place.token} colour={place.colour} /> : null}
     </div>
   );
 }

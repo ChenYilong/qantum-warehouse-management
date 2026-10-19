@@ -33,11 +33,14 @@ The app's own HTTP API, as built. Requirements are in `slice-specification.md`, 
 ```ts
 { sites: Array<{ id, name, reference, address?,
   operator?: { name, phone }, picker?: { name, phone },
+  location?: { lat: number, lng: number },              // degrees, for the project map (AC 74)
   crewStatus: "clear" | "blocked" | "nothing_planned" | "unavailable",
   shortageCount: number, dataProblemCount: number,
   shortages: Array<{ materialId, name, unit, kind: "short" | "unknown",
     requiredQty: number, shortfallQty: number | null }> }> }
 ```
+
+`location` comes with the site from upstream too (AC 74): latitude and longitude in degrees, invented points in Auckland in the sample. Like every upstream field its structure is strict (a wrong type rejects the response) and its values lenient: the projects list ignores a point out of range or at 0,0, and then shows no map, no Directions and no distance. The API never computes travel: the phone asks Mapbox for the drive itself, only after a tap (AC 75).
 
 `operator` and `picker` come with the site from upstream (AC 49). `phone` is international, a `+` then digits and spaces. Either may be missing; the operator and the picker may be the same person.
 

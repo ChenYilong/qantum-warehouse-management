@@ -14,6 +14,10 @@
         "name": "Sam Lee",
         "phone": "+44 7700 900157",
         "email": "sam.lee@example.com"
+      },
+      "location": {
+        "lat": -36.8443,
+        "lng": 174.7676
       }
     },
     {
@@ -29,6 +33,10 @@
         "name": "Sam Lee",
         "phone": "+44 7700 900157",
         "email": "sam.lee@example.com"
+      },
+      "location": {
+        "lat": -36.841,
+        "lng": 174.7571
       }
     },
     {
@@ -44,6 +52,10 @@
         "name": "Tama Rewi",
         "phone": "+44 7700 900159",
         "email": "tama.rewi@example.com"
+      },
+      "location": {
+        "lat": -36.7309,
+        "lng": 174.702
       }
     },
     {
@@ -59,6 +71,10 @@
         "name": "Sam Lee",
         "phone": "+44 7700 900157",
         "email": "sam.lee@example.com"
+      },
+      "location": {
+        "lat": -36.9228,
+        "lng": 174.786
       }
     }
   ]

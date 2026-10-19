@@ -132,7 +132,28 @@ jobs:
           printf '%s' "$SOLUTIONS_CSV_B64" | base64 -d > data/solutions-excerpt.csv
           echo "cc01d2ab3fd65a29d95ef42fd04648682e116b1142700300fab9074a30b5e805  data/solutions-excerpt.csv" | sha256sum -c -
       - run: npx vercel@62.2.0 pull --yes --environment=production --token "$VERCEL_TOKEN"
-      - run: npx vercel@62.2.0 build --prod --token "$VERCEL_TOKEN"
+      - name: Check the Mapbox token
+        # The project maps (AC 74 to 76) need a public Mapbox token (pk.). Without one the deploy has no maps and
+        # nothing else changes; a token that is not public stops the deploy, so a secret token never reaches a page.
+        env:
+          MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
+        run: |
+          if [ -z "$MAPBOX_PUBLIC_TOKEN" ]; then
+            echo "::warning::Secret MAPBOX_PUBLIC_TOKEN is not set, so this deploy has no project maps. Set a public Mapbox token (pk.) once: gh secret set MAPBOX_PUBLIC_TOKEN"
+            exit 0
+          fi
+          case "$MAPBOX_PUBLIC_TOKEN" in
+            pk.*) echo "A public Mapbox token is set." ;;
+            *)
+              echo "::error::Secret MAPBOX_PUBLIC_TOKEN is not a public Mapbox token (pk.), so nothing was deployed. Never use a secret token (sk.) here."
+              exit 1
+              ;;
+          esac
+      - name: Build
+        # next.config.ts bakes the public token into the server code only (no NEXT_PUBLIC_ name) and fails on sk.
+        env:
+          MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
+        run: npx vercel@62.2.0 build --prod --token "$VERCEL_TOKEN"
       - name: Migrate the production database
         # After the build and before the deploy, so a failed build never touches the database. Migrations only add
         # (tables, columns with defaults, wider checks), so the version still live keeps working until the deploy.
