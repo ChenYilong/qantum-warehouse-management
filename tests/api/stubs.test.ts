@@ -21,6 +21,18 @@ describe("sample stubs", () => {
     const materials = await stubs.solutionMaterials.getSolutionMaterials(["0451", "0464"]);
     expect(materials.items.map((item) => item.internalCode)).toEqual(["0451", "0451"]);
     expect(materials.materials.map((material) => material.id).sort()).toEqual(["MAT-PUTTY", "MAT-SEALANT"]);
+
+    // AC 61: each site's pick list, and none for a site with nothing planned.
+    const picks = await stubs.picks.getPicks("site-b");
+    expect(picks).toMatchObject({ siteId: "site-b", picker: "Sam Lee", lastAction: "Marked picked" });
+    expect(picks?.lines.map((line) => line.id)).toEqual(["b-sealant", "b-collar", "b-batt", "b-wrap"]);
+    expect(await stubs.picks.getPicks("site-d")).toBeNull();
+  });
+
+  it("AC 61: the pick system fails closed when down or malformed, and empty has no lists", async () => {
+    await expect(makeStubs({ picks: "down" }).picks.getPicks("site-b")).rejects.toMatchObject({ code: "upstream_unavailable", system: "picks" });
+    await expect(makeStubs({ picks: "malformed" }).picks.getPicks("site-b")).rejects.toMatchObject({ code: "upstream_invalid", system: "picks" });
+    expect(await makeStubs({ picks: "empty" }).picks.getPicks("site-b")).toBeNull();
   });
 
   it("AC 9: down throws upstream_unavailable and malformed throws upstream_invalid, with no raw payload", async () => {

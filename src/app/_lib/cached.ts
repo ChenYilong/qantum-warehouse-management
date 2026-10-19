@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { describeMaterialStock, describePenetration, listActions, listAllActions, listCandidates, listMaterialStock, loadSiteData } from "@/application";
+import { describeMaterialStock, describePenetration, getPickCheck, listActions, listAllActions, listCandidates, listMaterialStock, loadSiteData } from "@/application";
 import { getDependencies } from "@/server/deps";
 
 export const getCachedSite = cache(async (siteId: string) => getDependencies().sites.getSite(siteId));
@@ -26,3 +26,6 @@ export const getCachedMaterialList = cache(async () => listMaterialStock(getDepe
 export const getCachedMaterialDetail = cache(async (materialId: string, from?: string) =>
   describeMaterialStock(getDependencies(), materialId, from),
 );
+
+/** The site's pick check (AC 61), for the site screen and the Pick check and report pages. */
+export const getCachedPickCheck = cache(async (siteId: string) => getPickCheck(getDependencies(), siteId));

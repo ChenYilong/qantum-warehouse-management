@@ -105,6 +105,24 @@ Candidate lines are one per material (quantities summed per material). The notic
 
 Body `{ fromInternalCode, toInternalCode, reason }`. `from` must be the penetration's current nomination, else 409 `stale_nomination`. `to` must be a current candidate, else 422 `not_a_candidate`. Response `{ record, created }` with `status` always `proposed`. Nothing else changes.
 
+### `POST /api/sites/{id}/pick-reports`
+
+A pick-error report to the warehouse (AC 65). `Idempotency-Key` required, like every write. Body:
+
+```ts
+{ kind: "wrong_spec" | "missing_parts" | "part_picked" | "other",
+  lineId: string,                 // a line of this site's pick list, else 404 pick_line_not_found
+  plannedQty?: number | null,     // whole, 0 to 100000
+  pickedQty?: number | null,
+  missingPart?: string,           // trimmed, at most 120 characters; empty is none
+  note?: string,                  // trimmed, at most 500 characters; empty is none
+  sendToPicker: boolean,
+  sendToPurchasing: boolean,      // at least one of the two, else 422
+  photoAttached?: boolean }       // the photo itself stays on the phone in the demo
+```
+
+Response `{ record, created }`: 201 the first time; the same key again returns the original with 200, whatever the body says, so a phone resending its outbox after a lost answer is recorded once (AC 66). The same key for another site, line or kind is 409 `idempotency_key_reused`. The pick check itself (AC 61 to 64) has no API route: the site screens read it through the page-only use case `getPickCheck`.
+
 ### `GET .../actions`
 
 ```ts

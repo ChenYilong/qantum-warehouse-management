@@ -1,5 +1,5 @@
-import type { ShortageAction, SubstitutionProposal } from "@/domain";
-import type { ActionsRepository, NewShortageAction, NewSubstitutionProposal } from "@/ports";
+import type { PickReport, ShortageAction, SubstitutionProposal } from "@/domain";
+import type { ActionsRepository, NewPickReport, NewShortageAction, NewSubstitutionProposal } from "@/ports";
 
 export interface MemoryActionsOptions {
   readonly now?: () => Date;
@@ -20,6 +20,13 @@ interface StoredProposal {
   readonly sequence: number;
 }
 
+interface StoredReport {
+  readonly record: PickReport;
+  readonly createdBy: string;
+  readonly idempotencyKey: string;
+  readonly sequence: number;
+}
+
 function byNewest(left: { record: { createdAt: string }; sequence: number }, right: { record: { createdAt: string }; sequence: number }): number {
   const leftMs = Date.parse(left.record.createdAt);
   const rightMs = Date.parse(right.record.createdAt);
@@ -32,6 +39,7 @@ export function createMemoryActionsRepository(options: MemoryActionsOptions = {}
   const newId = options.newId ?? (() => crypto.randomUUID());
   const actions: StoredAction[] = [];
   const proposals: StoredProposal[] = [];
+  const reports: StoredReport[] = [];
   let sequence = 0;
 
   return {
@@ -92,6 +100,41 @@ export function createMemoryActionsRepository(options: MemoryActionsOptions = {}
 
     async listSubstitutionProposals(siteId: string) {
       return proposals
+        .filter((item) => item.record.siteId === siteId)
+        .sort(byNewest)
+        .map((item) => ({ ...item.record }));
+    },
+
+    async appendPickReport(input: NewPickReport) {
+      const existing = reports.find((item) => item.createdBy === input.createdBy && item.idempotencyKey === input.idempotencyKey);
+      if (existing) return { record: { ...existing.record }, created: false };
+      const record: PickReport = {
+        id: newId(),
+        siteId: input.siteId,
+        lineId: input.lineId,
+        kind: input.kind,
+        plannedQty: input.plannedQty,
+        pickedQty: input.pickedQty,
+        missingPart: input.missingPart,
+        note: input.note,
+        sendToPicker: input.sendToPicker,
+        sendToPurchasing: input.sendToPurchasing,
+        photoAttached: input.photoAttached,
+        createdBy: input.createdBy,
+        createdAt: now().toISOString(),
+      };
+      reports.push({ record, createdBy: input.createdBy, idempotencyKey: input.idempotencyKey, sequence: sequence });
+      sequence += 1;
+      return { record: { ...record }, created: true };
+    },
+
+    async findPickReportByKey(createdBy: string, idempotencyKey: string) {
+      const existing = reports.find((item) => item.createdBy === createdBy && item.idempotencyKey === idempotencyKey);
+      return existing ? { ...existing.record } : null;
+    },
+
+    async listPickReports(siteId: string) {
+      return reports
         .filter((item) => item.record.siteId === siteId)
         .sort(byNewest)
         .map((item) => ({ ...item.record }));

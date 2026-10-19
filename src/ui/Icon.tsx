@@ -1,7 +1,7 @@
 import type { IconName } from "./status";
 import styles from "./primitives.module.css";
 
-export function Icon({ name }: { name: IconName | "chevron-left" | "chevron-right" | "menu" | "close" }) {
+export function Icon({ name }: { name: IconName | "chevron-left" | "chevron-right" | "menu" | "close" | "phone" }) {
   return (
     <svg className={styles.icon} viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false">
       {name === "check" ? <path d="M4 10.5 8.2 14.5 16 6" fill="none" stroke="currentColor" strokeWidth="2" /> : null}
@@ -38,6 +38,15 @@ export function Icon({ name }: { name: IconName | "chevron-left" | "chevron-righ
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ) : null}
+      {name === "phone" ? (
+        <path
+          d="M6.6 2.5H4.2A1.7 1.7 0 0 0 2.5 4.3 13.3 13.3 0 0 0 15.7 17.5a1.7 1.7 0 0 0 1.8-1.7v-2.4a1 1 0 0 0-.8-1l-2.7-.6a1 1 0 0 0-1 .3l-1.1 1.3a10.4 10.4 0 0 1-4.3-4.3L8.9 8a1 1 0 0 0 .3-1l-.6-2.7a1 1 0 0 0-1-.8z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
           strokeLinejoin="round"
         />
       ) : null}

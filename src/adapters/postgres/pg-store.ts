@@ -1,7 +1,7 @@
 import type { Pool, QueryResultRow } from "pg";
-import type { ActionsStore, ShortageActionInsert, StoreResult, SubstitutionProposalInsert } from "./repository";
+import type { ActionsStore, PickReportInsert, ShortageActionInsert, StoreResult, SubstitutionProposalInsert } from "./repository";
 
-type SqlValue = string | number | null;
+type SqlValue = string | number | boolean | null;
 
 const INSERT_SHORTAGE = `insert into public.shortage_action (
   site_id, shortage_id, kind, escalate_to, note, shortfall_qty_at_time, created_by, idempotency_key
@@ -20,6 +20,15 @@ returning *`;
 const SELECT_PROPOSAL = "select * from public.substitution_proposal where created_by = $1 and idempotency_key = $2";
 
 const LIST_PROPOSAL = "select * from public.substitution_proposal where site_id = $1 order by created_at desc, id desc";
+
+const INSERT_REPORT = `insert into public.pick_report (
+  site_id, line_id, kind, planned_qty, picked_qty, missing_part, note, send_to_picker, send_to_purchasing, photo_attached, created_by, idempotency_key
+) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+returning *`;
+
+const SELECT_REPORT = "select * from public.pick_report where created_by = $1 and idempotency_key = $2";
+
+const LIST_REPORT = "select * from public.pick_report where site_id = $1 order by created_at desc, id desc";
 
 export function createPgActionsStore(pool: Pool): ActionsStore {
   return {
@@ -41,6 +50,15 @@ export function createPgActionsStore(pool: Pool): ActionsStore {
     listSubstitutionProposals(siteId) {
       return many(pool, LIST_PROPOSAL, [siteId]);
     },
+    insertPickReport(row) {
+      return one(pool, INSERT_REPORT, reportValues(row));
+    },
+    selectPickReportByKey(createdBy, idempotencyKey) {
+      return maybeOne(pool, SELECT_REPORT, [createdBy, idempotencyKey]);
+    },
+    listPickReports(siteId) {
+      return many(pool, LIST_REPORT, [siteId]);
+    },
   };
 }
 
@@ -56,6 +74,23 @@ function proposalValues(row: SubstitutionProposalInsert): SqlValue[] {
     row.to_internal_code,
     row.reason,
     row.status,
+    row.created_by,
+    row.idempotency_key,
+  ];
+}
+
+function reportValues(row: PickReportInsert): SqlValue[] {
+  return [
+    row.site_id,
+    row.line_id,
+    row.kind,
+    row.planned_qty,
+    row.picked_qty,
+    row.missing_part,
+    row.note,
+    row.send_to_picker,
+    row.send_to_purchasing,
+    row.photo_attached,
     row.created_by,
     row.idempotency_key,
   ];

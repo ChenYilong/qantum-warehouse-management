@@ -2,13 +2,15 @@ import { describe, expect, it } from "vitest";
 import { createMemoryActionsRepository } from "@/adapters/memory/actions-repository";
 import {
   createActionsRepository,
+  pickReportFromRow,
+  pickReportToInsert,
   shortageActionFromRow,
   shortageActionToInsert,
   substitutionProposalFromRow,
   substitutionProposalToInsert,
   type ActionsStore,
 } from "@/adapters/postgres/repository";
-import { UpstreamError, type ActionsRepository, type NewShortageAction, type NewSubstitutionProposal } from "@/ports";
+import { UpstreamError, type ActionsRepository, type NewPickReport, type NewShortageAction, type NewSubstitutionProposal } from "@/ports";
 
 function actionInput(overrides: Partial<NewShortageAction> = {}): NewShortageAction {
   return {
@@ -36,6 +38,41 @@ function proposalInput(overrides: Partial<NewSubstitutionProposal> = {}): NewSub
     ...overrides,
   };
 }
+
+function reportInput(overrides: Partial<NewPickReport> = {}): NewPickReport {
+  return {
+    siteId: "site-b",
+    lineId: "b-collar",
+    kind: "missing_parts",
+    plannedQty: 6,
+    pickedQty: 6,
+    missingPart: "Fixing kit × 6",
+    note: "Crew goes Thursday",
+    sendToPicker: true,
+    sendToPurchasing: false,
+    photoAttached: false,
+    createdBy: "demo-leader",
+    idempotencyKey: "report-1",
+    ...overrides,
+  };
+}
+
+const reportRow = {
+  id: "33333333-3333-4333-8333-333333333333",
+  site_id: "site-b",
+  line_id: "b-collar",
+  kind: "missing_parts",
+  planned_qty: "6",
+  picked_qty: 6,
+  missing_part: "Fixing kit × 6",
+  note: null,
+  send_to_picker: true,
+  send_to_purchasing: false,
+  photo_attached: true,
+  created_by: "demo-leader",
+  created_at: "2026-10-03T12:00:00.000Z",
+  idempotency_key: "report-1",
+};
 
 type ContractCase = (name: string, fn: () => Promise<void>) => void;
 
@@ -97,6 +134,21 @@ export function actionsRepositoryContract(factory: () => ActionsRepository, test
     expect(otherSite).toEqual({ record: first.record, created: false });
     expect(await repo.listShortageActions("site-b")).toEqual([first.record]);
     expect(await repo.listShortageActions("site-a")).toEqual([]);
+  });
+
+  test("AC 65, AC 66: a pick report repeated with the same key is one record; another user's key is another", async () => {
+    const repo = factory();
+    const first = await repo.appendPickReport(reportInput());
+    const resend = await repo.appendPickReport(reportInput({ note: "sent again from the outbox" }));
+    const other = await repo.appendPickReport(reportInput({ createdBy: "other-leader" }));
+    expect(first.created).toBe(true);
+    expect(first.record).toMatchObject({ siteId: "site-b", lineId: "b-collar", kind: "missing_parts", note: "Crew goes Thursday", sendToPicker: true });
+    expect(resend).toEqual({ record: first.record, created: false });
+    expect(other.created).toBe(true);
+    expect((await repo.listPickReports("site-b")).map((report) => report.id)).toEqual([other.record.id, first.record.id]);
+    expect(await repo.listPickReports("site-a")).toEqual([]);
+    expect(await repo.findPickReportByKey("demo-leader", "report-1")).toEqual(first.record);
+    expect(await repo.findPickReportByKey("demo-leader", "missing")).toBeNull();
   });
 
   test("the same key for a different user creates a new proposal", async () => {
@@ -259,6 +311,15 @@ describe("actions repository mapping", () => {
       async listSubstitutionProposals() {
         return { data: null, error: { code: "XX000" } };
       },
+      async insertPickReport() {
+        return { data: null, error: { code: "23505" } };
+      },
+      async selectPickReportByKey() {
+        return { data: null, error: { code: "XX000" } };
+      },
+      async listPickReports() {
+        return { data: { not: "rows" }, error: null };
+      },
     };
     const repo = createActionsRepository(store);
     const saved = await repo.appendShortageAction(actionInput());
@@ -310,6 +371,16 @@ describe("actions repository mapping", () => {
       async listSubstitutionProposals(siteId) {
         return { data: siteId === "site-b" ? [proposalRow] : [], error: null };
       },
+      async insertPickReport() {
+        return { data: reportRow, error: null };
+      },
+      async selectPickReportByKey(createdBy, idempotencyKey) {
+        selects.push({ table: "report", createdBy, idempotencyKey });
+        return { data: createdBy === "demo-leader" ? reportRow : null, error: null };
+      },
+      async listPickReports(siteId) {
+        return { data: siteId === "site-b" ? [reportRow] : [], error: null };
+      },
     };
     const repo = createActionsRepository(store);
     const inserted = await repo.appendShortageAction(actionInput());
@@ -330,5 +401,31 @@ describe("actions repository mapping", () => {
       { table: "shortage", createdBy: "other-leader", idempotencyKey: "missing" },
       { table: "proposal", createdBy: "demo-leader", idempotencyKey: "proposal-1" },
     ]);
+  });
+
+  it("AC 65: maps pick reports to the migration's columns and back, and refuses rows the table would not hold", async () => {
+    expect(pickReportToInsert(reportInput())).toEqual({
+      site_id: "site-b",
+      line_id: "b-collar",
+      kind: "missing_parts",
+      planned_qty: 6,
+      picked_qty: 6,
+      missing_part: "Fixing kit × 6",
+      note: "Crew goes Thursday",
+      send_to_picker: true,
+      send_to_purchasing: false,
+      photo_attached: false,
+      created_by: "demo-leader",
+      idempotency_key: "report-1",
+    });
+    expect(pickReportFromRow(reportRow)).toMatchObject({ id: reportRow.id, plannedQty: 6, pickedQty: 6, note: null, photoAttached: true });
+    for (const bad of [
+      { ...reportRow, kind: "approved" },
+      { ...reportRow, planned_qty: "-1" },
+      { ...reportRow, send_to_picker: false, send_to_purchasing: false },
+      { ...reportRow, created_at: "not a time" },
+    ]) {
+      expect(() => pickReportFromRow(bad)).toThrow(UpstreamError);
+    }
   });
 });

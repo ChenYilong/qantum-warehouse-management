@@ -1,0 +1,193 @@
+"use client";
+
+import Link from "next/link";
+import { useId } from "react";
+import { useConnection } from "./ConnectionBar";
+import { clockLabel } from "./connection";
+import { telHref } from "./contacts";
+import { formatRecordedAt } from "./format";
+import { Icon } from "./Icon";
+import { PICKS } from "./messages";
+import { useWaitingReports } from "./PickOutboxSync";
+import { crewGate, initials, pickAmountLine, pickEmailHref, pickLineAnchor, pickLineLabel, picksPath, type PickView } from "./picks";
+import type { StatusView } from "./status";
+import { StatusChip } from "./StatusChip";
+import styles from "./primitives.module.css";
+
+/** A time as the phone shows it once the connection has a clock; a fixed UTC stamp before, so server and browser agree. */
+export function useStamp(iso: string | null): string | null {
+  const { now } = useConnection();
+  if (iso === null) return null;
+  return now > 0 ? (clockLabel(iso, now) ?? formatRecordedAt(iso)) : formatRecordedAt(iso);
+}
+
+/**
+ * The site screen's Picks section (AC 62, 63): the pick check's result, who picked with Call and Email, each
+ * material planned against picked, reports waiting to send, and Send the crew, locked unless the picks match,
+ * the site is clear and the phone is online. Offline, everything reads as last known.
+ */
+export function PickSummary({
+  siteId,
+  siteName,
+  view,
+  siteClear,
+  operatorTextHref,
+}: {
+  siteId: string;
+  siteName: string;
+  /** Null when the pick system could not be read. */
+  view: PickView | null;
+  siteClear: boolean;
+  operatorTextHref: string | null;
+}) {
+  const connection = useConnection();
+  const phase = connection.state;
+  const saved = phase === "offline";
+  const waiting = useWaitingReports(siteId);
+  const headingId = useId();
+  const reasonId = useId();
+  const savedAt = clockLabel(connection.lastOkAt ?? connection.pageLoadedAt, connection.now) ?? "unknown";
+  const gate = crewGate(view ? view.check.status : "unavailable", siteClear, phase);
+  const canSend = gate.enabled && operatorTextHref !== null;
+
+  return (
+    <section className={styles.section} aria-labelledby={headingId}>
+      <h2 id={headingId}>{PICKS.heading}</h2>
+      <PickStatus siteId={siteId} view={view} saved={saved} />
+      {waiting > 0 ? (
+        <p className={styles.pickWaiting}>
+          <Icon name="clock" />
+          <span>
+            <strong>{PICKS.waiting(waiting)}</strong>
+            <span className={styles.muted}>{PICKS.waitingText}</span>
+          </span>
+        </p>
+      ) : null}
+      {/* No pick list, nothing to call the picker about (a nothing-planned site offers no call at all, AC 57). */}
+      {view?.picker && view.check.status !== "unknown" ? <PickerCard siteName={siteName} view={view} saved={saved} savedAt={savedAt} /> : null}
+      {view && view.check.lines.length > 0 ? (
+        <div className={styles.pickMaterials}>
+          <p className={styles.pickEyebrow}>{saved ? PICKS.materialsSaved(savedAt) : PICKS.materials}</p>
+          <ul className={styles.pickLines}>
+            {view.check.lines.map((checked) => (
+              <li key={checked.line.id}>
+                <Link className={styles.pickLine} href={`${picksPath(siteId)}#${pickLineAnchor(checked.line.id)}`}>
+                  <span className={styles.pickLineText}>
+                    <span className={styles.materialName}>{checked.line.materialName}</span>
+                    <span className={styles.muted}>{pickAmountLine(checked)}</span>
+                  </span>
+                  <StatusChip status={pickLineLabel(checked.kind, saved)} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      <div className={styles.crewGate}>
+        {canSend ? (
+          <a className={`${styles.button} ${styles.primary} ${styles.fullWidth}`} href={operatorTextHref} aria-describedby={reasonId}>
+            {PICKS.sendCrew}
+          </a>
+        ) : (
+          <button type="button" className={`${styles.button} ${styles.fullWidth}`} disabled aria-describedby={reasonId}>
+            {PICKS.sendCrew}
+          </button>
+        )}
+        <p id={reasonId} className={styles.muted}>
+          {gate.enabled && operatorTextHref === null ? PICKS.noOperator : gate.reason}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function PickStatus({ siteId, view, saved }: { siteId: string; view: PickView | null; saved: boolean }) {
+  const check = view?.check;
+  let status: StatusView;
+  let text: string;
+  let link: { readonly label: string; readonly primary: boolean } | null = null;
+  if (!check) {
+    status = { label: PICKS.noList, tone: "warning", icon: "warning" };
+    text = PICKS.unavailable;
+  } else if (check.status === "unknown") {
+    status = { label: PICKS.noList, tone: "warning", icon: "warning" };
+    text = PICKS.noListText;
+  } else if (saved) {
+    status = { label: PICKS.offlineHeading, tone: "warning", icon: "warning" };
+    text = check.issueCount > 0 ? PICKS.offlineText(check.issueCount) : PICKS.offlineReadyText;
+    link = { label: PICKS.offlineReview, primary: false };
+  } else if (check.status === "not_ready") {
+    status = { label: PICKS.notReady(check.issueCount), tone: "danger", icon: "stop" };
+    text = PICKS.notReadyText;
+    link = { label: PICKS.review, primary: true };
+  } else {
+    status = { label: PICKS.ready, tone: "success", icon: "check" };
+    text = PICKS.readyText;
+    link = { label: PICKS.openCheck, primary: false };
+  }
+  return (
+    <div className={`${styles.pickStatus} ${styles[status.tone]}`} data-pick-status={saved && check && check.status !== "unknown" ? "saved" : (check?.status ?? "unavailable")}>
+      <p className={styles.pickStatusTitle}>
+        <Icon name={status.icon} />
+        <strong>{status.label}</strong>
+      </p>
+      <p>{text}</p>
+      {link ? (
+        <Link className={link.primary ? `${styles.button} ${styles.primary} ${styles.fullWidth}` : `${styles.button} ${styles.fullWidth}`} href={picksPath(siteId)}>
+          {link.label}
+          <Icon name="chevron-right" />
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
+function PickerCard({ siteName, view, saved, savedAt }: { siteName: string; view: PickView; saved: boolean; savedAt: string }) {
+  const nameId = useId();
+  const lastActionAt = useStamp(view.lastActionAt);
+  const picker = view.picker!;
+  return (
+    <div className={styles.pickerCard}>
+      <p className={styles.pickEyebrow}>{saved ? PICKS.pickedBySaved : PICKS.pickedBy}</p>
+      <div className={styles.pickerRow}>
+        <span className={styles.avatar} aria-hidden="true">
+          {initials(picker.name)}
+        </span>
+        <div className={styles.pickerText}>
+          <p id={nameId} className={styles.pickerName}>
+            {picker.name} <span className={styles.muted}>{PICKS.sample}</span>
+          </p>
+          <p className={styles.muted}>{PICKS.pickerRole}</p>
+          {view.lastAction && lastActionAt ? (
+            <p>
+              <strong>{PICKS.lastAction(view.lastAction, lastActionAt)}</strong>
+            </p>
+          ) : null}
+          {saved ? <p className={styles.muted}>{PICKS.asKnownAt(savedAt)}</p> : null}
+        </div>
+      </div>
+      <dl className={styles.pickerFacts}>
+        <div>
+          <dt>{PICKS.phone}</dt>
+          <dd>{picker.phone}</dd>
+        </div>
+        {picker.email ? (
+          <div>
+            <dt>{PICKS.email}</dt>
+            <dd>{picker.email}</dd>
+          </div>
+        ) : null}
+      </dl>
+      <div className={styles.siteCardActions}>
+        <a className={styles.button} href={telHref(picker.phone)} aria-describedby={nameId}>
+          {saved ? PICKS.callOffline : PICKS.call}
+        </a>
+        {picker.email ? (
+          <a className={styles.button} href={pickEmailHref(picker.email, siteName)} aria-describedby={nameId}>
+            {saved ? PICKS.emailOffline : PICKS.emailAction}
+          </a>
+        ) : null}
+      </div>
+    </div>
+  );
+}

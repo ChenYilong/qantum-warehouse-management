@@ -4,9 +4,11 @@ import { connection } from "next/server";
 import Link from "next/link";
 import type { SiteActions, SiteReadinessView } from "@/application";
 import { IdSchema } from "@/ports";
-import { getCachedActions, getCachedMaterialDetail, getCachedSite } from "../../_lib/cached";
+import { getCachedActions, getCachedMaterialDetail, getCachedPickCheck, getCachedSite } from "../../_lib/cached";
 import { loadPage } from "../../_lib/load";
 import { Notice } from "@/ui/Notice";
+import { PickSummary } from "@/ui/PickSummary";
+import { readyText, smsHref } from "@/ui/contacts";
 import { PenetrationFilters } from "@/ui/PenetrationFilters";
 import { PenetrationGroups, type PenetrationPlace } from "@/ui/PenetrationGroups";
 import { fromLogPath, materialPagePath, siteFromMaterialPath, sitePath } from "@/ui/format";
@@ -48,8 +50,19 @@ export default async function SitePage({ params, searchParams }: PageProps) {
   const showList = frame.status === "ready" && frame.readiness !== null && frame.places !== null;
   // The list's decision marks count the same log as the penetration page. A failed read leaves the rows up.
   const actionsLoad = showList ? await loadPage(() => getCachedActions(id)) : null;
+  // The pick check is its own upstream read: when the pick system is down the section says so, and the rest stays.
+  const picksLoad = frame.status === "ready" ? await loadPage(() => getCachedPickCheck(id)) : null;
   return (
     <SiteFrame frame={frame} back={fromMaterial?.back ?? (fromLog ? logBack(fromLog) : undefined)}>
+      {frame.status === "ready" ? (
+        <PickSummary
+          siteId={frame.site.id}
+          siteName={frame.site.name}
+          view={picksLoad?.status === "ready" ? picksLoad.value : null}
+          siteClear={frame.readiness?.crewStatus === "clear"}
+          operatorTextHref={frame.site.operator ? smsHref(frame.site.operator.phone, readyText(frame.site.name, frame.site.reference)) : null}
+        />
+      ) : null}
       {frame.status === "ready" && frame.readiness && frame.places ? (
         <SitePenetrations
           siteId={frame.site.id}
