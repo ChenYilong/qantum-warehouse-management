@@ -19,7 +19,7 @@ test("AC 43, AC 83: the Guide opens the actions log, one section per site; it ha
   await expect(page.getByRole("heading", { level: 1, name: "Decisions" })).toBeVisible();
 
   const tabs = page.getByRole("navigation", { name: "Main" });
-  await expect(tabs.getByRole("link")).toHaveText(["Projects", "Map", "Calendar", "Guide"]);
+  await expect(tabs.getByRole("link")).toHaveText(["Map", "Calendar", "Projects", "Guide"]);
   await expect(tabs.locator('[aria-current="page"]')).toHaveCount(0);
 
   for (const [id, name] of SITES) {

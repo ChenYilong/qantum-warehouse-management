@@ -26,8 +26,8 @@ test("AC 37: the tab bar is fixed to the foot of the screen with every entry, th
   await expect(page.getByRole("banner").getByRole("link", { name: /^Back to / })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /menu/i })).toHaveCount(0);
   const tabs = tabsOf(page);
-  // AC 83: Projects, Map, Calendar and Guide.
-  await expect(tabs.getByRole("link")).toHaveText(["Projects", "Map", "Calendar", "Guide"]);
+  // AC 83: Map, Calendar, Projects and Guide.
+  await expect(tabs.getByRole("link")).toHaveText(["Map", "Calendar", "Projects", "Guide"]);
   await expect(tabs.getByRole("link", { name: "Projects" })).toHaveAttribute("aria-current", "page");
   await expect(tabs.getByRole("link", { name: "Map" })).not.toHaveAttribute("aria-current", "page");
   await expect(tabs.getByRole("link", { name: "Guide" })).toHaveAttribute("href", "/about-this-demo");
@@ -140,4 +140,18 @@ test("AC 37: the Guide's theme choice pins light or dark, is remembered on this 
   expect(await background()).toBe("rgb(0, 0, 0)");
   await page.reload();
   await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.+/);
+});
+
+test("AC 75, AC 83: every tab's page starts with Use my location and its note, under the picker's line", async ({ page }) => {
+  for (const path of ["/map", "/calendar", "/sites", "/about-this-demo"]) {
+    await gotoApp(page, path);
+    const button = page.getByRole("button", { name: /^(Use|Update) my location$/ });
+    await expect(button, path).toHaveCount(1);
+    await expect(page.locator("[data-travel-note]"), path).toHaveText(/^Distances are from /);
+    // Under the picker's line, above everything else the page holds.
+    const picker = await page.getByText(/^Picker last action/).boundingBox();
+    const top = await button.boundingBox();
+    expect((top?.y ?? 0) > (picker?.y ?? Infinity), path).toBe(true);
+    await expect(page.locator("main > *:not(h1)").first().locator("[data-travel-note]"), path).toHaveCount(1);
+  }
 });
