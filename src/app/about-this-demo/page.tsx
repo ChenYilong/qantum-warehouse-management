@@ -2,16 +2,19 @@ import Link from "next/link";
 import { MenuBar } from "@/ui/AppBar";
 import { ACTIONS_PATH, MATERIALS_PATH, penetrationPath, sitePath } from "@/ui/format";
 import { NAV } from "@/ui/messages";
+import { SignOutButton } from "@/ui/SignOutButton";
 
 export const metadata = { title: NAV.about };
 
-/** The guide: what the tool is for, what is real in the demo, how to move around, then a short tour. */
+/** The guide: Sign out, what the tool is for, what is real in the demo, how to move around, then a short tour. */
 export default function LandingPage() {
   return (
     <>
       <MenuBar current="about" />
       <main>
         <h1>Is the crew good to go?</h1>
+        {/* Shown at the top right (AC 60): CSS lifts it above the heading. */}
+        <SignOutButton />
         <p>
           Before a crew heads out, this tool compares what each job needs with what the warehouse holds. When a material
           falls short, you choose the next step: hold off, raise it with a manager, or put forward a replacement for review.
@@ -20,7 +23,7 @@ export default function LandingPage() {
           <h2 id="demo-heading">How this demo works</h2>
           <ul>
             <li>The projects and stock levels are made up for the demo. The fire-stopping catalogue comes from a real supplier list.</li>
-            <li>There is no sign-in, so anyone with the link sees and adds to the same set of decisions.</li>
+            <li>The sign-in is only for show: any username and password work, and anyone with the link sees and adds to the same set of decisions.</li>
             <li>No orders or messages leave the app. A suggested replacement is only a catalogue match, waiting for a manager to verify it.</li>
             <li>
               <p>

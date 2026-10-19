@@ -3,6 +3,7 @@ import { Announcer } from "@/ui/Announcer";
 import { ConnectionBar, OfflineBanner } from "@/ui/ConnectionBar";
 import { NavHistory } from "@/ui/NavHistory";
 import { SideMenu } from "@/ui/SideMenu";
+import { LoginGate } from "@/ui/LoginGate";
 import { HEAD_SCRIPT } from "@/ui/sidebar";
 import styles from "@/ui/primitives.module.css";
 import "./globals.css";
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Suspense fallback={null}>
           <NavHistory />
         </Suspense>
-        <div className={styles.appShell}>
+        <div className={styles.appShell} data-app-shell="">
           <SideMenu />
           <div className={styles.appContent}>
             {/* Above every screen's own header: the picker's last action and the Online switch (AC 48). */}
@@ -39,6 +40,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <OfflineBanner />
           </div>
         </div>
+        {/* The demo sign-in covers every page until someone signs in (AC 59). */}
+        <LoginGate />
       </body>
     </html>
   );
