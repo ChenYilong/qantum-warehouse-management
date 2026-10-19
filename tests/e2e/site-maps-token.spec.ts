@@ -113,10 +113,10 @@ const FROM_DEFAULT = "/directions-matrix/v1/mapbox/driving/174.7661,-36.8643;174
 test.describe("before the phone shares where it is", () => {
   test.use({ permissions: [] });
 
-  test("AC 75: one request from 5 Arawa Street gives each project its drive, until the phone's location replaces it", async ({ page }) => {
+  test("AC 75: one request from Auckland city warehouse gives each project its drive, until the phone's location replaces it", async ({ page }) => {
     const matrix = await answerMapbox(page);
     await gotoApp(page, "/sites");
-    for (const [index, id] of IDS.entries()) await expect(inList(page).locator(`[data-travel="${id}"]`), id).toHaveText(`${DRIVES[index]!} from 5 Arawa Street`);
+    for (const [index, id] of IDS.entries()) await expect(inList(page).locator(`[data-travel="${id}"]`), id).toHaveText(`${DRIVES[index]!} from Auckland city warehouse`);
     expect(matrix.map((url) => new URL(url).pathname)).toEqual([FROM_DEFAULT]);
     await expect(page.getByRole("button", { name: "Use my location" })).toBeVisible();
     // The phone shares where it is: its own drive replaces the default, without the address.

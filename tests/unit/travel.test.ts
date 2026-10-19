@@ -65,7 +65,7 @@ describe("AC 74: a project's location and the directions to it", () => {
 describe("AC 75: how far and how long", () => {
   it("measures the straight line on the earth's surface", () => {
     expect(straightLineMetres(OFFICE, OFFICE)).toBe(0);
-    // About 1.8 km from Grafton to the waterfront.
+    // About 1.8 km from the warehouse to the waterfront.
     expect(Math.round(straightLineMetres(OFFICE, CEDAR))).toBe(1759);
     expect(Math.round(straightLineMetres({ lat: 0, lng: 0 }, { lat: 0, lng: 1 }) / 10) * 10).toBe(111200);
   });
@@ -93,9 +93,9 @@ describe("AC 75: how far and how long", () => {
     expect(travelLabel({ kind: "routing" })).toBe("Working out the drive…");
     expect(travelLabel({ kind: "ready", origin: phone, to: CEDAR, route: { metres: 12_340, seconds: 1_070 } })).toBe("12.3 km · 18 min drive");
     expect(travelLabel({ kind: "ready", origin: phone, to: CEDAR, route: null })).toBe("1.8 km in a straight line · no drive time");
-    expect(travelLabel({ kind: "ready", origin: fallback, to: CEDAR, route: { metres: 2_300, seconds: 420 } })).toBe("2.3 km · 7 min drive from 5\u00a0Arawa Street");
-    // 2,228 m from 5 Arawa Street to Cedar Court, worked out independently of this code.
-    expect(travelLabel({ kind: "ready", origin: fallback, to: CEDAR, route: null })).toBe("2.2 km in a straight line from 5\u00a0Arawa Street · no drive time");
+    expect(travelLabel({ kind: "ready", origin: fallback, to: CEDAR, route: { metres: 2_300, seconds: 420 } })).toBe("2.3 km · 7 min drive from Auckland city warehouse");
+    // 2,228 m from Auckland city warehouse to Cedar Court, worked out independently of this code.
+    expect(travelLabel({ kind: "ready", origin: fallback, to: CEDAR, route: null })).toBe("2.2 km in a straight line from Auckland city warehouse · no drive time");
   });
 
   it("asks the driving matrix for at most nine places per request, from the phone to each project", () => {
@@ -125,10 +125,10 @@ describe("AC 75: how far and how long", () => {
   });
 });
 
-describe("AC 75: until the phone shares where it is, trips start from 5 Arawa Street", () => {
-  it("is a real point in Grafton (OpenStreetMap), with its address; a no-break space keeps the number with the street", () => {
-    expect(DEFAULT_ORIGIN.address).toBe("5\u00a0Arawa Street, Grafton, Auckland 1023");
-    expect(DEFAULT_ORIGIN.name).toBe("5\u00a0Arawa Street");
+describe("AC 75: until the phone shares where it is, trips start from Auckland city warehouse", () => {
+  it("is a real point, named only as the Auckland city warehouse, never by its street address", () => {
+    expect(DEFAULT_ORIGIN.address).toBe("Auckland city warehouse");
+    expect(DEFAULT_ORIGIN.name).toBe("Auckland city warehouse");
     expect(validLocation(DEFAULT_ORIGIN.point)).toEqual({ lat: -36.8643, lng: 174.7661 });
   });
 
@@ -141,11 +141,11 @@ describe("AC 75: until the phone shares where it is, trips start from 5 Arawa St
 
   it("says above the list where distances are from, and why when the phone's location is missing", () => {
     expect(originNote("idle")).toBe(
-      "Distances are from 5\u00a0Arawa Street, Grafton, Auckland 1023 until you use this phone's location. Only Mapbox sees it, to work out the drive.",
+      "Distances are from Auckland city warehouse until you use this phone's location. Only Mapbox sees it, to work out the drive.",
     );
-    expect(originNote("locating")).toBe("Finding where you are… Until then, distances are from 5\u00a0Arawa Street, Grafton, Auckland 1023.");
-    expect(originNote("denied")).toBe("Location is off, so distances are from 5\u00a0Arawa Street, Grafton, Auckland 1023.");
-    expect(originNote("unavailable")).toBe("Can't find where you are right now, so distances are from 5\u00a0Arawa Street, Grafton, Auckland 1023.");
+    expect(originNote("locating")).toBe("Finding where you are… Until then, distances are from Auckland city warehouse.");
+    expect(originNote("denied")).toBe("Location is off, so distances are from Auckland city warehouse.");
+    expect(originNote("unavailable")).toBe("Can't find where you are right now, so distances are from Auckland city warehouse.");
     expect(originNote("ready")).toBe("Distances are from where this phone is. Only Mapbox sees its location, to work out the drive.");
   });
 
