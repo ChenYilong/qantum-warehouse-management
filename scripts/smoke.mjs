@@ -27,12 +27,18 @@ while (Date.now() <= deadline) {
     // The Guide's heading and the list's name, as the pages read them (docs/ui-design.md, UI refresh 2026-10-19).
     const homeOk = homeResponse.status === 200 && new URL(homeResponse.url).pathname === "/about-this-demo" && homeText.includes("Is the crew good to go?");
     const listOk = listResponse.status === 200 && listText.includes("Projects");
-    const pagesOk = homeOk && listOk;
+    // The pick check also reads this app's reports and reviews, so a migration the code needs but the database lacks
+    // shows here as "Can't check picks" (data-pick-status="unavailable") while every check above still passes.
+    const siteResponse = await fetch(new URL("/sites/site-a", raw), { cache: "no-store" });
+    const siteText = await siteResponse.text();
+    const pickStatus = /data-pick-status="([a-z_]+)"/.exec(siteText)?.[1] ?? "missing";
+    const picksOk = siteResponse.status === 200 && (pickStatus === "ready" || pickStatus === "not_ready");
+    const pagesOk = homeOk && listOk && picksOk;
     if (sitesResponse.status === 200 && noStore && count === 4 && pagesOk) {
       console.log("smoke ok");
       process.exit(0);
     }
-    last = `sites ${sitesResponse.status} cache ${cache || "missing"} count ${count} home ${homeResponse.status}${homeOk ? "" : " (content missing)"} list ${listResponse.status}${listOk ? "" : " (content missing)"}`;
+    last = `sites ${sitesResponse.status} cache ${cache || "missing"} count ${count} home ${homeResponse.status}${homeOk ? "" : " (content missing)"} list ${listResponse.status}${listOk ? "" : " (content missing)"} site-a ${siteResponse.status} picks ${pickStatus}`;
   } catch (error) {
     last = error instanceof Error ? error.name : "request failed";
   }
