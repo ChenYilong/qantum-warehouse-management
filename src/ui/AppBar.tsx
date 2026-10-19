@@ -1,5 +1,5 @@
 import { BackControl } from "./BackControl";
-import { NAV } from "./messages";
+import { Greeting } from "./Greeting";
 import type { NavSection } from "./nav-section";
 import { TabBar } from "./TabBar";
 import { ThemeSwitch } from "./ThemeSwitch";
@@ -23,7 +23,9 @@ export function MenuBar({ current }: { current: NavSection }) {
   return (
     <>
       <header className={`${styles.appBar} ${styles.menuBar}`} data-menu-bar="">
-        <span className={styles.menuBarTitle}>{NAV.title}</span>
+        <span className={styles.menuBarTitle}>
+          <Greeting />
+        </span>
         <ThemeSwitch />
       </header>
       <TabBar current={current} />
