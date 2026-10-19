@@ -111,7 +111,7 @@ test("AC 37: the header's theme choice pins light or dark, is remembered on this
 
   await theme.getByRole("radio", { name: "Dark" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  expect(await background()).toBe("rgb(18, 19, 22)");
+  expect(await background()).toBe("rgb(0, 0, 0)");
   await assertAxe(page);
   await assertTargets(page);
 
@@ -131,7 +131,7 @@ test("AC 37: the header's theme choice pins light or dark, is remembered on this
   expect(await background()).toBe("rgb(255, 255, 255)");
   await theme.getByRole("radio", { name: "System" }).click();
   await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.+/);
-  expect(await background()).toBe("rgb(18, 19, 22)");
+  expect(await background()).toBe("rgb(0, 0, 0)");
   await page.reload();
   await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.+/);
 });
