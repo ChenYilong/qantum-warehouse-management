@@ -59,7 +59,7 @@ test("AC 49: each site card keeps Text operator, Call operator and Sort out shor
   const riverside = page.getByRole("listitem").filter({ hasText: "Cedar Court, Block A" });
   await expect(riverside.getByText("Operator · Mere Tane")).toBeVisible();
   const text = riverside.getByRole("link", { name: "Text operator" });
-  await expect(text).toHaveAttribute("href", /^sms:\+447700900156\?&body=Cedar Court%20Plaza%2C%20Block%20A%2C%20Job%20ref%20CC-A2/);
+  await expect(text).toHaveAttribute("href", /^sms:\+447700900156\?&body=Cedar%20Court%2C%20Block%20A%2C%20Job%20ref%20CC-A2/);
   await expect(riverside.getByRole("link", { name: "Call operator" })).toHaveAttribute("href", "tel:+447700900156");
 
   for (const [name, href, operator] of [
