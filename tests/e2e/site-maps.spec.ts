@@ -45,25 +45,25 @@ test.describe("with the phone's location allowed", () => {
   });
 });
 
-// From 5 Arawa Street, Grafton, the demo's default start, worked out independently of the app's code.
+// From Auckland city warehouse, the demo's default start, worked out independently of the app's code.
 const FROM_DEFAULT = [
-  ["site-a", "2.2 km in a straight line from 5 Arawa Street · no drive time"],
-  ["site-b", "2.7 km in a straight line from 5 Arawa Street · no drive time"],
-  ["site-c", "15.9 km in a straight line from 5 Arawa Street · no drive time"],
-  ["site-d", "6.7 km in a straight line from 5 Arawa Street · no drive time"],
+  ["site-a", "2.2 km in a straight line from Auckland city warehouse · no drive time"],
+  ["site-b", "2.7 km in a straight line from Auckland city warehouse · no drive time"],
+  ["site-c", "15.9 km in a straight line from Auckland city warehouse · no drive time"],
+  ["site-d", "6.7 km in a straight line from Auckland city warehouse · no drive time"],
 ] as const;
 
-test("AC 75: before the phone shares where it is, every project is measured from 5 Arawa Street, and a refused location keeps it", async ({ page }) => {
+test("AC 75: before the phone shares where it is, every project is measured from Auckland city warehouse, and a refused location keeps it", async ({ page }) => {
   await gotoApp(page, "/sites");
   // Nothing asked yet, and every card already says how far it is, from the default.
   await expect(page.locator("[data-travel-note]")).toHaveText(
-    "Distances are from 5 Arawa Street, Grafton, Auckland 1023 until you use this phone's location. Only Mapbox sees it, to work out the drive.",
+    "Distances are from Auckland city warehouse until you use this phone's location. Only Mapbox sees it, to work out the drive.",
   );
   for (const [id, line] of FROM_DEFAULT) await expect(inList(page).locator(`[data-travel="${id}"]`), id).toHaveText(line);
   await page.context().clearPermissions();
   await page.getByRole("button", { name: "Use my location" }).click();
   await expect(page.locator("[data-travel-note]")).toHaveText(
-    /^(Location is off|Can't find where you are right now), so distances are from 5\sArawa Street, Grafton, Auckland 1023\.$/,
+    /^(Location is off|Can't find where you are right now), so distances are from Auckland city warehouse\.$/,
   );
   for (const [id, line] of FROM_DEFAULT) await expect(inList(page).locator(`[data-travel="${id}"]`), id).toHaveText(line);
   await expect(page.getByRole("button", { name: "Use my location" })).toBeEnabled();

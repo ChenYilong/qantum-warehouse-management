@@ -16,13 +16,12 @@ export interface Route {
 }
 
 /**
- * The demo's start until the phone shares where it is (AC 75): 5 Arawa Street, Grafton, Auckland 1023. The point is
- * the building's, from OpenStreetMap (Nominatim and Photon agree, 2026-10-19), to four decimals (about 10 m). A
- * no-break space keeps the number with the street, so a narrow card never ends a line with "from 5".
+ * The demo's start until the phone shares where it is (AC 75). The screens name it only as the Auckland city
+ * warehouse, never by its street address.
  */
 export const DEFAULT_ORIGIN = {
-  name: "5\u00a0Arawa Street",
-  address: "5\u00a0Arawa Street, Grafton, Auckland 1023",
+  name: "Auckland city warehouse",
+  address: "Auckland city warehouse",
   point: { lat: -36.8643, lng: 174.7661 },
 } as const;
 
