@@ -43,6 +43,40 @@ test("AC 74: each project has its map with a pin, and a tap on the map opens the
   await assertAxe(page);
 });
 
+test("AC 79: with a token the pins sit on a Mapbox map fitted to the chosen tab, with Mapbox's credits clear of the drawer", async ({ page }) => {
+  await answerMapbox(page);
+  await gotoApp(page, "/sites");
+  const map = page.locator("[data-projects-map]");
+  await expect(map).toHaveAttribute("data-projects-map", "ready");
+  await expect(map.locator("canvas")).toHaveCount(1);
+  const room = await map.boundingBox();
+  // The map fills its room: a canvas of no height would put every pin and the credits anywhere.
+  const canvas = await map.locator("canvas").boundingBox();
+  expect(Math.abs((canvas?.height ?? 0) - (room?.height ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((canvas?.width ?? 0) - (room?.width ?? 0))).toBeLessThanOrEqual(1);
+  const drawer = page.getByRole("region", { name: "Selected project" });
+  const insideMap = async (id: string) => {
+    const dot = await page.locator(`[data-pin="${id}"] [data-pin-dot]`).boundingBox();
+    if (!dot || !room) return false;
+    return dot.x >= room.x && dot.x + dot.width <= room.x + room.width && dot.y >= room.y && dot.y + dot.height <= room.y + room.height;
+  };
+  await expect(page.locator("[data-pin]")).toHaveCount(1);
+  expect(await insideMap("site-a")).toBe(true);
+  // Blocked: the map fits both of its projects, 13 km apart.
+  await page.getByRole("tab", { name: "Blocked 2", exact: true }).click();
+  await expect(page.locator("[data-pin]")).toHaveCount(2);
+  await expect.poll(async () => (await insideMap("site-b")) && (await insideMap("site-c"))).toBe(true);
+  // Mapbox's wordmark, required on every map, is never under the drawer.
+  const logo = await map.locator(".mapboxgl-ctrl-logo").boundingBox();
+  const sheet = await drawer.boundingBox();
+  expect((logo?.y ?? Infinity) + (logo?.height ?? 0)).toBeLessThanOrEqual(sheet?.y ?? 0);
+  await page.locator('[data-pin="site-c"]').click();
+  await expect(drawer.getByRole("link", { name: "Northgate Depot, Phase 2" })).toBeVisible();
+  await expect(page.locator('[data-pin="site-c"]')).toHaveAttribute("aria-pressed", "true");
+  await assertTargets(page);
+  await assertAxe(page);
+});
+
 test("AC 74: each project's map sits under its name and above its signal, exactly as wide as the signal", async ({ page }) => {
   await answerMapbox(page);
   for (const width of [375, 1280]) {

@@ -4,7 +4,8 @@ import { appText, gotoApp } from "./support";
 test("AC 9: stock down shows can't check and never crew can go", async ({ page }) => {
   // Runs on the stock-down server (STUB_STOCK_MODE=down), not the main server.
   await gotoApp(page, "/sites");
-  await expect(page.getByText("Can't check")).toHaveCount(4);
+  // The list's cards; today's panel above them says the same in its own words (AC 77).
+  await expect(page.getByRole("list", { name: "Projects" }).getByText("Can't check")).toHaveCount(4);
   await expect(page.getByText("Crew can go")).toHaveCount(0);
 
   // AC 52, AC 54: every signal is amber and checks again when tapped. None is a link, so none can call or text.
@@ -47,6 +48,27 @@ test("AC 9: stock down shows can't check and never crew can go", async ({ page }
   await expect(page.getByText("We can't load the decisions right now. Try again shortly.")).toBeVisible();
   await expect(page.getByText("Nothing recorded")).toHaveCount(0);
   await expect(page.getByText("Crew can go")).toHaveCount(0);
+});
+
+test("AC 77 to 79: with the stock down every crew counts as can't go, the totals never count, and the panel opens on Blocked", async ({ page }) => {
+  await gotoApp(page, "/sites");
+  const verdict = page.locator("[data-verdict]");
+  await expect(verdict.getByRole("heading", { level: 2 })).toHaveText("4 of 4 crews can't go yet");
+  await expect(verdict.getByText("Stock can't be checked", { exact: true })).toBeVisible();
+  await expect(verdict.getByRole("img", { name: "4 can't be checked" }).locator('[data-segment="unchecked"]')).toHaveCount(4);
+  const tablist = page.getByRole("tablist", { name: "Projects by status" });
+  await expect(tablist.getByRole("tab")).toHaveText(["Blocked 4", "Can go 0", "Idle 0"]);
+  // Can go has no project, so the panel opens on Blocked, every pin in the can't-check yellow.
+  await expect(tablist.getByRole("tab", { name: "Blocked 4" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("[data-pin]")).toHaveCount(4);
+  const drawer = page.getByRole("region", { name: "Selected project" });
+  await expect(drawer).toContainText("Can't check");
+  await expect(drawer).toContainText("Stock can't be checked right now, so don't send the crew yet.");
+  await expect(drawer.getByRole("link", { name: /Sort out shortages|Check data problems/ })).toHaveCount(0);
+  // An empty tab says so, and has no pin.
+  await tablist.getByRole("tab", { name: "Can go 0" }).click();
+  await expect(page.locator("[data-pin]")).toHaveCount(0);
+  await expect(drawer).toContainText("No projects in this group.");
 });
 
 test("AC 38, AC 39: with the stock down, the materials pages say they can't check, never zero or not short", async ({ page }) => {
