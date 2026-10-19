@@ -4,6 +4,7 @@ import { ACTIONS_PATH, CALENDAR_PATH, MAP_PATH, MATERIALS_PATH, penetrationPath,
 import { NAV } from "@/ui/messages";
 import { SignOutButton } from "@/ui/SignOutButton";
 import { ThemeSwitch } from "@/ui/ThemeSwitch";
+import { TravelButton, TravelProvider } from "@/ui/TravelProvider";
 
 export const metadata = { title: NAV.about };
 
@@ -14,6 +15,10 @@ export default function LandingPage() {
       <MenuBar current="about" />
       <main>
         <h1>Is the crew good to go?</h1>
+        {/* At the top of every tab's page (AC 75, AC 83). The guide lists no projects, so it asks Mapbox for nothing. */}
+        <TravelProvider token="" places={[]}>
+          <TravelButton />
+        </TravelProvider>
         {/* Shown at the top right (AC 60): CSS lifts it above the heading. */}
         <SignOutButton />
         <p>

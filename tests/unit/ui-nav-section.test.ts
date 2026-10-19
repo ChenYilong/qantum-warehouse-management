@@ -4,11 +4,11 @@ import { ABOUT_PATH } from "@/ui/format";
 import { NAV_ITEMS } from "@/ui/nav-section";
 
 describe("AC 37, AC 47, AC 83: the menu's entries and the root", () => {
-  it("AC 83: lists Projects, Map and Calendar, in that order, for the tab bar at every width", () => {
+  it("AC 83: lists Map, Calendar and Projects, in that order, for the tab bar at every width", () => {
     expect(NAV_ITEMS.map((item) => [item.section, item.href, item.label, item.kind])).toEqual([
-      ["sites", "/sites", "Projects", "site"],
       ["map", "/map", "Map", "map"],
       ["calendar", "/calendar", "Calendar", "calendar"],
+      ["sites", "/sites", "Projects", "site"],
     ]);
   });
 

@@ -6,7 +6,7 @@ import { buildCalendar } from "@/ui/calendar";
 import { CalendarPanel } from "@/ui/CalendarPanel";
 import { EMPTY, NAV, SITES_UNAVAILABLE } from "@/ui/messages";
 import { placesOf, projectCards } from "@/ui/ProjectCard";
-import { TravelProvider } from "@/ui/TravelProvider";
+import { TravelButton, TravelProvider } from "@/ui/TravelProvider";
 import { UnavailablePanel } from "@/ui/UnavailablePanel";
 import styles from "@/ui/primitives.module.css";
 import { loadPage } from "../_lib/load";
@@ -31,6 +31,8 @@ export default async function CalendarPage() {
           <p>{EMPTY.sites}</p>
         ) : (
           <TravelProvider token={token} places={placesOf(sites)}>
+            {/* At the top of every tab's page, under the picker's line (AC 75, AC 83). */}
+            <TravelButton />
             <CalendarPanel calendar={buildCalendar(sites)} cards={projectCards(sites, token, "calendar-card")} />
           </TravelProvider>
         )}

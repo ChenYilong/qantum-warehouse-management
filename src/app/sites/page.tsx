@@ -31,6 +31,8 @@ export default async function SitesPage({ searchParams }: PageProps) {
           <p>{EMPTY.sites}</p>
         ) : (
           <TravelProvider token={token} places={placesOf(loaded.value.sites)}>
+            {/* At the top of every tab's page, under the picker's line (AC 75, AC 83). */}
+            <TravelButton />
             <FilteredSites sites={loaded.value.sites} filters={filters} token={token} />
           </TravelProvider>
         )}
@@ -45,7 +47,6 @@ export default async function SitesPage({ searchParams }: PageProps) {
  */
 function FilteredSites({ sites, filters, token }: { sites: readonly ListedSite[]; filters: SiteFilters; token: string }) {
   const shown = filterSites(sites, filters);
-  const places = placesOf(shown);
   return (
     <>
       <SiteFilterForm key={`${filters.status}|${filters.query}`} filters={filters} />
@@ -54,7 +55,6 @@ function FilteredSites({ sites, filters, token }: { sites: readonly ListedSite[]
       ) : (
         <>
           {isFiltered(filters) ? <p className={styles.muted}>{SITE_FILTER.count(shown.length, sites.length)}</p> : null}
-          {places.length > 0 ? <TravelButton /> : null}
           {/* A waterfall: cards keep their own heights and fill the columns top to bottom (one column on a phone). */}
           <ul className={styles.feed} aria-label={SITE_FILTER.list}>
             {shown.map((site) => (
