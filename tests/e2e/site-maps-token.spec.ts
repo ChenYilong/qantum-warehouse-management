@@ -1,6 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { answerMapbox, E2E_MAPBOX_TOKEN } from "./mapbox-fake";
 import { assertAxe, assertNoOverflow, assertTargets, gotoApp } from "./support";
+
+// The list's cards. Today's panel shows one of them again above the list (AC 79), so a locator for a card's parts is scoped here.
+const inList = (page: Page) => page.getByRole("list", { name: "Projects" });
 
 // On the maps server, started with a (fake) public Mapbox token. Every Mapbox request is answered here (AC 74 to 76).
 
@@ -14,23 +17,23 @@ test("AC 74: each project has its map with a pin, and a tap on the map opens the
   // The directions open in a new tab; answer Google here too, so the test never leaves the machine.
   await page.context().route("https://www.google.com/**", (route) => route.fulfill({ contentType: "text/plain", body: "directions" }));
   await gotoApp(page, "/sites");
-  await expect(page.locator("[data-map]")).toHaveCount(4);
+  await expect(inList(page).locator("[data-map]")).toHaveCount(4);
   for (const id of IDS) {
-    const map = page.locator(`[data-map="${id}"]`);
+    const map = inList(page).locator(`[data-map="${id}"]`);
     await map.scrollIntoViewIfNeeded();
     await expect(map, id).toHaveAttribute("data-map-state", "ready");
     await expect(map.locator("canvas"), id).toHaveCount(1);
     await expect(map.locator(".mapboxgl-marker"), id).toHaveCount(1);
   }
   // A tap on the map is a tap on the link laid over it; keyboards and screen readers skip it for Directions.
-  const overlay = page.locator('[data-map="site-b"] [data-map-link]');
+  const overlay = inList(page).locator('[data-map="site-b"] [data-map-link]');
   await expect(overlay).toHaveAttribute("tabindex", "-1");
   await expect(overlay).toHaveAttribute("aria-hidden", "true");
-  const [directions] = await Promise.all([page.waitForEvent("popup"), page.locator('[data-map="site-b"]').click({ position: { x: 40, y: 40 } })]);
+  const [directions] = await Promise.all([page.waitForEvent("popup"), inList(page).locator('[data-map="site-b"]').click({ position: { x: 40, y: 40 } })]);
   expect(directions.url()).toBe("https://www.google.com/maps/dir/?api=1&destination=-36.841%2C174.7571&travelmode=driving");
   await directions.close();
   // Mapbox's credits stay above the link, so their own links still work.
-  const credits = page.locator('[data-map="site-b"] .mapboxgl-ctrl-logo');
+  const credits = inList(page).locator('[data-map="site-b"] .mapboxgl-ctrl-logo');
   await expect(credits).toBeVisible();
   const creditsOnTop = await credits.evaluate((logo) => {
     const box = logo.getBoundingClientRect();
@@ -43,7 +46,7 @@ test("AC 74: each project has its map with a pin, and a tap on the map opens the
   await assertAxe(page);
 });
 
-test("AC 79: with a token the pins sit on a Mapbox map fitted to the chosen tab, with Mapbox's credits clear of the drawer", async ({ page }) => {
+test("AC 79: with a token the pins sit on a Mapbox map fitted to the chosen tab, with Mapbox's credits clear of the card under it", async ({ page }) => {
   await answerMapbox(page);
   await gotoApp(page, "/sites");
   const map = page.locator("[data-projects-map]");
@@ -54,7 +57,7 @@ test("AC 79: with a token the pins sit on a Mapbox map fitted to the chosen tab,
   const canvas = await map.locator("canvas").boundingBox();
   expect(Math.abs((canvas?.height ?? 0) - (room?.height ?? 0))).toBeLessThanOrEqual(1);
   expect(Math.abs((canvas?.width ?? 0) - (room?.width ?? 0))).toBeLessThanOrEqual(1);
-  const drawer = page.getByRole("region", { name: "Selected project" });
+  const card = page.getByRole("region", { name: "Selected project" });
   const insideMap = async (id: string) => {
     const dot = await page.locator(`[data-pin="${id}"] [data-pin-dot]`).boundingBox();
     if (!dot || !room) return false;
@@ -66,12 +69,12 @@ test("AC 79: with a token the pins sit on a Mapbox map fitted to the chosen tab,
   await page.getByRole("tab", { name: "Blocked 2", exact: true }).click();
   await expect(page.locator("[data-pin]")).toHaveCount(2);
   await expect.poll(async () => (await insideMap("site-b")) && (await insideMap("site-c"))).toBe(true);
-  // Mapbox's wordmark, required on every map, is never under the drawer.
+  // Mapbox's wordmark, required on every map, is never under the card.
   const logo = await map.locator(".mapboxgl-ctrl-logo").boundingBox();
-  const sheet = await drawer.boundingBox();
+  const sheet = await card.boundingBox();
   expect((logo?.y ?? Infinity) + (logo?.height ?? 0)).toBeLessThanOrEqual(sheet?.y ?? 0);
   await page.locator('[data-pin="site-c"]').click();
-  await expect(drawer.getByRole("link", { name: "Northgate Depot, Phase 2" })).toBeVisible();
+  await expect(card.getByRole("link", { name: "Northgate Depot, Phase 2" }).first()).toBeVisible();
   await expect(page.locator('[data-pin="site-c"]')).toHaveAttribute("aria-pressed", "true");
   await assertTargets(page);
   await assertAxe(page);
@@ -84,8 +87,8 @@ test("AC 74: each project's map sits under its name and above its signal, exactl
     await gotoApp(page, "/sites");
     for (const id of IDS) {
       const where = `${id} at ${width}px`;
-      const map = page.locator(`[data-map="${id}"]`);
-      const signal = page.getByRole("listitem").filter({ has: map }).locator("[data-signal]");
+      const map = inList(page).locator(`[data-map="${id}"]`);
+      const signal = page.getByRole("listitem").filter({ has: page.locator(`[data-map="${id}"]`) }).locator("[data-signal]");
       await map.scrollIntoViewIfNeeded();
       await expect(map, where).toHaveAttribute("data-map-state", "ready");
       const [name, strip, box] = await Promise.all([page.locator(`#site-card-${id}`).boundingBox(), map.boundingBox(), signal.boundingBox()]);
@@ -111,13 +114,13 @@ test.describe("before the phone shares where it is", () => {
   test("AC 75: one request from 5 Arawa Street gives each project its drive, until the phone's location replaces it", async ({ page }) => {
     const matrix = await answerMapbox(page);
     await gotoApp(page, "/sites");
-    for (const [index, id] of IDS.entries()) await expect(page.locator(`[data-travel="${id}"]`), id).toHaveText(`${DRIVES[index]!} from 5 Arawa Street`);
+    for (const [index, id] of IDS.entries()) await expect(inList(page).locator(`[data-travel="${id}"]`), id).toHaveText(`${DRIVES[index]!} from 5 Arawa Street`);
     expect(matrix.map((url) => new URL(url).pathname)).toEqual([FROM_DEFAULT]);
     await expect(page.getByRole("button", { name: "Use my location" })).toBeVisible();
     // The phone shares where it is: its own drive replaces the default, without the address.
     await page.context().grantPermissions(["geolocation"]);
     await page.getByRole("button", { name: "Use my location" }).click();
-    for (const [index, id] of IDS.entries()) await expect(page.locator(`[data-travel="${id}"]`), id).toHaveText(DRIVES[index]!);
+    for (const [index, id] of IDS.entries()) await expect(inList(page).locator(`[data-travel="${id}"]`), id).toHaveText(DRIVES[index]!);
     expect(matrix.map((url) => new URL(url).pathname)).toEqual([FROM_DEFAULT, FROM_PHONE]);
     await expect(page.getByRole("button", { name: "Update my location" })).toBeVisible();
     await expect(page.locator("[data-travel-note]")).toHaveText("Distances are from where this phone is. Only Mapbox sees its location, to work out the drive.");
@@ -127,7 +130,7 @@ test.describe("before the phone shares where it is", () => {
 test("AC 75, AC 76: one driving-matrix request from the phone, with the public token, gives each project its drive; offline, the straight line", async ({ page }) => {
   const matrix = await answerMapbox(page);
   await gotoApp(page, "/sites");
-  for (const [index, id] of IDS.entries()) await expect(page.locator(`[data-travel="${id}"]`), id).toHaveText(DRIVES[index]!);
+  for (const [index, id] of IDS.entries()) await expect(inList(page).locator(`[data-travel="${id}"]`), id).toHaveText(DRIVES[index]!);
   // The phone already allows its location, so the page finds it at once; a request from the default it started first
   // may have gone out before the fix came in, and is never shown once the phone's answer is in.
   const paths = matrix.map((url) => new URL(url).pathname);
@@ -144,9 +147,9 @@ test("AC 75, AC 76: one driving-matrix request from the phone, with the public t
   const askedBefore = matrix.length;
   await page.getByRole("switch", { name: "Online" }).click();
   await expect(page.locator("[data-connection]")).toHaveAttribute("data-connection", "offline");
-  await expect(page.locator('[data-travel="site-a"]')).toHaveText("1.9 km in a straight line · no drive time");
+  await expect(inList(page).locator('[data-travel="site-a"]')).toHaveText("1.9 km in a straight line · no drive time");
   expect(matrix).toHaveLength(askedBefore);
   await page.getByRole("switch", { name: "Online" }).click();
   await expect(page.locator("[data-connection]")).toHaveAttribute("data-connection", "online");
-  await expect(page.locator('[data-travel="site-a"]')).toHaveText("2.3 km · 7 min drive");
+  await expect(inList(page).locator('[data-travel="site-a"]')).toHaveText("2.3 km · 7 min drive");
 });

@@ -1,20 +1,15 @@
 "use client";
 
 import "mapbox-gl/dist/mapbox-gl.css";
-import Link from "next/link";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { Icon } from "./Icon";
-import { KindIcon } from "./KindIcon";
-import { OperatorRow } from "./OperatorRow";
-import { StatusChip } from "./StatusChip";
-import { firstProject, nextTab, schematicPositions, segmentGroup, TODAY, TODAY_GROUPS, type Today, type TodayGroup, type TodayProject } from "./today";
+import { Fragment, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { firstProject, inTab, nextTab, schematicPositions, segmentLit, TODAY, TODAY_TABS, type Today, type TodayProject, type TodayTabId } from "./today";
 import { DEFAULT_ORIGIN, MAP_STYLE, type LatLng } from "./travel";
 import styles from "./primitives.module.css";
 
 type MapState = "none" | "loading" | "ready" | "failed";
 
-/** How far from the map's edges a pin may sit, so its label and the drawer over the map's foot never hide it. */
-const PIN_ROOM = { insetX: 64, insetTop: 40, insetBottom: 64 } as const;
+/** How far from the map's edges a pin may sit, so its label stays on the map. */
+const PIN_ROOM = { insetX: 64, insetTop: 40, insetBottom: 40 } as const;
 
 /** Mapbox's camera, fitted to the pins with the same room. */
 const FIT_PADDING = { top: PIN_ROOM.insetTop, bottom: PIN_ROOM.insetBottom, left: PIN_ROOM.insetX, right: PIN_ROOM.insetX } as const;
@@ -35,24 +30,25 @@ interface MapboxLike {
 
 /**
  * Today's panel (AC 77 to 79), after the author's design "I · Verdict + tabs + map (B+D+E)": the verdict with its bar
- * and, inside it, the tabs; then the chosen tab's map and the drawer. The tab, the bar, the pins and the drawer move
- * together: a tab lights its segments, shows its pins and opens the drawer on its first project; a pin takes the
- * drawer.
+ * and, inside it, the tabs; then the chosen tab's map and, right under it, the chosen project's card. The card is the
+ * list's own (`cards`, rendered on the server by the same component), so both look and read the same. The tab, the
+ * bar, the pins and the card move together: a tab lights its segments, shows its pins and opens on its first
+ * project; a pin takes the card.
  */
-export function TodayPanel({ today, token }: { today: Today; token: string }) {
-  const [group, setGroup] = useState<TodayGroup>(today.initialGroup);
-  const [chosenId, setChosenId] = useState<string | null>(firstProject(today.projects, today.initialGroup)?.id ?? null);
-  const tabRefs = useRef<Partial<Record<TodayGroup, HTMLButtonElement | null>>>({});
-  const shown = today.projects.filter((project) => project.group === group);
+export function TodayPanel({ today, token, cards }: { today: Today; token: string; cards: Readonly<Record<string, ReactNode>> }) {
+  const [tab, setTab] = useState<TodayTabId>(today.initialTab);
+  const [chosenId, setChosenId] = useState<string | null>(firstProject(today.projects, today.initialTab)?.id ?? null);
+  const tabRefs = useRef<Partial<Record<TodayTabId, HTMLButtonElement | null>>>({});
+  const shown = today.projects.filter((project) => inTab(project, tab));
   const chosen = shown.find((project) => project.id === chosenId) ?? shown[0] ?? null;
 
-  const choose = (next: TodayGroup) => {
-    setGroup(next);
+  const choose = (next: TodayTabId) => {
+    setTab(next);
     setChosenId(firstProject(today.projects, next)?.id ?? null);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const next = nextTab(TODAY_GROUPS, group, event.key);
+    const next = nextTab(TODAY_TABS, tab, event.key);
     if (next === null) return;
     event.preventDefault();
     choose(next);
@@ -72,37 +68,39 @@ export function TodayPanel({ today, token }: { today: Today; token: string }) {
         {today.segments.length > 0 ? (
           <div className={styles.verdictBar} role="img" aria-label={today.barLabel}>
             {today.segments.map((kind, index) => (
-              <span key={`${kind}-${index}`} className={styles.verdictSegment} data-segment={kind} data-lit={segmentGroup(kind) === group ? "" : undefined} />
+              <span key={`${kind}-${index}`} className={styles.verdictSegment} data-segment={kind} data-lit={segmentLit(kind, tab) ? "" : undefined} />
             ))}
           </div>
         ) : null}
         <div className={styles.verdictTabs} role="tablist" aria-label={TODAY.tabsLabel} onKeyDown={onKeyDown}>
-          {today.tabs.map((tab) => {
-            const selected = tab.group === group;
+          {today.tabs.map((item) => {
+            const selected = item.id === tab;
             return (
               <button
-                key={tab.group}
+                key={item.id}
                 ref={(element) => {
-                  tabRefs.current[tab.group] = element;
+                  tabRefs.current[item.id] = element;
                 }}
                 type="button"
                 role="tab"
-                id={`today-tab-${tab.group}`}
+                id={`today-tab-${item.id}`}
                 className={styles.verdictTab}
                 aria-selected={selected}
                 aria-controls="today-tabpanel"
                 tabIndex={selected ? 0 : -1}
-                onClick={() => choose(tab.group)}
+                onClick={() => choose(item.id)}
               >
-                {tab.label}
+                {item.label}
               </button>
             );
           })}
         </div>
       </section>
-      <div role="tabpanel" id="today-tabpanel" aria-labelledby={`today-tab-${group}`} className={styles.todayTabPanel}>
+      <div role="tabpanel" id="today-tabpanel" aria-labelledby={`today-tab-${tab}`} className={styles.todayTabPanel}>
         <ProjectsMap projects={shown} chosenId={chosen?.id ?? null} onChoose={setChosenId} token={token} />
-        <Drawer project={chosen} />
+        <section id="today-card" className={styles.todayCard} aria-label={TODAY.cardLabel}>
+          {chosen ? <Fragment key={chosen.id}>{cards[chosen.id] ?? null}</Fragment> : <p className={styles.todayEmpty}>{TODAY.empty}</p>}
+        </section>
       </div>
     </div>
   );
@@ -244,7 +242,7 @@ function ProjectsMap({
                 data-side={at.x > size.width * 0.6 ? "left" : "right"}
                 aria-pressed={chosen}
                 aria-label={`${project.name}, ${project.status.label}`}
-                aria-controls="today-drawer"
+                aria-controls="today-card"
                 style={{ left: `${at.x}px`, top: `${at.y}px` }}
                 onClick={() => onChoose(project.id)}
               >
@@ -259,42 +257,5 @@ function ProjectsMap({
           })
         : null}
     </div>
-  );
-}
-
-/** The chosen project (AC 79), in the project's own words: what its card says, without its map. */
-function Drawer({ project }: { project: TodayProject | null }) {
-  return (
-    <section id="today-drawer" className={styles.drawer} aria-label={TODAY.drawerLabel}>
-      <span className={styles.drawerHandle} aria-hidden="true" />
-      {project ? (
-        <>
-          <StatusChip status={project.status} />
-          <Link id="today-drawer-name" className={styles.drawerTitle} href={project.href}>
-            <span className={styles.kindTitle}>
-              <KindIcon kind="site" />
-              {project.name}
-            </span>
-            <Icon name="chevron-right" />
-          </Link>
-          <div className={styles.drawerDetails}>
-            {project.details.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
-          {project.operator ? <OperatorRow operator={project.operator} describedBy="today-drawer-name" nameId="today-drawer-operator" /> : null}
-          {project.decide ? (
-            <div className={styles.siteCardActions}>
-              <Link className={`${styles.button} ${styles.primary}`} href={project.decide.href} aria-describedby="today-drawer-name">
-                {project.decide.label}
-                <Icon name="chevron-right" />
-              </Link>
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <p>{TODAY.empty}</p>
-      )}
-    </section>
   );
 }

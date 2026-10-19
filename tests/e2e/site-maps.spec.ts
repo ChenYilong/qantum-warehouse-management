@@ -1,5 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { assertAxe, assertNoOverflow, assertTargets, gotoApp } from "./support";
+
+// The list's cards. Today's panel shows one of them again above the list (AC 79), so a locator for a card's parts is scoped here.
+const inList = (page: Page) => page.getByRole("list", { name: "Projects" });
 
 // Read-only, on the main server, which has no Mapbox token: no map, but Directions and the straight-line distance
 // still work (AC 74, 75). The maps themselves are in site-maps-token.spec.ts, on a server with a token.
@@ -30,11 +33,11 @@ test.describe("with the phone's location allowed", () => {
       await expect(directions, name).toHaveAttribute("target", "_blank");
       await expect(directions, name).toHaveAccessibleDescription(name);
       // Already allowed, so the page asked by itself; with no token there is no route, so no drive time.
-      await expect(page.locator(`[data-travel="${id}"]`), name).toHaveText(line);
+      await expect(inList(page).locator(`[data-travel="${id}"]`), name).toHaveText(line);
     }
     await expect(page.locator("[data-travel-note]")).toHaveText("Distances are from where this phone is. Only Mapbox sees its location, to work out the drive.");
     await page.getByRole("button", { name: "Update my location" }).click();
-    await expect(page.locator('[data-travel="site-a"]')).toHaveText("1.9 km in a straight line · no drive time");
+    await expect(inList(page).locator('[data-travel="site-a"]')).toHaveText("1.9 km in a straight line · no drive time");
     expect(mapbox).toEqual([]);
     await assertTargets(page);
     await assertNoOverflow(page);
@@ -56,12 +59,12 @@ test("AC 75: before the phone shares where it is, every project is measured from
   await expect(page.locator("[data-travel-note]")).toHaveText(
     "Distances are from 5 Arawa Street, Grafton, Auckland 1023 until you use this phone's location. Only Mapbox sees it, to work out the drive.",
   );
-  for (const [id, line] of FROM_DEFAULT) await expect(page.locator(`[data-travel="${id}"]`), id).toHaveText(line);
+  for (const [id, line] of FROM_DEFAULT) await expect(inList(page).locator(`[data-travel="${id}"]`), id).toHaveText(line);
   await page.context().clearPermissions();
   await page.getByRole("button", { name: "Use my location" }).click();
   await expect(page.locator("[data-travel-note]")).toHaveText(
     /^(Location is off|Can't find where you are right now), so distances are from 5\sArawa Street, Grafton, Auckland 1023\.$/,
   );
-  for (const [id, line] of FROM_DEFAULT) await expect(page.locator(`[data-travel="${id}"]`), id).toHaveText(line);
+  for (const [id, line] of FROM_DEFAULT) await expect(inList(page).locator(`[data-travel="${id}"]`), id).toHaveText(line);
   await expect(page.getByRole("button", { name: "Use my location" })).toBeEnabled();
 });
