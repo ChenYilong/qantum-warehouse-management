@@ -2465,3 +2465,156 @@ section:has(> .stickyHeading) {
 .allProjects {
   margin-top: 0;
 }
+
+/*
+ * The deadline calendar (AC 81, 82): a copy of today's map panel with a month calendar in place of the map. The
+ * verdict, bar, tabs and card use the panel's own styles; these are the calendar's.
+ */
+.calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem var(--space);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.calendarRange {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.calendarProblem {
+  margin: 0;
+  color: var(--danger-text);
+  font-weight: 700;
+}
+
+.calendarHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.calendarTitle {
+  max-width: none;
+  margin: 0;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.calendarStep {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Seven equal columns: 49px each on a 375px phone, room for a 48px button. */
+.calendarGrid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.calendarGrid th {
+  padding: 0 0 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.calendarGrid td {
+  height: 3.25rem;
+  padding: 0.125rem 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  vertical-align: top;
+}
+
+.calendarDay {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+}
+
+/* Today, ringed. */
+.calendarGrid td[data-today-date] .calendarDay {
+  box-shadow: inset 0 0 0 2px var(--text);
+  font-weight: 700;
+}
+
+.calendarSite {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.125rem;
+  width: 100%;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* The big signal's capsule, small: its fill, its edge, and its knob on the same side. */
+.calendarOval {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 2.75rem;
+  height: 1.5rem;
+  padding: 0 1px;
+  border: 2px solid var(--signal-edge);
+  border-radius: 999px;
+  background: var(--signal-fill);
+}
+
+.calendarOval[data-knob="right"] {
+  justify-content: flex-end;
+}
+
+.calendarKnob {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* The chosen project's oval, ringed like the chosen pin is enlarged. */
+.calendarSite[aria-pressed="true"] .calendarOval {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--text);
+}
+
+/* The name only where there is room for it; the button's name always has it. */
+.calendarSiteName {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .calendarSiteName {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

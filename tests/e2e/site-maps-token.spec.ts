@@ -58,15 +58,17 @@ test("AC 79: with a token the pins sit on a Mapbox map fitted to the chosen tab,
   expect(Math.abs((canvas?.height ?? 0) - (room?.height ?? 0))).toBeLessThanOrEqual(1);
   expect(Math.abs((canvas?.width ?? 0) - (room?.width ?? 0))).toBeLessThanOrEqual(1);
   const card = page.getByRole("region", { name: "Selected project" });
+  // Measured afresh each time: a tap scrolls the page, and the deadline calendar above the map makes it scroll more.
   const insideMap = async (id: string) => {
-    const dot = await page.locator(`[data-pin="${id}"] [data-pin-dot]`).boundingBox();
-    if (!dot || !room) return false;
-    return dot.x >= room.x && dot.x + dot.width <= room.x + room.width && dot.y >= room.y && dot.y + dot.height <= room.y + room.height;
+    const [dot, box] = [await page.locator(`[data-pin="${id}"] [data-pin-dot]`).boundingBox(), await map.boundingBox()];
+    if (!dot || !box) return false;
+    return dot.x >= box.x && dot.x + dot.width <= box.x + box.width && dot.y >= box.y && dot.y + dot.height <= box.y + box.height;
   };
   await expect(page.locator("[data-pin]")).toHaveCount(1);
   expect(await insideMap("site-a")).toBe(true);
   // Blocked: the map fits both of its projects, 13 km apart.
-  await page.getByRole("tab", { name: "Blocked 2", exact: true }).click();
+  // The map panel's own tabs; the deadline calendar above it has a set of its own (AC 81).
+  await page.getByRole("tablist", { name: "Projects by status" }).getByRole("tab", { name: "Blocked 2", exact: true }).click();
   await expect(page.locator("[data-pin]")).toHaveCount(2);
   await expect.poll(async () => (await insideMap("site-b")) && (await insideMap("site-c"))).toBe(true);
   // Mapbox's wordmark, required on every map, is never under the card.
