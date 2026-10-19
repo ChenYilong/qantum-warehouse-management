@@ -2,6 +2,7 @@
 
 import { useId, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
+import { Greeting } from "./Greeting";
 import { Icon } from "./Icon";
 import { NAV } from "./messages";
 import { NavContent } from "./NavContent";
@@ -35,7 +36,7 @@ export function SideMenu() {
     <aside className={styles.sideMenu}>
       <div className={styles.drawerHeader}>
         <h2 className={styles.drawerTitle} hidden={collapsed}>
-          {NAV.title}
+          <Greeting />
         </h2>
         <button
           type="button"

@@ -1,3 +1,4 @@
+import { AUTH_SCRIPT } from "./auth";
 import { THEME_SCRIPT } from "./theme";
 
 /** Expanded is the absence of a choice, same shape as the theme's "system". */
@@ -36,5 +37,5 @@ export function applySidebar(state: SidebarState, root: SidebarRoot, storage: Si
 /** Runs in <head> before first paint, so a remembered collapsed menu never flashes open. */
 export const SIDEBAR_SCRIPT = `try{var s=localStorage.getItem(${JSON.stringify(SIDEBAR_KEY)});if(s==="collapsed")document.documentElement.dataset.sidebar="collapsed"}catch(e){}`;
 
-/** Theme and sidebar together. The layout keeps them in one inline script. */
-export const HEAD_SCRIPT = `${THEME_SCRIPT}${SIDEBAR_SCRIPT}`;
+/** Theme, sidebar and the demo sign-in together. The layout keeps them in one inline script. */
+export const HEAD_SCRIPT = `${THEME_SCRIPT}${SIDEBAR_SCRIPT}${AUTH_SCRIPT}`;

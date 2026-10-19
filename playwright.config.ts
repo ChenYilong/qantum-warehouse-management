@@ -5,6 +5,22 @@ const externalBase = process.env.E2E_BASE_URL;
 const baseURL = externalBase ?? `http://127.0.0.1:${port}`;
 const viewport = { width: 375, height: 812 };
 
+/** Every spec starts signed in to the demo (AC 59), so the sign-in cover does not hide the page under test. The sign-in spec clears it. */
+function signedIn(origin: string) {
+  return {
+    cookies: [],
+    origins: [
+      {
+        origin,
+        localStorage: [
+          { name: "team-leader:signed-in", value: "1" },
+          { name: "team-leader:user", value: "Test lead" },
+        ],
+      },
+    ],
+  };
+}
+
 const readSpecs = [
   "**/ac30-status-text.spec.ts",
   "**/ac32-viewport.spec.ts",
@@ -18,6 +34,7 @@ const readSpecs = [
   "**/side-menu.spec.ts",
   "**/actions-log.spec.ts",
   "**/field-ui.spec.ts",
+  "**/sign-in.spec.ts",
 ];
 
 const writeSpecs = ["**/ac31-keyboard.spec.ts", "**/idempotency-key.spec.ts", "**/scenario.spec.ts"];
@@ -42,6 +59,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL,
+    storageState: signedIn(baseURL),
     browserName: "chromium",
     viewport,
     navigationTimeout: 120_000,
@@ -61,12 +79,12 @@ export default defineConfig({
     {
       name: "stock-down",
       testMatch: "**/stock-down.spec.ts",
-      use: { baseURL: "http://127.0.0.1:3101", browserName: "chromium", viewport },
+      use: { baseURL: "http://127.0.0.1:3101", storageState: signedIn("http://127.0.0.1:3101"), browserName: "chromium", viewport },
     },
     {
       name: "stock-malformed",
       testMatch: "**/stock-malformed.spec.ts",
-      use: { baseURL: "http://127.0.0.1:3102", browserName: "chromium", viewport },
+      use: { baseURL: "http://127.0.0.1:3102", storageState: signedIn("http://127.0.0.1:3102"), browserName: "chromium", viewport },
     },
   ],
   // When E2E_BASE_URL is set, no server is started. The stock projects still call 3101 and 3102.

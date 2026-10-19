@@ -225,6 +225,11 @@ main > * {
   max-width: 100%;
 }
 
+/* While the demo sign-in covers the page, only the cover scrolls. */
+:root:not([data-auth="in"]):has([data-login-gate]) body {
+  overflow: hidden;
+}
+
 /* Links take the theme's link colour (black on light, yellow on dark), never the browser's default blue. */
 a {
   color: var(--link);
