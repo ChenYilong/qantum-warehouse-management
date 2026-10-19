@@ -24,15 +24,15 @@ while (Date.now() <= deadline) {
     const homeText = await homeResponse.text();
     const listResponse = await fetch(new URL("/sites", raw), { cache: "no-store" });
     const listText = await listResponse.text();
-    const pagesOk =
-      homeResponse.status === 200 &&
-      new URL(homeResponse.url).pathname === "/about-this-demo" &&
-      homeText.includes("Ready to send the crew?") && listResponse.status === 200 && listText.includes("Sites");
+    // The Guide's heading and the list's name, as the pages read them (docs/ui-design.md, UI refresh 2026-10-19).
+    const homeOk = homeResponse.status === 200 && new URL(homeResponse.url).pathname === "/about-this-demo" && homeText.includes("Is the crew good to go?");
+    const listOk = listResponse.status === 200 && listText.includes("Projects");
+    const pagesOk = homeOk && listOk;
     if (sitesResponse.status === 200 && noStore && count === 4 && pagesOk) {
       console.log("smoke ok");
       process.exit(0);
     }
-    last = `sites ${sitesResponse.status} cache ${cache || "missing"} count ${count} home ${homeResponse.status} list ${listResponse.status}`;
+    last = `sites ${sitesResponse.status} cache ${cache || "missing"} count ${count} home ${homeResponse.status}${homeOk ? "" : " (content missing)"} list ${listResponse.status}${listOk ? "" : " (content missing)"}`;
   } catch (error) {
     last = error instanceof Error ? error.name : "request failed";
   }
