@@ -544,8 +544,9 @@ button.signal:active {
   border-radius: 1rem;
 }
 
-/* Project maps (AC 74, 75): "Show distance and time" above the list; on each card a map strip, then the trip line
-   and Directions. The map is decoration for touch: Directions is the control for everyone. */
+/* Project maps (AC 74, 75): "Show distance and time" above the list; on each card a map strip under the name, as
+   wide as the signal under it, and the trip line and Directions at the card's foot. The map is decoration for touch:
+   Directions is the control for everyone. */
 .travelBar {
   display: flex;
   flex-direction: column;
@@ -561,14 +562,10 @@ button.signal:active {
   align-self: flex-start;
 }
 
-.sitePlace {
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-}
-
+/* Full width of the card, like the signal (AC 74). */
 .siteMap {
   position: relative;
+  width: 100%;
   height: 10rem;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -594,6 +591,7 @@ button.signal:active {
 .sitePlaceRow {
   display: flex;
   flex-wrap: wrap;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
