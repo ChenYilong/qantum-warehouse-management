@@ -70,6 +70,35 @@ export function isSignedIn(root: AuthRoot): boolean {
   return root.dataset.auth === "in";
 }
 
+/**
+ * Signed in by the stamp on <html>, or by storage when the page has lost the stamp: Next rebuilds <html> for some
+ * screens (the not-found page), which drops what the head script set. Blocked storage leaves only the stamp.
+ */
+export function readSignedIn(root: AuthRoot, storage: AuthStorage): boolean {
+  return isSignedIn(root) || read(storage, AUTH_KEYS.signedIn) === "1";
+}
+
+/** Puts a lost stamp back, so the CSS that hides the cover and frees the page applies again. */
+export function restoreStamp(root: AuthRoot, storage: AuthStorage): void {
+  if (!isSignedIn(root) && read(storage, AUTH_KEYS.signedIn) === "1") root.dataset.auth = "in";
+}
+
+/** Storage that holds nothing: what the sign-in falls back to when the browser's storage cannot be reached. */
+export const NO_STORAGE: AuthStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+};
+
+/** The browser's storage, or NO_STORAGE when merely reaching it throws (blocked site data). */
+export function safeStorage(get: () => AuthStorage): AuthStorage {
+  try {
+    return get();
+  } catch {
+    return NO_STORAGE;
+  }
+}
+
 export function readAccounts(storage: AuthStorage): Account[] {
   try {
     const parsed: unknown = JSON.parse(read(storage, AUTH_KEYS.accounts) ?? "[]");

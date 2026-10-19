@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { AUTH_KEYS, AUTH_SCRIPT, isSignedIn, readAccounts, readRole, readUser, register, signIn, signOut } from "@/ui/auth";
+import {
+  AUTH_KEYS,
+  AUTH_SCRIPT,
+  isSignedIn,
+  NO_STORAGE,
+  readAccounts,
+  readRole,
+  readSignedIn,
+  readUser,
+  register,
+  restoreStamp,
+  safeStorage,
+  signIn,
+  signOut,
+} from "@/ui/auth";
+import { AUTH } from "@/ui/messages";
 
 function fakeRoot(auth?: string) {
   const dataset: Record<string, string | undefined> = {};
@@ -83,6 +98,45 @@ describe("AC 59: the demo sign-in", () => {
   });
 });
 
+describe("AC 59: a page that lost the stamp on <html>", () => {
+  it("still reads signed in from storage, and puts the stamp back", () => {
+    const storage = fakeStorage();
+    signIn("Alex", "x", "team-leader", fakeRoot(), storage);
+    // Next rebuilt <html> (the not-found page): the stamp from the head script is gone.
+    const rebuilt = fakeRoot();
+    expect(isSignedIn(rebuilt)).toBe(false);
+    expect(readSignedIn(rebuilt, storage)).toBe(true);
+    restoreStamp(rebuilt, storage);
+    expect(rebuilt.dataset.auth).toBe("in");
+  });
+
+  it("is signed out when neither the stamp nor storage says otherwise, and never invents a stamp", () => {
+    const root = fakeRoot();
+    expect(readSignedIn(root, fakeStorage())).toBe(false);
+    restoreStamp(root, fakeStorage());
+    expect(root.dataset.auth).toBeUndefined();
+    // Blocked storage: only the stamp counts.
+    expect(readSignedIn(fakeRoot("in"), fakeStorage(true))).toBe(true);
+    expect(readSignedIn(fakeRoot(), fakeStorage(true))).toBe(false);
+  });
+
+  it("falls back to storage that holds nothing when reaching the browser's storage throws", () => {
+    const storage = fakeStorage();
+    expect(safeStorage(() => storage)).toBe(storage);
+    const none = safeStorage(() => {
+      throw new Error("blocked");
+    });
+    expect(none).toBe(NO_STORAGE);
+    none.setItem(AUTH_KEYS.user, "Alex");
+    none.removeItem(AUTH_KEYS.user);
+    expect(none.getItem(AUTH_KEYS.user)).toBeNull();
+  });
+
+  it("greets the user by name", () => {
+    expect(AUTH.greeting("Alex")).toBe("Hi, Alex");
+  });
+});
+
 describe("AC 60: create account and sign out", () => {
   it("creates an account, replaces one with the same name, and signs it in", () => {
     const storage = fakeStorage();
@@ -100,6 +154,22 @@ describe("AC 60: create account and sign out", () => {
     expect(readAccounts(storage)).toEqual([]);
     storage.items.set(AUTH_KEYS.accounts, JSON.stringify([{ username: "" }, 3, { username: "Kim", role: "boss" }]));
     expect(readAccounts(storage)).toEqual([{ username: "Kim", email: "", role: "team-leader" }]);
+    storage.items.set(AUTH_KEYS.accounts, JSON.stringify({ username: "Kim" }));
+    expect(readAccounts(storage)).toEqual([]);
+    storage.items.set(AUTH_KEYS.accounts, JSON.stringify([null, { username: 7 }, { username: "Lee", email: 5, role: 1 }, { username: "Ana", email: "a@b.c", role: "operator" }]));
+    expect(readAccounts(storage)).toEqual([
+      { username: "Lee", email: "", role: "team-leader" },
+      { username: "Ana", email: "a@b.c", role: "operator" },
+    ]);
+  });
+
+  it("does not create an account without a username or a password", () => {
+    const storage = fakeStorage();
+    const root = fakeRoot();
+    expect(register({ username: " ", email: "", role: "operator" }, "pw", root, storage)).toBe(false);
+    expect(register({ username: "Sam", email: "", role: "operator" }, "", root, storage)).toBe(false);
+    expect(storage.items.size).toBe(0);
+    expect(isSignedIn(root)).toBe(false);
   });
 
   it("signs out but keeps the username and role to offer again", () => {
