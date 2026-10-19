@@ -131,7 +131,10 @@ jobs:
           test -n "$SOLUTIONS_CSV_B64" || { echo "::error::Secret SOLUTIONS_CSV_B64 is missing"; exit 1; }
           printf '%s' "$SOLUTIONS_CSV_B64" | base64 -d > data/solutions-excerpt.csv
           echo "cc01d2ab3fd65a29d95ef42fd04648682e116b1142700300fab9074a30b5e805  data/solutions-excerpt.csv" | sha256sum -c -
-      - run: npx vercel@62.2.0 pull --yes --environment=production --token "$VERCEL_TOKEN"
+      - name: Install the Vercel CLI
+        # Pinned and installed without lifecycle scripts (it has none), rather than npx fetching and running it on demand.
+        run: npm install --global --ignore-scripts vercel@62.2.0
+      - run: vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
       - name: Check the Mapbox token
         # The project maps (AC 74 to 76) need a public Mapbox token (pk.). Without one the deploy has no maps and
         # nothing else changes; a token that is not public stops the deploy, so a secret token never reaches a page.
@@ -153,7 +156,7 @@ jobs:
         # next.config.ts bakes the public token into the server code only (no NEXT_PUBLIC_ name) and fails on sk.
         env:
           MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
-        run: npx vercel@62.2.0 build --prod --token "$VERCEL_TOKEN"
+        run: vercel build --prod --token "$VERCEL_TOKEN"
       - name: Migrate the production database
         # After the build and before the deploy, so a failed build never touches the database. Migrations only add
         # (tables, columns with defaults, wider checks), so the version still live keeps working until the deploy.
@@ -186,7 +189,7 @@ jobs:
             exit 1
           fi
           DB_HOST="$host" DB_PORT=5432 DB_USER="$user" DB_PASSWORD="$SUPABASE_DB_PASSWORD" DB_NAME="${name:-qantum_slice}" DB_SSL=require npm run db:migrate
-      - run: npx vercel@62.2.0 deploy --prebuilt --prod --token "$VERCEL_TOKEN"
+      - run: vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN"
       - name: Smoke
         env:
           PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}

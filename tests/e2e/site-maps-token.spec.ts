@@ -11,14 +11,8 @@ const IDS = ["site-a", "site-b", "site-c", "site-d"] as const;
 
 test("AC 74: each project has its map with a pin, and a tap on the map opens the directions", async ({ page }) => {
   await answerMapbox(page);
-  await page.addInitScript(() => {
-    const opened: string[] = [];
-    (window as unknown as { opened: string[] }).opened = opened;
-    window.open = ((url?: string | URL) => {
-      opened.push(String(url));
-      return null;
-    }) as typeof window.open;
-  });
+  // The directions open in a new tab; answer Google here too, so the test never leaves the machine.
+  await page.context().route("https://www.google.com/**", (route) => route.fulfill({ contentType: "text/plain", body: "directions" }));
   await gotoApp(page, "/sites");
   await expect(page.locator("[data-map]")).toHaveCount(4);
   for (const id of IDS) {
@@ -28,10 +22,22 @@ test("AC 74: each project has its map with a pin, and a tap on the map opens the
     await expect(map.locator("canvas"), id).toHaveCount(1);
     await expect(map.locator(".mapboxgl-marker"), id).toHaveCount(1);
   }
-  await page.locator('[data-map="site-b"]').click({ position: { x: 40, y: 40 } });
-  expect(await page.evaluate(() => (window as unknown as { opened: string[] }).opened)).toEqual([
-    "https://www.google.com/maps/dir/?api=1&destination=-36.841%2C174.7571&travelmode=driving",
-  ]);
+  // A tap on the map is a tap on the link laid over it; keyboards and screen readers skip it for Directions.
+  const overlay = page.locator('[data-map="site-b"] [data-map-link]');
+  await expect(overlay).toHaveAttribute("tabindex", "-1");
+  await expect(overlay).toHaveAttribute("aria-hidden", "true");
+  const [directions] = await Promise.all([page.waitForEvent("popup"), page.locator('[data-map="site-b"]').click({ position: { x: 40, y: 40 } })]);
+  expect(directions.url()).toBe("https://www.google.com/maps/dir/?api=1&destination=-36.841%2C174.7571&travelmode=driving");
+  await directions.close();
+  // Mapbox's credits stay above the link, so their own links still work.
+  const credits = page.locator('[data-map="site-b"] .mapboxgl-ctrl-logo');
+  await expect(credits).toBeVisible();
+  const creditsOnTop = await credits.evaluate((logo) => {
+    const box = logo.getBoundingClientRect();
+    const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+    return hit !== null && logo.contains(hit);
+  });
+  expect(creditsOnTop).toBe(true);
   await assertTargets(page);
   await assertNoOverflow(page);
   await assertAxe(page);

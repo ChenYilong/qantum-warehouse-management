@@ -1,7 +1,7 @@
 "use client";
 
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
 import { MAP } from "./messages";
 import { useTravel } from "./TravelProvider";
@@ -12,8 +12,9 @@ type MapState = "waiting" | "loading" | "ready" | "failed";
 
 /**
  * A project's map (AC 74): Mapbox GL JS, created only when the card nears the screen, centred on the project with a
- * pin in its signal colour. It does not pan or zoom; a tap anywhere but its credits opens the directions. If the map
- * can't start (no WebGL, Mapbox failing), it hides and the Directions link below still works.
+ * pin in its signal colour. It does not pan or zoom. A link laid over it, under Mapbox's credits, opens the directions
+ * for a tap; it is hidden from keyboards and screen readers, which have Directions below. If the map can't start (no
+ * WebGL, Mapbox failing), it hides and Directions still works.
  */
 function SiteMap({ siteId, token, location, colour, href }: { siteId: string; token: string; location: LatLng; colour: string; href: string }) {
   const holder = useRef<HTMLDivElement>(null);
@@ -66,13 +67,14 @@ function SiteMap({ siteId, token, location, colour, href }: { siteId: string; to
     };
   }, [token, location.lat, location.lng, colour]);
 
-  function open(event: MouseEvent<HTMLDivElement>) {
-    // The credits are Mapbox's own links; a tap there is theirs, not a request for directions.
-    if (event.target instanceof Element && event.target.closest(".mapboxgl-ctrl")) return;
-    window.open(href, "_blank", "noopener,noreferrer");
-  }
-
-  return <div ref={holder} className={styles.siteMap} data-map={siteId} data-map-state={state} onClick={open} />;
+  return (
+    <div className={styles.siteMap} data-map={siteId} data-map-state={state}>
+      <div ref={holder} className={styles.siteMapCanvas} />
+      <a className={styles.siteMapLink} href={href} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true" data-map-link>
+        <span className={styles.srOnly}>{MAP.directions}</span>
+      </a>
+    </div>
+  );
 }
 
 /**
