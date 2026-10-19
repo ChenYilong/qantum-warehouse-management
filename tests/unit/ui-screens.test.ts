@@ -112,8 +112,9 @@ describe("navigation shell", () => {
         expect(source, file).toMatch(/<AppBar backHref=/);
         expect(source, file).not.toContain("<MenuBar");
       }
-      // The title is the page's own h1 inside main, not part of the header.
-      expect(source, file).toMatch(/<main[^>]*>\s*(<title>[^<]*<\/title>\s*)?<h1>/);
+      // The title is the page's own h1, first inside main, not part of the header (the projects list hides it from
+      // view while today's panel leads, AC 77).
+      expect(source, file).toMatch(/<main[^>]*>\s*(<title>[^<]*<\/title>\s*)?<h1[\s>]/);
       expect(source, file).not.toMatch(/<AppBar[^>]*title=/);
       const backBlocks = linkButtonBlocks(source).filter((block) => /backHref|backName/.test(block));
       expect(backBlocks, file).toEqual([]);

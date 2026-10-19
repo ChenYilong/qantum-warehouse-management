@@ -8,6 +8,8 @@ import { SiteFilterForm } from "@/ui/SiteFilterForm";
 import { filterSites, isFiltered, parseSiteFilters, type SiteFilters } from "@/ui/site-filters";
 import { siteChip } from "@/ui/status";
 import { markerColour, validLocation } from "@/ui/travel";
+import { buildToday, TODAY } from "@/ui/today";
+import { TodayPanel } from "@/ui/TodayPanel";
 import { TravelButton, TravelProvider, type Place } from "@/ui/TravelProvider";
 import { UnavailablePanel } from "@/ui/UnavailablePanel";
 import styles from "@/ui/primitives.module.css";
@@ -21,17 +23,24 @@ type PageProps = { searchParams: Promise<{ status?: string | string[]; q?: strin
 export default async function SitesPage({ searchParams }: PageProps) {
   const filters = parseSiteFilters(await searchParams);
   const loaded = await loadPage(() => listSites(getDependencies()));
+  const sites = loaded.status === "unavailable" ? [] : loaded.value.sites;
+  const token = mapboxPublicToken();
+  // With today's panel leading the page, the h1 stays first in main for structure but is not shown (AC 77).
   return (
     <>
       <MenuBar current="sites" />
       <main>
-        <h1>{NAV.sites}</h1>
+        <h1 className={sites.length > 0 ? styles.srOnly : undefined}>{NAV.sites}</h1>
         {loaded.status === "unavailable" ? (
           <UnavailablePanel status={{ label: SITES_UNAVAILABLE, tone: "warning", icon: "warning" }} />
-        ) : loaded.value.sites.length === 0 ? (
+        ) : sites.length === 0 ? (
           <p>{EMPTY.sites}</p>
         ) : (
-          <FilteredSites sites={loaded.value.sites} filters={filters} token={mapboxPublicToken()} />
+          <>
+            <TodayPanel today={buildToday(sites)} token={token} />
+            <h2 className={styles.allProjects}>{TODAY.allProjects}</h2>
+            <FilteredSites sites={sites} filters={filters} token={token} />
+          </>
         )}
       </main>
     </>
