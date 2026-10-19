@@ -78,6 +78,20 @@ export const MATERIALS = {
 
 export const NO_FILTER_MATCH = "No penetrations match these filters.";
 
+/** The projects list's filter (AC 72, 73). The readiness labels are qantum-stock's. */
+export const SITE_FILTER = {
+  label: "Filter projects",
+  search: "Search projects",
+  searchPlaceholder: "Name, job ref or address",
+  readiness: "Readiness",
+  options: { all: "All statuses", ready: "Ready", shortage: "Shortage", unknown: "Unknown" },
+  apply: "Apply",
+  reset: "Reset",
+  list: "Projects",
+  noMatch: "No projects match these filters.",
+  count: (shown: number, total: number) => `${shown} of ${total} ${total === 1 ? "project" : "projects"}`,
+} as const;
+
 export function filterLine(materialName: string, shown: number, total: number): string {
   return `Using ${materialName} · ${shown} of ${total}`;
 }

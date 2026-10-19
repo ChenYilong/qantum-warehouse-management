@@ -72,3 +72,15 @@ test("AC 38, AC 39: with the stock down, the materials pages say they can't chec
   await expect(appText(page, "0")).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Material" }).getByRole("link", { name: "Decisions" })).not.toContainText(/\d/);
 });
+
+test("AC 72: with stock down no project is Ready or Shortage, and Unknown shows every project", async ({ page }) => {
+  // Fail closed: a project that can't be checked is never filtered in as ready or short.
+  for (const status of ["ready", "shortage"]) {
+    await gotoApp(page, `/sites?status=${status}`);
+    await expect(page.getByText("No projects match these filters."), status).toBeVisible();
+    await expect(page.locator("[data-signal]"), status).toHaveCount(0);
+  }
+  await gotoApp(page, "/sites?status=unknown");
+  await expect(page.getByText("4 of 4 projects")).toBeVisible();
+  await expect(page.locator('[data-signal="unknown"]')).toHaveCount(4);
+});
