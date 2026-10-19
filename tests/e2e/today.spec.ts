@@ -12,9 +12,9 @@ const listCard = (page: Page, name: string) => page.getByRole("list", { name: "P
 const pins = (page: Page) => page.locator("[data-pin]");
 const pin = (page: Page, id: string) => page.locator(`[data-pin="${id}"]`);
 
-/** Each segment of the bar with its opacity: lit at 1, faded below it. */
+/** Each segment of this panel's bar with its opacity: lit at 1, faded below it. The deadline calendar has its own (AC 81). */
 async function segments(page: Page): Promise<string[]> {
-  return page.locator("[data-segment]").evaluateAll((items) => items.map((item) => `${item.getAttribute("data-segment")}:${getComputedStyle(item).opacity}`));
+  return page.locator("[data-verdict] [data-segment]").evaluateAll((items) => items.map((item) => `${item.getAttribute("data-segment")}:${getComputedStyle(item).opacity}`));
 }
 
 /** The card's look and build: every element's tag and class, and the box's own style. Ids are left out on purpose. */
@@ -83,7 +83,7 @@ test("AC 78: four tabs inside the verdict open on Crew can go, and the chosen ta
   await tab(page, "All 4").click();
   await expect.poll(() => segments(page)).toEqual(["go:1", "blocked:1", "blocked:1"]);
   // A tablist: one tab in the tab order; the arrows, Home and End move and choose, wrapping round.
-  await expect(page.locator('[role="tab"][tabindex="0"]')).toHaveCount(1);
+  await expect(page.getByRole("tablist", { name: "Projects by status" }).locator('[role="tab"][tabindex="0"]')).toHaveCount(1);
   await tab(page, "Other 1").click();
   await tab(page, "Other 1").focus();
   await page.keyboard.press("ArrowRight");
@@ -102,7 +102,7 @@ test("AC 79: the map shows only the chosen tab's pins, and under it the chosen p
   await gotoApp(page, "/sites");
   // Crew can go: Cedar Court alone, chosen.
   await expect(pins(page)).toHaveCount(1);
-  await expect(page.getByRole("button", { name: "Cedar Court, Block A, Crew can go" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("[data-projects-map]").getByRole("button", { name: "Cedar Court, Block A, Crew can go" })).toHaveAttribute("aria-pressed", "true");
   await expect(pin(page, "site-a")).toContainText("Cedar Court");
   await expect(card(page).getByRole("link", { name: "Cedar Court, Block A" }).first()).toHaveAttribute("href", "/sites/site-a");
   await expect(card(page).locator("[data-signal]")).toHaveAttribute("data-signal", "go");
