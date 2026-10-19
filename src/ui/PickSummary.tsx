@@ -8,8 +8,9 @@ import { telHref } from "./contacts";
 import { formatRecordedAt } from "./format";
 import { Icon } from "./Icon";
 import { PICKS } from "./messages";
-import { useWaitingReports } from "./PickOutboxSync";
-import { crewGate, initials, pickAmountLine, pickEmailHref, pickLineAnchor, pickLineLabel, picksPath, type PickView } from "./picks";
+import { useWaiting } from "./PickOutboxSync";
+import type { CheckedPickLine } from "@/domain";
+import { crewGate, initials, pickAmountLine, pickEmailHref, pickLineAnchor, pickLineLabel, pickReviewPath, picksPath, reportFinding, type PickView } from "./picks";
 import type { StatusView } from "./status";
 import { StatusChip } from "./StatusChip";
 import styles from "./primitives.module.css";
@@ -43,7 +44,7 @@ export function PickSummary({
   const connection = useConnection();
   const phase = connection.state;
   const saved = phase === "offline";
-  const waiting = useWaitingReports(siteId);
+  const waiting = useWaiting(siteId);
   const headingId = useId();
   const reasonId = useId();
   const savedAt = clockLabel(connection.lastOkAt ?? connection.pageLoadedAt, connection.now) ?? "unknown";
@@ -54,11 +55,11 @@ export function PickSummary({
     <section className={styles.section} aria-labelledby={headingId}>
       <h2 id={headingId}>{PICKS.heading}</h2>
       <PickStatus siteId={siteId} view={view} saved={saved} />
-      {waiting > 0 ? (
+      {waiting.reports + waiting.reviews > 0 ? (
         <p className={styles.pickWaiting}>
           <Icon name="clock" />
           <span>
-            <strong>{PICKS.waiting(waiting)}</strong>
+            <strong>{PICKS.waitingAll(waiting.reports, waiting.reviews)}</strong>
             <span className={styles.muted}>{PICKS.waitingText}</span>
           </span>
         </p>
@@ -70,15 +71,7 @@ export function PickSummary({
           <p className={styles.pickEyebrow}>{saved ? PICKS.materialsSaved(savedAt) : PICKS.materials}</p>
           <ul className={styles.pickLines}>
             {view.check.lines.map((checked) => (
-              <li key={checked.line.id}>
-                <Link className={styles.pickLine} href={`${picksPath(siteId)}#${pickLineAnchor(checked.line.id)}`}>
-                  <span className={styles.pickLineText}>
-                    <span className={styles.materialName}>{checked.line.materialName}</span>
-                    <span className={styles.muted}>{pickAmountLine(checked)}</span>
-                  </span>
-                  <StatusChip status={pickLineLabel(checked.kind, saved)} />
-                </Link>
-              </li>
+              <PickRow key={checked.line.id} siteId={siteId} checked={checked} saved={saved} />
             ))}
           </ul>
         </div>
@@ -101,6 +94,49 @@ export function PickSummary({
   );
 }
 
+/**
+ * One material, planned against picked (AC 62, 67, 70). Its name opens its card on the Pick check page; its own
+ * Review button opens the review on site, whatever the label, so a line the warehouse got "right" can still be
+ * checked. Under the label: an open report from site, or when it was last checked right on site.
+ */
+function PickRow({ siteId, checked, saved }: { siteId: string; checked: CheckedPickLine; saved: boolean }) {
+  const nameId = useId();
+  const reportedAt = useStamp(checked.openReport?.createdAt ?? null);
+  const checkedAt = useStamp(checked.checkedAt);
+  const { line } = checked;
+  return (
+    <li className={styles.pickRow}>
+      <Link className={styles.pickLine} href={`${picksPath(siteId)}#${pickLineAnchor(line.id)}`}>
+        <span className={styles.pickLineText}>
+          <span id={nameId} className={styles.materialName}>
+            {line.materialName}
+          </span>
+          <span className={styles.muted}>{pickAmountLine(checked)}</span>
+        </span>
+      </Link>
+      {checked.openReport && reportedAt ? (
+        <p className={`${styles.pickRowNote} ${styles.pickRowReported}`}>
+          <Icon name="stop" />
+          <span>{PICKS.reportedOnSite(reportedAt, reportFinding(checked.openReport))}</span>
+        </p>
+      ) : null}
+      {checked.checkedAt && checkedAt ? (
+        <p className={styles.pickRowNote}>
+          <Icon name="check" />
+          <span>{PICKS.checkedOnSite(checkedAt)}</span>
+        </p>
+      ) : null}
+      <div className={styles.pickRowActions}>
+        <StatusChip status={pickLineLabel(checked.kind, saved)} />
+        <Link className={`${styles.button} ${styles.pickReview}`} href={pickReviewPath(siteId, line.id)} aria-describedby={nameId}>
+          {PICKS.reviewButton}
+          <Icon name="chevron-right" />
+        </Link>
+      </div>
+    </li>
+  );
+}
+
 function PickStatus({ siteId, view, saved }: { siteId: string; view: PickView | null; saved: boolean }) {
   const check = view?.check;
   let status: StatusView;
@@ -118,7 +154,7 @@ function PickStatus({ siteId, view, saved }: { siteId: string; view: PickView | 
     link = { label: PICKS.offlineReview, primary: false };
   } else if (check.status === "not_ready") {
     status = { label: PICKS.notReady(check.issueCount), tone: "danger", icon: "stop" };
-    text = PICKS.notReadyText;
+    text = check.lines.some((checked) => checked.kind === "reported") ? PICKS.notReadyReportedText : PICKS.notReadyText;
     link = { label: PICKS.review, primary: true };
   } else {
     status = { label: PICKS.ready, tone: "success", icon: "check" };

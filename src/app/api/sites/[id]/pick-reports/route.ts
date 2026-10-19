@@ -17,6 +17,8 @@ export function POST(request: Request, context: { params: Promise<{ id: string }
       kind: body.kind,
       plannedQty: body.plannedQty ?? null,
       pickedQty: body.pickedQty ?? null,
+      affectedQty: body.affectedQty ?? null,
+      request: body.request ?? "repick",
       missingPart: body.missingPart ?? null,
       note: body.note ?? null,
       sendToPicker: body.sendToPicker,

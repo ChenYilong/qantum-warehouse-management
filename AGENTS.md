@@ -18,7 +18,7 @@ Project skills come from [Skill Forge](https://github.com/more-than-code/skill-f
 - `src/domain/` is pure: no Next.js, React, database driver, file system or adapter imports (lint enforces it).
 - Upstream systems (sites, nominations, stock, solution materials) sit behind ports in `src/ports/`; adapters in `src/adapters/`. The supplied catalogue CSV is loaded by an adapter into a typed map (no port).
 - Route handlers in `src/app/` stay thin: validate with Zod, call a use case, map errors to `{ code, message }`.
-- This app stores only wait, escalate and proposed-substitute actions, and pick-error reports. It never writes sites, nominations, stock, pick lists or the catalogue.
+- This app stores only wait, escalate and proposed-substitute actions, pick-error reports and reviews on site. It never writes sites, nominations, stock, pick lists or the catalogue.
 
 ## Safety rules (do not weaken)
 

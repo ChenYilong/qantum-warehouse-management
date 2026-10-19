@@ -107,13 +107,17 @@ Body `{ fromInternalCode, toInternalCode, reason }`. `from` must be the penetrat
 
 ### `POST /api/sites/{id}/pick-reports`
 
-A pick-error report to the warehouse (AC 65). `Idempotency-Key` required, like every write. Body:
+A pick-error report to the warehouse (AC 65), or what the site found on a review (AC 69). `Idempotency-Key` required, like every write. Body:
 
 ```ts
-{ kind: "wrong_spec" | "missing_parts" | "part_picked" | "other",
+{ kind: "wrong_spec" | "missing_parts" | "part_picked"           // what the pick check finds
+      | "unsuitable" | "wrong_item" | "damaged"                   // what the site finds (AC 69)
+      | "other",
   lineId: string,                 // a line of this site's pick list, else 404 pick_line_not_found
   plannedQty?: number | null,     // whole, 0 to 100000
   pickedQty?: number | null,
+  affectedQty?: number | null,    // how many the site found affected: whole, 0 to 100000; absent is none said
+  request?: "repick" | "same_day", // what the site needs; absent is a re-pick for the next delivery
   missingPart?: string,           // trimmed, at most 120 characters; empty is none
   note?: string,                  // trimmed, at most 500 characters; empty is none
   sendToPicker: boolean,
@@ -122,6 +126,18 @@ A pick-error report to the warehouse (AC 65). `Idempotency-Key` required, like e
 ```
 
 Response `{ record, created }`: 201 the first time; the same key again returns the original with 200, whatever the body says, so a phone resending its outbox after a lost answer is recorded once (AC 66). The same key for another site, line or kind is 409 `idempotency_key_reused`. The pick check itself (AC 61 to 64) has no API route: the site screens read it through the page-only use case `getPickCheck`.
+
+Any report on a line is open until a later review of that line (AC 70): the line is then a pick issue, `reported`, even when the pick list matches the plan, so the site's picks are not ready and Send the crew stays locked.
+
+### `POST /api/sites/{id}/pick-reviews`
+
+A review on site that says a line is right (AC 68). `Idempotency-Key` required. Body `{ lineId: string }` and nothing else (anything else is 422). The line must be on this site's pick list, else 404 `pick_line_not_found`; an unknown site is 404 `site_not_found`.
+
+```ts
+{ record: { id, siteId, lineId, createdBy, createdAt }, created: boolean }
+```
+
+201 the first time; the same key again returns the original with 200; the same key for another site or line is 409 `idempotency_key_reused`. A review closes the line's reports made before it (strictly earlier, by `createdAt`) and the line then reads "Checked on site". It never turns a line that doesn't match the plan into a match, and it never changes the pick list, which this app does not write.
 
 ### `GET .../actions`
 

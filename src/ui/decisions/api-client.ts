@@ -48,6 +48,10 @@ export function substitutionUrl(siteId: string, penetrationId: string): string {
   return `/api/sites/${encodeURIComponent(siteId)}/penetrations/${encodeURIComponent(penetrationId)}/substitutions`;
 }
 
+export function pickReviewUrl(siteId: string): string {
+  return `/api/sites/${encodeURIComponent(siteId)}/pick-reviews`;
+}
+
 export function pickReportUrl(siteId: string): string {
   return `/api/sites/${encodeURIComponent(siteId)}/pick-reports`;
 }

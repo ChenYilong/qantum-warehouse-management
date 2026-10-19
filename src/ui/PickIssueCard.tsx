@@ -1,8 +1,9 @@
+import Link from "next/link";
 import type { CheckedPickLine } from "@/domain";
-import { formatUnit } from "./format";
+import { formatRecordedAt, formatUnit } from "./format";
 import { Icon } from "./Icon";
 import { PICKS } from "./messages";
-import { pickCardTitle, pickLineAnchor } from "./picks";
+import { pickCardTitle, pickLineAnchor, pickReviewPath, reportFinding } from "./picks";
 import styles from "./primitives.module.css";
 
 function shortfall(planned: number, picked: number): number | null {
@@ -24,6 +25,9 @@ function explanation(checked: CheckedPickLine): string {
       const unit = short === null ? "" : formatUnit(short, line.unit);
       return `${short ?? "Some"}${unit ? ` ${unit}` : ""} short${where}${parts ? `, and no ${parts} to go with them` : ""}.`;
     }
+    case "reported":
+      // A reported line has its report: the explanation is the report line below.
+      return "The pick list matches the plan, but the site found a problem with what arrived.";
     default:
       return "The warehouse sent numbers or a spec the app can't trust. Treat this line as not picked.";
   }
@@ -44,8 +48,11 @@ function PartRow({ name, picked, planned }: { name: string; picked: number; plan
   );
 }
 
-/** One pick issue on the Pick check page (AC 64): what is wrong, planned against picked, and why it matters. */
-export function PickIssueCard({ checked, index }: { checked: CheckedPickLine; index: number }) {
+/**
+ * One pick issue on the Pick check page (AC 64, 70): what is wrong, planned against picked, why it matters, any report
+ * from site still open, and Review, to check the line again on site once a re-pick arrives.
+ */
+export function PickIssueCard({ siteId, checked, index }: { siteId: string; checked: CheckedPickLine; index: number }) {
   const { line } = checked;
   const titleId = `${pickLineAnchor(line.id)}-title`;
   const progress = Number.isFinite(line.pickedQty) && Number.isFinite(line.plannedQty) && line.plannedQty > 0 ? Math.min(100, Math.round((line.pickedQty / line.plannedQty) * 100)) : 0;
@@ -94,6 +101,16 @@ export function PickIssueCard({ checked, index }: { checked: CheckedPickLine; in
         </ul>
       ) : null}
       <p>{explanation(checked)}</p>
+      {checked.openReport ? (
+        <p className={`${styles.pickRowNote} ${styles.pickRowReported}`}>
+          <Icon name="stop" />
+          <span>{PICKS.reportedCard(formatRecordedAt(checked.openReport.createdAt), reportFinding(checked.openReport))}</span>
+        </p>
+      ) : null}
+      <Link className={`${styles.button} ${styles.pickReview} ${styles.fullWidth}`} href={pickReviewPath(siteId, line.id)} aria-describedby={titleId}>
+        {PICKS.reviewButton}
+        <Icon name="chevron-right" />
+      </Link>
     </article>
   );
 }

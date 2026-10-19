@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { useConnection } from "./ConnectionBar";
-import { announce, pickReportUrl, postDecision } from "./decisions/api-client";
+import { announce, postDecision } from "./decisions/api-client";
 import { PICKS } from "./messages";
-import { afterSend, OUTBOX_CHANGED, readOutbox, removeFromOutbox, waitingFor } from "./pick-outbox";
+import { afterSend, OUTBOX_CHANGED, outboxUrl, readOutbox, removeFromOutbox, waitingCounts } from "./pick-outbox";
 
 function browserStorage(): Storage | null {
   try {
@@ -27,22 +27,31 @@ function subscribe(onChange: () => void): () => void {
   };
 }
 
-/** How many pick reports for this site wait on this phone (AC 66). None on the server. */
-export function useWaitingReports(siteId: string): number {
-  return useSyncExternalStore(
+const NONE_WAITING = "0:0";
+
+/**
+ * How many reports and reviews for this site wait on this phone (AC 66, 71). None on the server. Read as one string
+ * so the store hands React the same value until something changes.
+ */
+export function useWaiting(siteId: string): { readonly reports: number; readonly reviews: number } {
+  const counted = useSyncExternalStore(
     subscribe,
     () => {
       const storage = browserStorage();
-      return storage ? waitingFor(readOutbox(storage), siteId) : 0;
+      if (!storage) return NONE_WAITING;
+      const { reports, reviews } = waitingCounts(readOutbox(storage), siteId);
+      return `${reports}:${reviews}`;
     },
-    () => 0,
+    () => NONE_WAITING,
   );
+  const [reports, reviews] = counted.split(":").map(Number);
+  return { reports: reports ?? 0, reviews: reviews ?? 0 };
 }
 
 /**
- * Sends the pick reports waiting on this phone once it is online (AC 66), oldest first, each with the key it was
- * saved with, so a resend after a lost answer is recorded once. Stops at the first one that still can't get
- * through and tries again at the next connection check. Renders nothing.
+ * Sends the pick reports and reviews waiting on this phone once it is online (AC 66, 71), oldest first, each with the
+ * key it was saved with, so a resend after a lost answer is recorded once. Stops at the first one that still can't
+ * get through and tries again at the next connection check. Renders nothing.
  */
 export function PickOutboxSync() {
   const connection = useConnection();
@@ -57,16 +66,18 @@ export function PickOutboxSync() {
     if (entries.length === 0) return;
     sending.current = true;
     void (async () => {
-      let sent = 0;
+      let reports = 0;
+      let reviews = 0;
       for (const entry of entries) {
-        const next = afterSend(await postDecision(pickReportUrl(entry.siteId), entry.key, entry.body));
+        const next = afterSend(await postDecision(outboxUrl(entry), entry.key, entry.body));
         if (next === "keep") break;
         removeFromOutbox(storage, entry.key);
-        if (next === "sent") sent += 1;
+        if (next === "sent" && entry.type === "review") reviews += 1;
+        else if (next === "sent") reports += 1;
       }
       sending.current = false;
       notifyOutbox();
-      if (sent > 0) announce(PICKS.outboxSent(sent));
+      if (reports > 0 || reviews > 0) announce(PICKS.outboxSentAll(reports, reviews));
     })();
   }, [state, lastOkAt]);
 
