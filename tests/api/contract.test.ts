@@ -3,12 +3,14 @@ import { loadCatalogueFromCsv } from "@/adapters/catalogue-csv";
 import {
   IdSchema,
   NominationsFileSchema,
+  PicksFileSchema,
   SitesFileSchema,
   SolutionMaterialsFileSchema,
   StockBalanceSchema,
   StockFileSchema,
 } from "@/ports";
 import nominationsFile from "../../data/sample/nominations.json";
+import picksFile from "../../data/sample/picks.json";
 import sitesFile from "../../data/sample/sites.json";
 import solutionMaterialsFile from "../../data/sample/solution-materials.json";
 import stockFile from "../../data/sample/stock.json";
@@ -40,6 +42,15 @@ describe("upstream contract", () => {
       }
     }
     expect(missingCode).toBe(1);
+
+    // The pick lists (AC 61) belong to known sites, and every line and part id is unique within its site.
+    const picks = PicksFileSchema.parse(picksFile);
+    for (const [siteId, list] of Object.entries(picks.bySite)) {
+      expect(sites.sites.map((site) => site.id)).toContain(siteId);
+      const ids = list.lines.flatMap((line) => [line.id, ...line.requiredParts.map((part) => part.id)]);
+      expect(new Set(ids).size).toBe(ids.length);
+    }
+    expect((picksFile as { label?: string }).label).toMatch(/^INVENTED SAMPLE DATA/);
 
     for (const material of materials.materials) expect(material.id).not.toContain(":");
     for (const item of materials.items) expect(materialIds.has(item.materialId)).toBe(true);

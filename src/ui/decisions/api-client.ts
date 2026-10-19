@@ -48,6 +48,10 @@ export function substitutionUrl(siteId: string, penetrationId: string): string {
   return `/api/sites/${encodeURIComponent(siteId)}/penetrations/${encodeURIComponent(penetrationId)}/substitutions`;
 }
 
+export function pickReportUrl(siteId: string): string {
+  return `/api/sites/${encodeURIComponent(siteId)}/pick-reports`;
+}
+
 export async function postDecision(url: string, key: string, body: unknown): Promise<DecisionResult> {
   let response: Response;
   try {

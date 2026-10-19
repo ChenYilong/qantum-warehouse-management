@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { poolConfig } from "@/adapters/postgres/connection";
 import { createPgActionsStore } from "@/adapters/postgres/pg-store";
 import { createActionsRepository } from "@/adapters/postgres/repository";
-import type { ActionsRepository, NewShortageAction, NewSubstitutionProposal } from "@/ports";
+import type { ActionsRepository, NewPickReport, NewShortageAction, NewSubstitutionProposal } from "@/ports";
 
 const adminUrl = process.env.TEST_DB_ADMIN_URL;
 const required = process.env.REQUIRE_DB_CONTRACT === "1";
@@ -36,7 +36,7 @@ if (!adminUrl) {
       try {
         await runSetup(admin, database, appPassword);
         const first = migrate(admin, database);
-        expect(visible(first.stdout, secrets)).toContain(`applied 0001_actions host ${admin.host} database ${database}`);
+        expect(visible(first.stdout, secrets)).toContain(`applied 0001_actions 0002_pick_reports host ${admin.host} database ${database}`);
         expect(visible(`${first.stdout}\n${first.stderr}`, secrets)).not.toContain("[redacted]");
         const second = migrate(admin, database);
         expect(visible(second.stdout, secrets)).toContain(`applied (none) host ${admin.host} database ${database}`);
@@ -163,6 +163,45 @@ if (!adminUrl) {
       );
     });
 
+    it("AC 65, AC 66: appends a pick report, replays the same key as one row, and lists a site's reports newest first", async () => {
+      const actions = repository();
+      const siteId = id("site");
+      const input = reportInput(siteId);
+      const first = await actions.appendPickReport(input);
+      const resend = await actions.appendPickReport({ ...input, note: "resent from the outbox" });
+      await delay(30);
+      const later = await actions.appendPickReport(reportInput(siteId, { idempotencyKey: `${siteId}-later`, kind: "other", plannedQty: null, pickedQty: null }));
+      expect(first.created).toBe(true);
+      expect(first.record).toMatchObject({
+        siteId,
+        lineId: "b-sealant",
+        kind: "part_picked",
+        plannedQty: 10,
+        pickedQty: 6,
+        missingPart: "Nozzle × 1",
+        note: "Crew goes Thursday",
+        sendToPicker: true,
+        sendToPurchasing: true,
+        photoAttached: false,
+        createdBy: "demo-leader",
+      });
+      expect(resend).toEqual({ record: first.record, created: false });
+      expect((await actions.listPickReports(siteId)).map((row) => row.id)).toEqual([later.record.id, first.record.id]);
+      expect(await actions.findPickReportByKey("demo-leader", input.idempotencyKey)).toEqual(first.record);
+    });
+
+    it("AC 65: the pick report table refuses an unknown kind, a negative amount, a long note and a report to no one", async () => {
+      const siteId = id("site");
+      const insert = `insert into public.pick_report (site_id, line_id, kind, planned_qty, note, send_to_picker, send_to_purchasing, created_by, idempotency_key)
+        values ($1, 'line', $2, $3, $4, $5, $6, 'demo-leader', $7)`;
+      await expectState(insert, [siteId, "approved", 1, null, true, false, `${siteId}-kind`], "23514");
+      await expectState(insert, [siteId, "other", -1, null, true, false, `${siteId}-qty`], "23514");
+      await expectState(insert, [siteId, "other", 1, "n".repeat(501), true, false, `${siteId}-note`], "23514");
+      await expectState(insert, [siteId, "other", 1, null, false, false, `${siteId}-nobody`], "23514");
+      await expectState("update public.pick_report set note = 'changed'", [], "42501");
+      await expectState("delete from public.pick_report", [], "42501");
+    });
+
     it("refuses update, delete, truncate, and create table for the app role", async () => {
       const siteId = id("site");
       await repository().appendShortageAction(actionInput(siteId, { idempotencyKey: `${siteId}-priv` }));
@@ -183,7 +222,25 @@ if (!adminUrl) {
     return pool;
   }
 
-  async function expectState(text: string, values: readonly (string | number | null)[], code: string): Promise<void> {
+  function reportInput(siteId: string, overrides: Partial<NewPickReport> = {}): NewPickReport {
+    return {
+      siteId,
+      lineId: "b-sealant",
+      kind: "part_picked",
+      plannedQty: 10,
+      pickedQty: 6,
+      missingPart: "Nozzle × 1",
+      note: "Crew goes Thursday",
+      sendToPicker: true,
+      sendToPurchasing: true,
+      photoAttached: false,
+      createdBy: "demo-leader",
+      idempotencyKey: `${siteId}-report`,
+      ...overrides,
+    };
+  }
+
+  async function expectState(text: string, values: readonly (string | number | boolean | null)[], code: string): Promise<void> {
     let caught: unknown;
     try {
       await queryPool().query(text, [...values]);

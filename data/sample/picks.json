@@ -1,0 +1,122 @@
+{
+  "label": "INVENTED SAMPLE DATA. Stands in for the warehouse pick system's pick lists.",
+  "bySite": {
+    "site-a": {
+      "picker": "Sam Lee",
+      "lastAction": "Marked picked",
+      "lastActionAt": "2026-10-03T07:10:00Z",
+      "lines": [
+        {
+          "id": "a-sealant",
+          "materialName": "Intumescent sealant, 310 ml cartridge",
+          "unit": "cartridge",
+          "usedAt": "L1 and L2 · 3 openings",
+          "plannedQty": 2,
+          "pickedQty": 2,
+          "plannedSpec": null,
+          "pickedSpec": null,
+          "requiredParts": [{ "id": "a-nozzle", "name": "Applicator gun nozzle", "plannedQty": 1, "pickedQty": 1 }],
+          "warehouseStatus": "picked"
+        },
+        {
+          "id": "a-collar",
+          "materialName": "Pipe collar for 25 mm pipe",
+          "unit": "each",
+          "usedAt": "L2, Corridor north · 4 openings",
+          "plannedQty": 4,
+          "pickedQty": 4,
+          "plannedSpec": null,
+          "pickedSpec": null,
+          "requiredParts": [{ "id": "a-kit", "name": "Fixing kit (anchors and screws)", "plannedQty": 4, "pickedQty": 4 }],
+          "warehouseStatus": "picked"
+        }
+      ]
+    },
+    "site-b": {
+      "picker": "Sam Lee",
+      "lastAction": "Marked picked",
+      "lastActionAt": "2026-10-03T07:40:00Z",
+      "lines": [
+        {
+          "id": "b-sealant",
+          "materialName": "Intumescent sealant, 310 ml cartridge",
+          "unit": "cartridge",
+          "usedAt": "L3 to L5 · 12 openings",
+          "plannedQty": 10,
+          "pickedQty": 6,
+          "plannedSpec": null,
+          "pickedSpec": null,
+          "requiredParts": [{ "id": "b-nozzle", "name": "Applicator gun nozzle", "plannedQty": 1, "pickedQty": 0 }],
+          "warehouseStatus": "picked"
+        },
+        {
+          "id": "b-collar",
+          "materialName": "Pipe collar for 25 mm pipe",
+          "unit": "each",
+          "usedAt": "L3, Riser 2 · 6 openings",
+          "plannedQty": 6,
+          "pickedQty": 6,
+          "plannedSpec": null,
+          "pickedSpec": null,
+          "requiredParts": [{ "id": "b-kit", "name": "Fixing kit (anchors and screws)", "plannedQty": 6, "pickedQty": 0 }],
+          "warehouseStatus": "picked"
+        },
+        {
+          "id": "b-batt",
+          "materialName": "Mineral wool batt",
+          "unit": "each",
+          "usedAt": "L3, Riser 2 · 4 openings",
+          "plannedQty": 4,
+          "pickedQty": 4,
+          "plannedSpec": "FRR −/120/120",
+          "pickedSpec": "FRR −/60/60",
+          "requiredParts": [],
+          "warehouseStatus": "picked"
+        },
+        {
+          "id": "b-wrap",
+          "materialName": "Intumescent wrap strip",
+          "unit": "metre",
+          "usedAt": "L4 · 2 openings",
+          "plannedQty": 2,
+          "pickedQty": 2,
+          "plannedSpec": null,
+          "pickedSpec": null,
+          "requiredParts": [],
+          "warehouseStatus": "picked"
+        }
+      ]
+    },
+    "site-c": {
+      "picker": "Tama Rewi",
+      "lastAction": "Marked picked",
+      "lastActionAt": "2026-10-03T06:55:00Z",
+      "lines": [
+        {
+          "id": "c-mastic",
+          "materialName": "Fire mastic tube",
+          "unit": "tube",
+          "usedAt": "B1 · 1 opening",
+          "plannedQty": 1,
+          "pickedQty": 1,
+          "plannedSpec": null,
+          "pickedSpec": null,
+          "requiredParts": [],
+          "warehouseStatus": "picked"
+        },
+        {
+          "id": "c-collar",
+          "materialName": "Pipe collar for 32 mm pipe",
+          "unit": "each",
+          "usedAt": "G and L1 · 2 openings",
+          "plannedQty": 2,
+          "pickedQty": 2,
+          "plannedSpec": null,
+          "pickedSpec": null,
+          "requiredParts": [{ "id": "c-kit", "name": "Fixing kit (anchors and screws)", "plannedQty": 2, "pickedQty": 2 }],
+          "warehouseStatus": "picked"
+        }
+      ]
+    }
+  }
+}
