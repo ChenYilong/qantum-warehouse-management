@@ -41,7 +41,6 @@ describe("kind icons", () => {
       ["src/ui/TabBar.tsx", 'kind: "about"'],
       ["src/app/sites/[id]/penetrations/[pid]/page.tsx", 'kind="solution"'],
       ["src/ui/PenetrationGroups.tsx", 'kind="penetration"'],
-      ["src/ui/NavContent.tsx", 'kind="about"'],
     ];
     for (const [file, use] of uses) expect(readFileSync(file, "utf8"), `${file} ${use}`).toContain(use);
   });

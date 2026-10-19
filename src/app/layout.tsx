@@ -1,11 +1,10 @@
 import { Suspense, type ReactNode } from "react";
 import { Announcer } from "@/ui/Announcer";
-import { ConnectionBar, OfflineBanner } from "@/ui/ConnectionBar";
+import { OfflineBanner } from "@/ui/ConnectionBar";
+import { HEAD_SCRIPT } from "@/ui/head-script";
 import { NavHistory } from "@/ui/NavHistory";
-import { SideMenu } from "@/ui/SideMenu";
 import { LoginGate } from "@/ui/LoginGate";
 import { PickOutboxSync } from "@/ui/PickOutboxSync";
-import { HEAD_SCRIPT } from "@/ui/sidebar";
 import styles from "@/ui/primitives.module.css";
 import "./globals.css";
 
@@ -19,7 +18,7 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    // The head script stamps a remembered theme and sidebar on <html> before React hydrates, hence the warning
+    // The head script stamps a remembered theme and the sign-in on <html> before React hydrates, hence the warning
     // opt-out. It is a plain inline script on purpose: next/script's beforeInteractive queues inline code until
     // Next's runtime loads, which would flash light first. React's dev build logs "Encountered a script tag";
     // production does not.
@@ -33,10 +32,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <NavHistory />
         </Suspense>
         <div className={styles.appShell} data-app-shell="">
-          <SideMenu />
           <div className={styles.appContent}>
-            {/* Above every screen's own header: the picker's last action and the Online switch (AC 48). */}
-            <ConnectionBar />
+            {/* Every screen's own header holds the Online switch (AC 48); the tab bar is the menu at every width (AC 47). */}
             {children}
             <OfflineBanner />
           </div>

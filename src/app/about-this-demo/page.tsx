@@ -3,10 +3,11 @@ import { MenuBar } from "@/ui/AppBar";
 import { ACTIONS_PATH, MATERIALS_PATH, penetrationPath, sitePath } from "@/ui/format";
 import { NAV } from "@/ui/messages";
 import { SignOutButton } from "@/ui/SignOutButton";
+import { ThemeSwitch } from "@/ui/ThemeSwitch";
 
 export const metadata = { title: NAV.about };
 
-/** The guide: Sign out, what the tool is for, what is real in the demo, how to move around, then a short tour. */
+/** The guide: Sign out, what the tool is for, what is real in the demo, how to move around, a short tour, then the theme on this device. */
 export default function LandingPage() {
   return (
     <>
@@ -39,8 +40,8 @@ export default function LandingPage() {
             <li>
               <p>
                 Switch between <Link href="/sites">{NAV.sites}</Link>, <Link href={MATERIALS_PATH}>{NAV.materials}</Link>,{" "}
-                <Link href={ACTIONS_PATH}>{NAV.actions}</Link> and this guide from the bar at the bottom of a phone screen, or
-                the menu at the side of a larger one.
+                <Link href={ACTIONS_PATH}>{NAV.actions}</Link> and this guide from the bar at the bottom of the screen. The
+                switch at the top right says whether this phone is online; turn it off to work offline.
               </p>
             </li>
             <li>Deeper pages open with a back link that says where it leads: the page you arrived from, or else the one above it.</li>
@@ -79,6 +80,11 @@ export default function LandingPage() {
               </p>
             </li>
           </ol>
+        </section>
+        {/* The theme choice (AC 37): kept here, since the header holds the Online switch now. */}
+        <section aria-labelledby="device-heading">
+          <h2 id="device-heading">On this device</h2>
+          <ThemeSwitch />
         </section>
       </main>
     </>
