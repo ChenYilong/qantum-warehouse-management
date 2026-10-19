@@ -329,3 +329,21 @@ Not built, with reasons:
 | The warehouse closing the report | The warehouse's systems are read-only here, and only the site can see that the new delivery is right |
 | The big site signal turning red on a report | The signal reads stock (AC 52 to 57) on the list and the site screen alike; the pick gate is Send the crew. Folding picks into the signal needs a pick read per site on the sites list: a next step |
 | A photo sent with the report | There is no upload service; as in AC 65, the photo stays on the phone |
+
+## 13. Projects filter (2026-10-19)
+
+From the author: learn the readiness filter of qantum-stock's work-package list ("Search Work Packages", "Readiness" with All statuses, Ready, Shortage and Unknown, Apply, Reset) and put it at the top of the projects list. Requirements are FR29 and AC 72 and 73.
+
+| Topic | As built |
+| --- | --- |
+| The form | Under the "Projects" heading, in a card on the page surface: "Search projects" (placeholder "Name, job ref or address", at most 100 characters), "Readiness" (All statuses, Ready, Shortage, Unknown, qantum-stock's labels), then Apply (the primary button) and Reset. Stacked on a phone; from 672px the search and Readiness sit side by side with the buttons on the right under them. Every control is 48px |
+| What each choice shows | Ready: the projects whose crew can go (green signal). Shortage: the blocked ones (red). Unknown: nothing planned (grey) and can't check (amber). All statuses: every project. A project that can't be checked is never under Ready or Shortage, and a status the app doesn't know counts as Unknown |
+| URL | A GET form: `/sites?q=quay&status=shortage`, so it works without JavaScript, the browser's back button undoes a filter, and a filtered list can be sent to someone. A missing, unknown or repeated status is All statuses. Reset goes to `/sites` |
+| Result | With a filter on, a line under the form says "2 of 4 projects"; when nothing matches it says "No projects match these filters." in place of the list. The list itself is named "Projects" for screen readers |
+
+Not built, with reasons:
+
+| Idea | Why not now |
+| --- | --- |
+| Search by solution code or service, as qantum-stock does | The projects list does not read nominations; adding their codes to `GET /api/sites` would widen that call for a list of four. The site screen already filters its penetrations |
+| Applying on change, without the Apply button | qantum-stock's pattern is Apply and Reset, and an explicit button avoids reloading the list on every turn of a gloved finger |
