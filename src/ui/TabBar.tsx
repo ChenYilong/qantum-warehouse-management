@@ -8,9 +8,8 @@ import styles from "./primitives.module.css";
 const TABS = [...NAV_ITEMS, { section: "about", href: ABOUT_PATH, label: NAV.about, kind: "about" } as const];
 
 /**
- * The top-level pages' menu below 1024px (AC 37): the same entries as the side menu, as a tab bar fixed to the
- * foot of the screen. Only top-level pages render it, so it is gone on inner screens. From 1024px the side menu
- * replaces it.
+ * The top-level pages' menu at every width (AC 37, AC 47): a tab bar fixed to the foot of the screen, its entries
+ * in the page's column on a wide screen. Only top-level pages render it, so it is gone on inner screens.
  */
 export function TabBar({ current }: { current: NavSection }) {
   return (

@@ -14,7 +14,7 @@ function subscribe(onChange: () => void): () => void {
 
 /** System, Light or Dark, as one radio group. The server renders System; the browser then shows the stamped choice. */
 export function ThemeSwitch() {
-  // The top-level header and the side menu each render one; a shared name would make all six radios one group.
+  // A name per instance, so a second switch on a page would never join this group.
   const name = useId();
   const current = useSyncExternalStore(
     subscribe,

@@ -161,8 +161,8 @@ export interface Connection extends Facts {
 }
 
 /**
- * The connection (AC 48), for the bar and for anything that sends. Online needs the browser's network flag, a
- * health check that answered, and the person not having switched Online off. Checks every 30 seconds, when
+ * The connection (AC 48), for the header's switch and for anything that sends. Online needs the browser's network
+ * flag, a health check that answered, and the person not having switched Online off. Checks every 30 seconds, when
  * the network returns and when the tab is shown again.
  */
 export function useConnection(): Connection {
@@ -207,42 +207,46 @@ export function useConnection(): Connection {
 }
 
 /**
- * The slim bar above every screen (G1): the picker's last action on the left, the Online switch on the right.
- * Off reads "Offline" with when this phone last heard from the server. The switch is real: off means "work
- * offline", so decisions are not sent until it is on again.
+ * The Online switch in every screen's header (AC 48, AC 58), where the theme choice used to be. The header stays at
+ * the top while the page scrolls, so the connection is always in sight. Off reads "Offline" with when this phone
+ * last heard from the server. The switch is real: off means "work offline", so decisions are not sent until it is
+ * on again.
  */
-export function ConnectionBar() {
+export function ConnectionSwitch() {
   const connection = useConnection();
   const descriptionId = useId();
   const { state, lastOkAt, now, workOffline } = connection;
   const on = state === "online";
   const label = state === "checking" ? CONNECTION.checking : on ? CONNECTION.online : CONNECTION.offline;
   return (
-    <div className={styles.connectionBar} data-connection={state}>
-      <p className={styles.connectionPicker}>{pickerLine(connection.stockAsOf, now)}</p>
-      <div className={styles.connectionStatus}>
-        <span className={styles.connectionText} aria-hidden="true">
-          <span className={styles.connectionLabel}>{label}</span>
-          {state === "offline" ? <span className={styles.connectionUpdated}>{updatedLine(lastOkAt, now)}</span> : null}
-        </span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={on}
-          aria-label={CONNECTION.online}
-          aria-describedby={descriptionId}
-          className={styles.connectionSwitch}
-          disabled={state === "checking"}
-          onClick={() => void connection.setOnline(!on)}
-        >
-          <span className={styles.connectionKnob} />
-        </button>
-        <span id={descriptionId} className={styles.srOnly}>
-          {connectionDescription(state, lastOkAt, now, workOffline)}
-        </span>
-      </div>
+    <div className={styles.connectionControl} data-connection={state}>
+      <span className={styles.connectionText} aria-hidden="true">
+        <span className={styles.connectionLabel}>{label}</span>
+        {state === "offline" ? <span className={styles.connectionUpdated}>{updatedLine(lastOkAt, now)}</span> : null}
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label={CONNECTION.online}
+        aria-describedby={descriptionId}
+        className={styles.connectionSwitch}
+        disabled={state === "checking"}
+        onClick={() => void connection.setOnline(!on)}
+      >
+        <span className={styles.connectionKnob} />
+      </button>
+      <span id={descriptionId} className={styles.srOnly}>
+        {connectionDescription(state, lastOkAt, now, workOffline)}
+      </span>
     </div>
   );
+}
+
+/** The picker's last action (AC 48): the first line under the header. It scrolls with the page; the switch does not. */
+export function PickerLine() {
+  const connection = useConnection();
+  return <p className={styles.pickerLine}>{pickerLine(connection.stockAsOf, connection.now)}</p>;
 }
 
 /**

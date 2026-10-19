@@ -10,7 +10,7 @@ async function colours(locator: Locator): Promise<{ background: string; color: s
   });
 }
 
-test("AC 58: the connection row is green with dark text online and red with white text offline", async ({ page }) => {
+test("AC 58: the header's Online control is green with dark text online and red with white text offline", async ({ page }) => {
   await gotoApp(page, "/about-this-demo");
   const bar = page.locator("[data-connection]");
   await expect(bar).toHaveAttribute("data-connection", "online");

@@ -12,7 +12,30 @@ async function messageOf(link: Locator): Promise<string> {
   return decodeURIComponent(href.split("body=")[1] ?? "");
 }
 
-test("AC 48: the connection bar shows Online, and working offline sends nothing until Sync now", async ({ page }) => {
+test("AC 48: the header's Online switch stays at the top while the page scrolls, with the picker's last action under it", async ({ page }) => {
+  await gotoApp(page, "/sites/site-b");
+  const header = page.getByRole("banner");
+  const online = header.getByRole("switch", { name: "Online" });
+  await expect(online).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("switch", { name: "Online" })).toHaveCount(1);
+  // The picker's last action is the first line under the header.
+  const headerBox = await header.boundingBox();
+  const pickerBox = await page.getByText(/^Picker last action · /).boundingBox();
+  expect(Math.round(pickerBox?.y ?? -1)).toBeGreaterThanOrEqual(Math.round((headerBox?.y ?? 0) + (headerBox?.height ?? 0)) - 1);
+  // Scrolled to the end of a long page, the switch is still in the header at the top of the screen.
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
+  const box = await online.boundingBox();
+  expect(box?.y ?? -1).toBeGreaterThanOrEqual(0);
+  expect((box?.y ?? 99) + (box?.height ?? 0)).toBeLessThanOrEqual(56);
+  // On every kind of screen: a top-level page, an inner page and the error page have the same switch in the header.
+  for (const path of ["/sites", "/sites/site-b/penetrations/pen-b-01", "/materials", "/about-this-demo"]) {
+    await gotoApp(page, path);
+    await expect(page.getByRole("banner").getByRole("switch", { name: "Online" }), path).toBeVisible();
+  }
+});
+
+test("AC 48: the header's switch shows Online, and working offline sends nothing until Sync now", async ({ page }) => {
   // Read-only: the one decision tried while offline is never sent, and the route is blocked as well to be sure.
   const sent: string[] = [];
   page.on("request", (request) => {

@@ -102,11 +102,14 @@ test("AC 38: the materials list shows each planned material against the shared s
   await expect(page.getByRole("link", { name: "Back to Inventory" })).toBeVisible();
 });
 
-test("AC 37: the header's theme choice pins light or dark, is remembered on this device, and System follows the device", async ({ page }) => {
+test("AC 37: the Guide's theme choice pins light or dark, is remembered on this device, and System follows the device", async ({ page }) => {
   const background = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   await page.emulateMedia({ colorScheme: "light" });
+  // The header no longer holds it: the Online switch has that place (AC 48).
   await gotoApp(page, "/sites");
-  const theme = page.getByRole("banner").getByRole("group", { name: "Theme" });
+  await expect(page.getByRole("group", { name: "Theme" })).toHaveCount(0);
+  await gotoApp(page, "/about-this-demo");
+  const theme = page.getByRole("main").getByRole("group", { name: "Theme" });
   await expect(theme.getByRole("radio", { name: "System" })).toBeChecked();
 
   await theme.getByRole("radio", { name: "Dark" }).click();

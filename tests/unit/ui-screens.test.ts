@@ -93,12 +93,18 @@ describe("navigation shell", () => {
     for (const file of SCREEN_SOURCES) {
       const source = readFileSync(file, "utf8");
       // AC 37: the back control or the tab bar, never both. The landing page, Sites,
-      // Materials and the Actions log carry the tab bar (through MenuBar); inner screens a back control; the error screens have no header.
+      // Materials and the Actions log carry the tab bar (through MenuBar); inner screens a back control; the error
+      // screen a header with the Online switch only (AC 48); the global error screen replaces the layout and has none.
       const menu = ["src/app/about-this-demo/page.tsx", "src/app/sites/page.tsx", "src/app/materials/page.tsx", "src/app/actions/page.tsx"];
-      const noHeader = ["src/app/error.tsx", "src/app/global-error.tsx"];
+      const statusOnly = ["src/app/error.tsx"];
+      const noHeader = ["src/app/global-error.tsx"];
       if (menu.includes(file)) {
         expect(source, file).toMatch(/<MenuBar current="(sites|materials|actions|about)" \/>/);
         expect(source, file).not.toContain("<AppBar");
+      } else if (statusOnly.includes(file)) {
+        expect(source, file).toContain("<StatusBar />");
+        expect(source, file).not.toContain("<AppBar");
+        expect(source, file).not.toContain("<MenuBar");
       } else if (noHeader.includes(file)) {
         expect(source, file).not.toContain("<AppBar");
         expect(source, file).not.toContain("<MenuBar");
@@ -114,19 +120,24 @@ describe("navigation shell", () => {
     }
   });
 
-  it("AC 47: the root layout renders the side menu beside every page", () => {
+  it("AC 47, AC 48: no side menu; every header holds the Online switch, and the tab bar is the menu at every width", () => {
     const layout = readFileSync("src/app/layout.tsx", "utf8");
-    expect(layout).toContain("<SideMenu");
+    expect(layout).not.toContain("SideMenu");
+    expect(layout).not.toContain("ConnectionBar ");
     expect(layout).not.toMatch(/<header\b/);
-    const menu = readFileSync("src/ui/SideMenu.tsx", "utf8");
-    expect(menu).toContain("<aside");
-    expect(menu).toContain("navSectionForPath");
+    expect(existsSync("src/ui/SideMenu.tsx")).toBe(false);
     const bar = readFileSync("src/ui/AppBar.tsx", "utf8");
-    expect(bar).toContain("data-menu-bar");
+    // AppBar, MenuBar and StatusBar each put the switch in their header, and the picker's line under it.
+    expect(bar.match(/<ConnectionSwitch \/>/g)).toHaveLength(3);
+    expect(bar.match(/<PickerLine \/>/g)).toHaveLength(3);
+    expect(bar).not.toContain("ThemeSwitch");
     expect(bar).toContain("<TabBar current={current} />");
     const primitives = readFileSync("src/ui/primitives.module.css", "utf8");
-    expect(primitives).toContain("grid-template-columns 150ms");
-    expect(primitives).toContain(':global(:root[data-sidebar="collapsed"])');
+    expect(primitives).not.toContain("data-sidebar");
+    expect(primitives).not.toMatch(/\.sideMenu\b/);
+    expect(primitives).not.toMatch(/@media \(min-width: 1024px\)\s*\{\s*\.menuBar/);
+    // The theme choice lives on the Guide (AC 37).
+    expect(readFileSync("src/app/about-this-demo/page.tsx", "utf8")).toContain("<ThemeSwitch />");
   });
 
   it("the root layout has no demo footer and no header, and no screen carries a Demo tag (user decision)", () => {

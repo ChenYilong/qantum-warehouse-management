@@ -48,7 +48,7 @@
   --shadow: 0 8px 24px rgb(18 19 22 / 18%);
   --space: 1rem;
   --radius: 8px;
-  /* The company's colours: black and yellow. The chrome (connection bar, headers, tab bar, side menu) is black
+  /* The company's colours: black and yellow. The chrome (the headers and the tab bar) is black
      in both themes, with the yellow marking what is current and where focus is. */
   --brand-black: #000000;
   --brand-yellow: #fed105;
@@ -248,21 +248,12 @@ a {
   }
 }
 
-/* Below 1024px a top-level page's tab bar is fixed to the foot, so the page keeps room for it. */
-@media (max-width: 1023.98px) {
-  :root:has([data-tab-bar]) {
-    --tab-bar-space: calc(var(--tab-bar-height) + 1px + env(safe-area-inset-bottom));
-  }
-
-  body:has([data-tab-bar]) {
-    box-sizing: border-box;
-    padding-bottom: var(--tab-bar-space);
-  }
+/* A top-level page's tab bar is fixed to the foot at every width (AC 37, AC 47), so the page keeps room for it. */
+:root:has([data-tab-bar]) {
+  --tab-bar-space: calc(var(--tab-bar-height) + 1px + env(safe-area-inset-bottom));
 }
 
-/* At wide widths a top-level page's menu header is hidden, so sticky regions sit at the top of the viewport. */
-@media (min-width: 1024px) {
-  :root:has([data-menu-bar]) {
-    --app-bar-height: 0;
-  }
+body:has([data-tab-bar]) {
+  box-sizing: border-box;
+  padding-bottom: var(--tab-bar-space);
 }

@@ -32,7 +32,7 @@ const readSpecs = [
   "**/site-tabs.spec.ts",
   "**/penetration-page.spec.ts",
   "**/navigation-tabs.spec.ts",
-  "**/side-menu.spec.ts",
+  "**/wide-screen.spec.ts",
   "**/actions-log.spec.ts",
   "**/field-ui.spec.ts",
   "**/sign-in.spec.ts",

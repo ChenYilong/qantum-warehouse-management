@@ -25,7 +25,7 @@ function fakeStorage(fail = false) {
   };
 }
 
-describe("AC 37: the theme choice in the side menu", () => {
+describe("AC 37: the theme choice on the Guide", () => {
   it("reads only light or dark as a choice; anything else follows the system", () => {
     expect(parseTheme("light")).toBe("light");
     expect(parseTheme("dark")).toBe("dark");
