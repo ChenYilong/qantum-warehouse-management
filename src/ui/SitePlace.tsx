@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
 import { MAP } from "./messages";
 import { useTravel } from "./TravelProvider";
-import { directionsUrl, MAP_STYLE, travelLabel, type LatLng, type TravelState } from "./travel";
+import { directionsUrl, MAP_STYLE, travelLabel, type LatLng } from "./travel";
 import styles from "./primitives.module.css";
 
 type MapState = "waiting" | "loading" | "ready" | "failed";
@@ -80,28 +80,20 @@ export function SiteMap({ siteId, token, location, colour }: { siteId: string; t
 }
 
 /**
- * How to get to a project (AC 74, 75), at the card's foot: a line about the trip once the phone's position is known,
- * and Directions, which opens the phone's maps app from where it is to the project.
+ * How to get to a project (AC 74, 75), at the card's foot: how far it is and how long the drive takes, from the phone
+ * once it shares where it is and from the default address until then, and Directions, which opens the phone's maps
+ * app from where it is to the project.
  */
 export function SitePlace({ siteId, titleId, location }: { siteId: string; titleId: string; location: LatLng }) {
-  const { fix, routeFor } = useTravel();
+  const { tripFor } = useTravel();
   const href = directionsUrl(location);
-  let state: TravelState;
-  if (fix.status === "ready") {
-    const route = routeFor(siteId);
-    state = route === undefined ? { kind: "routing" } : { kind: "ready", origin: fix.origin, to: location, route };
-  } else {
-    state = { kind: fix.status };
-  }
-  const label = travelLabel(state);
+  const label = travelLabel(tripFor(siteId, location));
   return (
     <div className={styles.sitePlaceRow}>
-      {label ? (
-        <p className={styles.siteTravel} data-travel={siteId}>
-          <Icon name="pin" />
-          <span>{label}</span>
-        </p>
-      ) : null}
+      <p className={styles.siteTravel} data-travel={siteId}>
+        <Icon name="pin" />
+        <span>{label}</span>
+      </p>
       <a className={styles.button} href={href} target="_blank" rel="noopener noreferrer" aria-describedby={titleId}>
         {MAP.directions}
         <Icon name="chevron-right" />
