@@ -544,9 +544,9 @@ button.signal:active {
   border-radius: 1rem;
 }
 
-/* Project maps (AC 74, 75): "Show distance and time" above the list; on each card a map strip under the name, as
-   wide as the signal under it, and the trip line and Directions at the card's foot. The map is decoration for touch:
-   Directions is the control for everyone. */
+/* Project maps (AC 74, 75): "Use my location" above the list, with where distances are from; on each card a map
+   strip under the name, as wide as the signal under it, and the trip line and Directions at the card's foot. The map
+   is decoration for touch: Directions is the control for everyone. */
 .travelBar {
   display: flex;
   flex-direction: column;

@@ -22,13 +22,15 @@ export async function answerMapbox(page: Page): Promise<string[]> {
   await page.route(/^https:\/\/([a-z0-9-]+\.)*mapbox\.com\//, async (route: Route) => {
     const request = route.request();
     const url = request.url();
-    if (request.method() === "OPTIONS") return route.fulfill({ status: 204, headers: CORS });
-    if (url.includes("/styles/v1/")) return route.fulfill({ json: STYLE, headers: CORS });
+    // The page aborts an older matrix request when a newer start comes in, so an answer may find nobody waiting.
+    const answer = (options: Parameters<Route["fulfill"]>[0]) => route.fulfill(options).catch(() => undefined);
+    if (request.method() === "OPTIONS") return answer({ status: 204, headers: CORS });
+    if (url.includes("/styles/v1/")) return answer({ json: STYLE, headers: CORS });
     if (url.includes("/directions-matrix/v1/")) {
       matrix.push(url);
-      return route.fulfill({ json: MATRIX, headers: CORS });
+      return answer({ json: MATRIX, headers: CORS });
     }
-    return route.fulfill({ status: 204, headers: CORS });
+    return answer({ status: 204, headers: CORS });
   });
   return matrix;
 }

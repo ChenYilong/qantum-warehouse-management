@@ -4,16 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useConnection } from "./ConnectionBar";
 import { Icon } from "./Icon";
 import { MAP } from "./messages";
-import { matrixBatches, matrixUrl, parseMatrix, type LatLng, type Route } from "./travel";
+import { cardTrip, matrixBatches, matrixUrl, originNote, parseMatrix, tripOrigin, type Fix, type LatLng, type TravelState, type TripAnswer } from "./travel";
 import styles from "./primitives.module.css";
-
-/** Where the phone is, as far as this page knows (AC 75). */
-type Fix =
-  | { readonly status: "idle" }
-  | { readonly status: "locating" }
-  | { readonly status: "denied" }
-  | { readonly status: "unavailable" }
-  | { readonly status: "ready"; readonly origin: LatLng };
 
 export interface Place {
   readonly id: string;
@@ -22,33 +14,35 @@ export interface Place {
 
 interface Travel {
   readonly fix: Fix;
-  /** Undefined while the drive is being worked out; null when there is no route. */
-  readonly routeFor: (siteId: string) => Route | null | undefined;
+  /** What the card for this project says about the trip there (AC 75). */
+  readonly tripFor: (siteId: string, to: LatLng) => TravelState;
   readonly locate: () => void;
 }
 
-const TravelContext = createContext<Travel>({ fix: { status: "idle" }, routeFor: () => null, locate: () => undefined });
+/** Outside a provider: the straight line from the default address, and nothing to ask. */
+const NO_TRAVEL: Travel = {
+  fix: { status: "idle" },
+  tripFor: (_siteId, to) => ({ kind: "ready", origin: tripOrigin({ status: "idle" }), to, route: null }),
+  locate: () => undefined,
+};
+
+const TravelContext = createContext<Travel>(NO_TRAVEL);
 
 export function useTravel(): Travel {
   return useContext(TravelContext);
 }
 
-/** The routes worked out for one fix and one set of projects, so an answer for an older request is never shown. */
-interface Routes {
-  readonly key: string;
-  readonly byId: Readonly<Record<string, Route | null>>;
-}
-
 /**
- * The phone's position and the drive to each project on the list (AC 75). It asks for the position only when
- * "Show distance and time" is tapped, or by itself when the phone already allows it. Then, online and with a token,
- * one driving-matrix request per nine projects; otherwise every project gets the straight line and no drive time.
- * The position goes only to Mapbox and is never stored.
+ * The trip to each project on the list (AC 75). Until the phone shares where it is, every trip starts from the demo's
+ * default address. The phone's position is asked for only when "Use my location" is tapped, or by itself when the
+ * phone already allows it, and it replaces the default once its answer is in. Online and with a token, one
+ * driving-matrix request per nine projects; otherwise every project gets the straight line and no drive time. The
+ * position goes only to Mapbox and is never stored.
  */
 export function TravelProvider({ token, places, children }: { token: string; places: readonly Place[]; children: ReactNode }) {
   const connection = useConnection();
   const [fix, setFix] = useState<Fix>({ status: "idle" });
-  const [routes, setRoutes] = useState<Routes>({ key: "", byId: {} });
+  const [answer, setAnswer] = useState<TripAnswer | null>(null);
   const asked = useRef(0);
 
   const locate = useCallback(() => {
@@ -85,21 +79,23 @@ export function TravelProvider({ token, places, children }: { token: string; pla
     };
   }, [locate]);
 
-  const origin = fix.status === "ready" ? fix.origin : null;
+  const origin = tripOrigin(fix);
   const online = connection.state === "online";
   const placesKey = places.map((place) => `${place.id}@${place.location.lat},${place.location.lng}`).join("|");
-  const requestKey = origin && token && online && places.length > 0 ? `${origin.lat},${origin.lng}|${placesKey}` : "";
+  const startKey = `${origin.kind}@${origin.point.lat},${origin.point.lng}`;
+  const requestKey = token && online && places.length > 0 ? `${startKey}|${placesKey}` : "";
 
   useEffect(() => {
-    if (!origin || requestKey === "") return;
+    if (requestKey === "") return;
     const abort = new AbortController();
+    const start = origin;
     const batches = matrixBatches(places);
     void Promise.all(
       batches.map(async (batch) => {
         try {
           const response = await fetch(
             matrixUrl(
-              origin,
+              start.point,
               batch.map((place) => place.location),
               token,
             ),
@@ -112,40 +108,36 @@ export function TravelProvider({ token, places, children }: { token: string; pla
         }
       }),
     ).then((answers) => {
-      if (!abort.signal.aborted) setRoutes({ key: requestKey, byId: Object.fromEntries(answers.flat()) });
+      if (!abort.signal.aborted) setAnswer({ key: requestKey, origin: start, byId: Object.fromEntries(answers.flat()) });
     });
     return () => abort.abort();
-    // The key covers the origin, the token, the connection and the projects.
+    // The key covers the start, the token, the connection and the projects.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestKey]);
 
   const value = useMemo<Travel>(
     () => ({
       fix,
-      routeFor: (siteId) => {
-        if (requestKey === "") return null;
-        if (routes.key !== requestKey) return undefined;
-        return routes.byId[siteId] ?? null;
-      },
+      tripFor: (siteId, to) => cardTrip({ key: requestKey, origin: tripOrigin(fix) }, answer, siteId, to),
       locate,
     }),
-    [fix, locate, requestKey, routes],
+    [fix, locate, requestKey, answer],
   );
 
   return <TravelContext.Provider value={value}>{children}</TravelContext.Provider>;
 }
 
-/** "Show distance and time" (AC 75): one tap for every project on the list. */
+/** "Use my location" (AC 75): one tap for every project on the list, and the line that says where distances are from. */
 export function TravelButton() {
   const { fix, locate } = useTravel();
   return (
     <div className={styles.travelBar}>
       <button type="button" className={styles.button} onClick={locate} disabled={fix.status === "locating"} aria-describedby="travel-hint">
         <Icon name="pin" />
-        {fix.status === "ready" ? MAP.updateDistance : MAP.showDistance}
+        {fix.status === "ready" ? MAP.updateLocation : MAP.useLocation}
       </button>
-      <p id="travel-hint" className={styles.muted}>
-        {MAP.distanceHint}
+      <p id="travel-hint" className={styles.muted} data-travel-note="" aria-live="polite">
+        {originNote(fix.status)}
       </p>
     </div>
   );

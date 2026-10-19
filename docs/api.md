@@ -40,7 +40,7 @@ The app's own HTTP API, as built. Requirements are in `slice-specification.md`, 
     requiredQty: number, shortfallQty: number | null }> }> }
 ```
 
-`location` comes with the site from upstream too (AC 74): latitude and longitude in degrees, invented points in Auckland in the sample. Like every upstream field its structure is strict (a wrong type rejects the response) and its values lenient: the projects list ignores a point out of range or at 0,0, and then shows no map, no Directions and no distance. The API never computes travel: the phone asks Mapbox for the drive itself, only after a tap (AC 75).
+`location` comes with the site from upstream too (AC 74): latitude and longitude in degrees, invented points in Auckland in the sample. Like every upstream field its structure is strict (a wrong type rejects the response) and its values lenient: the projects list ignores a point out of range or at 0,0, and then shows no map, no Directions and no distance. The API never computes travel: the page asks Mapbox for the drive itself, from the demo's default address until the phone shares its location, and from the phone only after a tap or the phone's own permission (AC 75).
 
 `operator` and `picker` come with the site from upstream (AC 49). `phone` is international, a `+` then digits and spaces. Either may be missing; the operator and the picker may be the same person.
 
