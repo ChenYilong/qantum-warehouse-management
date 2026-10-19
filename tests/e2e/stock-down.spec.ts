@@ -53,7 +53,7 @@ test("AC 9: stock down shows can't check and never crew can go", async ({ page }
 });
 
 test("AC 77 to 79: with the stock down every crew counts as can't go, the totals never count, and the panel opens on Blocked", async ({ page }) => {
-  await gotoApp(page, "/sites");
+  await gotoApp(page, "/map");
   const verdict = page.locator("[data-verdict]");
   await expect(verdict.getByRole("heading", { level: 2 })).toHaveText("4 of 4 crews can't go yet");
   await expect(verdict.getByText("Stock can't be checked", { exact: true })).toBeVisible();

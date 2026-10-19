@@ -213,6 +213,10 @@ export const MATERIALS_PATH = "/materials";
 
 export const ACTIONS_PATH = "/actions";
 
+/** The Map and Calendar tabs (AC 83). */
+export const MAP_PATH = "/map";
+export const CALENDAR_PATH = "/calendar";
+
 /** The anchor of one site's section on a material page. */
 export function siteAnchor(siteId: string): string {
   return `site-${siteId}`;

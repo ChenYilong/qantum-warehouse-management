@@ -70,6 +70,8 @@ describe("fixed screen copy", () => {
 const SCREEN_SOURCES = [
   "src/app/about-this-demo/page.tsx",
   "src/app/sites/page.tsx",
+  "src/app/map/page.tsx",
+  "src/app/calendar/page.tsx",
   "src/app/not-found.tsx",
   "src/app/error.tsx",
   "src/app/global-error.tsx",
@@ -95,11 +97,11 @@ describe("navigation shell", () => {
       // AC 37: the back control or the tab bar, never both. The landing page, Sites,
       // Materials and the Actions log carry the tab bar (through MenuBar); inner screens a back control; the error
       // screen a header with the Online switch only (AC 48); the global error screen replaces the layout and has none.
-      const menu = ["src/app/about-this-demo/page.tsx", "src/app/sites/page.tsx", "src/app/materials/page.tsx", "src/app/actions/page.tsx"];
+      const menu = ["src/app/about-this-demo/page.tsx", "src/app/sites/page.tsx", "src/app/map/page.tsx", "src/app/calendar/page.tsx", "src/app/materials/page.tsx", "src/app/actions/page.tsx"];
       const statusOnly = ["src/app/error.tsx"];
       const noHeader = ["src/app/global-error.tsx"];
       if (menu.includes(file)) {
-        expect(source, file).toMatch(/<MenuBar current="(sites|materials|actions|about)" \/>/);
+        expect(source, file).toMatch(/<MenuBar current="(sites|map|calendar|materials|actions|about)" \/>/);
         expect(source, file).not.toContain("<AppBar");
       } else if (statusOnly.includes(file)) {
         expect(source, file).toContain("<StatusBar />");

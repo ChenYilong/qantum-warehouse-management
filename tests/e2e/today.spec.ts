@@ -35,10 +35,10 @@ async function dotWidth(page: Page, id: string): Promise<number> {
     .evaluate((dot) => dot.getBoundingClientRect().width);
 }
 
-test("AC 77: the projects list opens with today's verdict: 2 of 3 crews can't go yet, the totals, and a bar of one green and two red", async ({ page }) => {
-  await gotoApp(page, "/sites");
+test("AC 77: the Map tab opens with today's verdict: 2 of 3 crews can't go yet, the totals, and a bar of one green and two red", async ({ page }) => {
+  await gotoApp(page, "/map");
   // The page's h1 stays first in main, for structure; the verdict leads what you see.
-  await expect(page.locator("main > h1")).toHaveText("Projects");
+  await expect(page.locator("main > h1")).toHaveText("Map");
   await expect(verdict(page).getByRole("heading", { level: 2 })).toHaveText("2 of 3 crews can't go yet");
   await expect(verdict(page).getByText("Today", { exact: true })).toBeVisible();
   await expect(verdict(page).getByText("3 shortages · 4 data problems", { exact: true })).toBeVisible();
@@ -54,17 +54,17 @@ test("AC 77: the projects list opens with today's verdict: 2 of 3 crews can't go
   // Full bleed on a phone, as in the design.
   const width = await verdict(page).evaluate((section) => [section.getBoundingClientRect().left, section.getBoundingClientRect().right]);
   expect(width).toEqual([0, 375]);
-  // At the top: the panel, then the map and the chosen project's card, then the list's filter.
-  const top = await verdict(page).boundingBox();
-  const filter = await page.getByRole("form", { name: "Filter projects" }).boundingBox();
-  expect((top?.y ?? Infinity) < (filter?.y ?? 0)).toBe(true);
+  // The Map tab holds this panel and nothing else (AC 83): no projects list, no calendar.
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Map", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("list", { name: "Projects" })).toHaveCount(0);
+  await expect(page.locator("[data-calendar-panel]")).toHaveCount(0);
   await assertAxe(page);
   await assertTargets(page);
   await assertNoOverflow(page);
 });
 
 test("AC 78: four tabs inside the verdict open on Crew can go, and the chosen tab's segments are lit while the others fade", async ({ page }) => {
-  await gotoApp(page, "/sites");
+  await gotoApp(page, "/map");
   await expect(tabs(page)).toHaveText(["All 4", "Blocked 2", "Crew can go 1", "Other 1"]);
   await expect(tab(page, "Crew can go 1")).toHaveAttribute("aria-selected", "true");
   // Inside the panel, right under the bar.
@@ -99,7 +99,12 @@ test("AC 78: four tabs inside the verdict open on Crew can go, and the chosen ta
 });
 
 test("AC 79: the map shows only the chosen tab's pins, and under it the chosen project's card is the list's own card, as wide as the map", async ({ page }) => {
+  // The list's own cards, read on the projects list first (AC 83 puts the panel on a page of its own).
   await gotoApp(page, "/sites");
+  const cedarCard = await cardShape(listCard(page, "Cedar Court, Block A").locator(":scope > div"));
+  const quaysideCard = await cardShape(listCard(page, "Quayside House, Levels 3 to 5").locator(":scope > div"));
+  const cedarTrip = (await listCard(page, "Cedar Court, Block A").locator('[data-travel="site-a"]').textContent()) ?? "";
+  await gotoApp(page, "/map");
   // Crew can go: Cedar Court alone, chosen.
   await expect(pins(page)).toHaveCount(1);
   await expect(page.locator("[data-projects-map]").getByRole("button", { name: "Cedar Court, Block A, Crew can go" })).toHaveAttribute("aria-pressed", "true");
@@ -110,9 +115,8 @@ test("AC 79: the map shows only the chosen tab's pins, and under it the chosen p
   await expect(card(page).getByRole("link", { name: "Call operator" })).toHaveAttribute("href", "tel:+447700900156");
   // The very card the list shows: the same build and the same look, as wide as the map.
   const top = card(page).locator(":scope > div");
-  const below = listCard(page, "Cedar Court, Block A").locator(":scope > div");
-  expect(await cardShape(top)).toEqual(await cardShape(below));
-  await expect(card(page).locator('[data-travel="site-a"]')).toHaveText((await listCard(page, "Cedar Court, Block A").locator('[data-travel="site-a"]').textContent()) ?? "");
+  expect(await cardShape(top)).toEqual(cedarCard);
+  await expect(card(page).locator('[data-travel="site-a"]')).toHaveText(cedarTrip);
   const map = await page.locator("[data-projects-map]").boundingBox();
   const box = await top.boundingBox();
   expect(Math.abs((box?.width ?? 0) - (map?.width ?? 0))).toBeLessThanOrEqual(1);
@@ -135,7 +139,7 @@ test("AC 79: the map shows only the chosen tab's pins, and under it the chosen p
   await expect(card(page).getByRole("link", { name: "Quayside House, Levels 3 to 5" }).first()).toBeVisible();
   await expect(card(page).getByText("Blocked · 2 shortages")).toBeVisible();
   await expect(card(page).getByRole("link", { name: "Sort out shortages" })).toHaveAttribute("href", "/sites/site-b#action-needed");
-  expect(await cardShape(card(page).locator(":scope > div"))).toEqual(await cardShape(listCard(page, "Quayside House, Levels 3 to 5").locator(":scope > div")));
+  expect(await cardShape(card(page).locator(":scope > div"))).toEqual(quaysideCard);
   expect(await dotWidth(page, "site-b")).toBeGreaterThan(await dotWidth(page, "site-c"));
   // In their relative places: Northgate Depot is north-west of Quayside House.
   const quayside = await pin(page, "site-b").locator("[data-pin-dot]").boundingBox();
@@ -174,8 +178,10 @@ test("AC 79: the map shows only the chosen tab's pins, and under it the chosen p
   await assertNoOverflow(page);
 });
 
-test("AC 77, AC 78: the verdict counts every project, whatever the list's filter", async ({ page }) => {
+test("AC 77, AC 78, AC 83: from a filtered projects list, the Map tab's verdict still counts every project", async ({ page }) => {
   await gotoApp(page, "/sites?status=ready");
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Map", exact: true }).click();
+  await expect(page).toHaveURL(/\/map$/);
   await expect(verdict(page).getByRole("heading", { level: 2 })).toHaveText("2 of 3 crews can't go yet");
   await expect(tabs(page)).toHaveText(["All 4", "Blocked 2", "Crew can go 1", "Other 1"]);
 });

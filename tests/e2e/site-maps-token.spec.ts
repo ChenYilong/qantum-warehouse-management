@@ -48,7 +48,7 @@ test("AC 74: each project has its map with a pin, and a tap on the map opens the
 
 test("AC 79: with a token the pins sit on a Mapbox map fitted to the chosen tab, with Mapbox's credits clear of the card under it", async ({ page }) => {
   await answerMapbox(page);
-  await gotoApp(page, "/sites");
+  await gotoApp(page, "/map");
   const map = page.locator("[data-projects-map]");
   await expect(map).toHaveAttribute("data-projects-map", "ready");
   await expect(map.locator("canvas")).toHaveCount(1);

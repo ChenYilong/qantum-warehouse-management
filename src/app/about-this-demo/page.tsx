@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MenuBar } from "@/ui/AppBar";
-import { ACTIONS_PATH, MATERIALS_PATH, penetrationPath, sitePath } from "@/ui/format";
+import { ACTIONS_PATH, CALENDAR_PATH, MAP_PATH, MATERIALS_PATH, penetrationPath, sitePath } from "@/ui/format";
 import { NAV } from "@/ui/messages";
 import { SignOutButton } from "@/ui/SignOutButton";
 import { ThemeSwitch } from "@/ui/ThemeSwitch";
@@ -39,8 +39,9 @@ export default function LandingPage() {
           <ul>
             <li>
               <p>
-                Switch between <Link href="/sites">{NAV.sites}</Link>, <Link href={MATERIALS_PATH}>{NAV.materials}</Link>,{" "}
-                <Link href={ACTIONS_PATH}>{NAV.actions}</Link> and this guide from the bar at the bottom of the screen. The
+                Switch between <Link href="/sites">{NAV.sites}</Link>, <Link href={MAP_PATH}>{NAV.map}</Link>,{" "}
+                <Link href={CALENDAR_PATH}>{NAV.calendar}</Link> and this guide from the bar at the bottom of the screen;{" "}
+                <Link href={MATERIALS_PATH}>{NAV.materials}</Link> and <Link href={ACTIONS_PATH}>{NAV.actions}</Link> are a link away. The
                 switch at the top right says whether this phone is online; turn it off to work offline.
               </p>
             </li>

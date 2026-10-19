@@ -1,7 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { assertAxe, assertNoOverflow, assertTargets, gotoApp } from "./support";
 
-// Read-only, on the main server: the deadline calendar at the top of the projects list (AC 81, 82). The phone's clock
+// Read-only, on the main server: the deadline calendar on the Calendar tab (AC 81 to 83). The phone's clock
 // is fixed to Tuesday 20 October 2026, so today and the default dates never move under the sample's deadlines.
 
 const NOW = new Date("2026-10-20T09:00:00+13:00");
@@ -31,12 +31,12 @@ test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(NOW);
 });
 
-test("AC 81: the projects list opens with the deadline calendar, a copy of today's map panel with a calendar for its map", async ({ page }) => {
-  await gotoApp(page, "/sites");
-  // First on the page, above the map panel, which keeps its own tabs and card.
-  expect((await panel(page).boundingBox())?.y ?? Infinity).toBeLessThan((await page.locator("[data-verdict]").boundingBox())?.y ?? 0);
-  await expect(page.getByRole("tablist", { name: "Projects by status" }).getByRole("tab")).toHaveText(["All 4", "Blocked 2", "Crew can go 1", "Other 1"]);
-  await expect(page.getByRole("region", { name: "Selected project" })).toHaveCount(1);
+test("AC 81: the Calendar tab holds the deadline calendar, a copy of the Map tab's panel with a calendar for its map", async ({ page }) => {
+  await gotoApp(page, "/calendar");
+  // The Calendar tab holds this panel and nothing else (AC 83): no map panel, no projects list.
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Calendar", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.locator("[data-verdict]")).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "Projects" })).toHaveCount(0);
   // The same verdict, totals, bar and tabs as the map panel.
   await expect(panel(page).getByRole("heading", { level: 2 })).toHaveText("2 of 3 crews can't go yet");
   await expect(panel(page).getByText("3 shortages · 4 data problems", { exact: true })).toBeVisible();
@@ -71,7 +71,7 @@ test("AC 81: the projects list opens with the deadline calendar, a copy of today
 });
 
 test("AC 81: a tab puts its own projects on the calendar, opens on its first and its month, and a tapped oval takes the card", async ({ page }) => {
-  await gotoApp(page, "/sites");
+  await gotoApp(page, "/calendar");
   // Blocked: Quayside House on Tue 27 Oct; Northgate Depot is in November.
   await tab(page, "Blocked 2").click();
   await expect(ovals(page)).toHaveCount(1);
@@ -103,7 +103,7 @@ test("AC 81: a tab puts its own projects on the calendar, opens on its first and
 });
 
 test("AC 82: From and To start at today and the end of the year, choose the deadlines the calendar holds, and say when they can't", async ({ page }) => {
-  await gotoApp(page, "/sites");
+  await gotoApp(page, "/calendar");
   const from = calendar(page).getByLabel("From", { exact: true });
   const to = calendar(page).getByLabel("To", { exact: true });
   await expect(from).toHaveValue("2026-10-20");
