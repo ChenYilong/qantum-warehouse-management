@@ -61,6 +61,8 @@ export interface Site {
   readonly operator?: Contact;
   /** Who picks this site's materials in the warehouse. May be the operator too. */
   readonly picker?: Contact;
+  /** Where the site is (AC 74): latitude and longitude in degrees. */
+  readonly location?: { readonly lat: number; readonly lng: number };
 }
 
 export interface Material {

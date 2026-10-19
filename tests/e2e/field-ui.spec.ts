@@ -74,7 +74,10 @@ test("AC 49: each site card keeps Text operator, Call operator and Sort out shor
     await expect(page.getByRole("link", { name })).toHaveCount(1);
   }
   const mill = page.getByRole("listitem").filter({ hasText: "Foundry Lane Annex" });
-  await expect(mill.getByRole("link")).toHaveCount(1);
+  // Nothing planned: its name and its Directions (AC 74), never a call or a text (AC 57).
+  await expect(mill.getByRole("link")).toHaveCount(2);
+  await expect(mill.getByRole("link", { name: "Directions" })).toHaveCount(1);
+  await expect(mill.locator('a[href^="tel:"], a[href^="sms:"]')).toHaveCount(0);
   await expect(mill.getByRole("button")).toHaveCount(0);
   await assertTargets(page);
   await assertNoOverflow(page);

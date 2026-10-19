@@ -176,3 +176,7 @@ Decided on approval (2026-10-03): the generic material names stay, one `Van 2` l
 | Foundry Lane Annex (`site-d`) | none | Can't check (no pick list) |
 
 The pickers in `sites.json` also carry an email at `example.com`, a domain reserved for documentation, so the Email links reach no one. The UI marks the picker "(sample)".
+
+## 8. Site locations (invented, 2026-10-19)
+
+Each site in `sites.json` carries a `location` (`{ lat, lng }`) for its map and directions (AC 74): invented points in Auckland, each near its made-up address (Cedar Court by the waterfront, Quayside House in the Wynyard Quarter, Northgate Depot in Albany, Foundry Lane Annex in Onehunga). They point at public streets, not at real projects. The e2e tests stand in a phone at Grafton (-36.8615, 174.769), so the straight-line distances are 1.9, 2.5, 15.7 and 7.0 km.

@@ -347,3 +347,23 @@ Not built, with reasons:
 | --- | --- |
 | Search by solution code or service, as qantum-stock does | The projects list does not read nominations; adding their codes to `GET /api/sites` would widen that call for a list of four. The site screen already filters its penetrations |
 | Applying on change, without the Apply button | qantum-stock's pattern is Apply and Reset, and an explicit button avoids reloading the list on every turn of a gloved finger |
+
+## 14. Project maps (2026-10-19)
+
+From the author: give each project on the projects list a map of where it is, open navigation there from the phone's current location when the map is tapped, and say how far it is and how long it takes. Mapbox GL JS, after its getting-started guide (npm). Requirements are FR30 and AC 74 to 76.
+
+| Topic | As built |
+| --- | --- |
+| The map | At the foot of each card, a 160px strip of Mapbox's streets style centred on the project, zoom 14, with a pin in the project's signal colour (green, red, amber or grey). It does not pan or zoom: a crew scrolls the list with gloves, and a map that grabbed the finger would get in the way. It loads only when its card comes within 200px of the screen, so a list of four starts one or two maps |
+| Tap | A tap anywhere on the map but Mapbox's credits opens Google Maps directions from wherever the phone is to the project, by car, in a new tab (on a phone, the maps app). Directions under the map does the same for everyone, keyboard and screen reader included: the map is a shortcut for touch, not the control |
+| Distance and time | "Show distance and time" above the list (with "Uses this phone's location once. Only Mapbox sees it, to work out the drive."). After the tap, or by itself when the phone already allows it, each card says "Finding where you are…", then "Working out the drive…", then "12.3 km · 18 min drive". No route (no token, working offline, Mapbox failing or no road): "9.8 km in a straight line · no drive time". Refused: "Location is off, so no distance." No fix: "Can't find where you are right now." The button then reads "Update distance and time" |
+| Without a token | No map; Directions and the straight-line distance still work. The same if the phone has no WebGL or Mapbox fails: the strip hides itself |
+| Target sizes | Directions and the button are 48px like every control. Mapbox's wordmark and credits, which Mapbox requires on every map, keep Mapbox's size; they are the only targets under 48px, and nothing in the app needs them |
+
+Not built, with reasons:
+
+| Idea | Why not now |
+| --- | --- |
+| Turn-by-turn inside the app | The phone's maps app already does it, with traffic and voice, and works when the app is closed |
+| A map on the site screen or one map with every project | Asked for on the projects list, one per project; a shared map is the next step once there are more projects than fit on a screen |
+| Apple Maps on iPhones | Google Maps' directions link opens the app on both platforms, or the browser; choosing per platform can come with the Flutter app |

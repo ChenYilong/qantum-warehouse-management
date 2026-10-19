@@ -546,6 +546,70 @@ button.signal:active {
   border-radius: 1rem;
 }
 
+/* Project maps (AC 74, 75): "Show distance and time" above the list; on each card a map strip, then the trip line
+   and Directions. The map is decoration for touch: Directions is the control for everyone. */
+.travelBar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin: 0 0 1rem;
+}
+
+.travelBar p {
+  margin: 0;
+}
+
+.travelBar .button {
+  align-self: flex-start;
+}
+
+.sitePlace {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.siteMap {
+  position: relative;
+  height: 10rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--neutral-bg);
+}
+
+.siteMap[data-map-state="failed"] {
+  display: none;
+}
+
+.siteMapCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.siteMapLink {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.sitePlaceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.siteTravel {
+  display: flex;
+  flex: 1 1 12rem;
+  align-items: flex-start;
+  gap: 0.375rem;
+  margin: 0;
+  font-weight: 700;
+}
+
 /* The projects filter (AC 72, 73), after qantum-stock's: search and readiness stacked on a phone, side by side when
    wide, with Apply and Reset under them. Every control is at least 48px. */
 .siteFilter {

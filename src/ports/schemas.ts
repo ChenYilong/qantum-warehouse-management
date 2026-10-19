@@ -22,6 +22,8 @@ export const SiteSchema = z.object({
   operator: ContactSchema.optional(),
   /** Who picks this site's materials in the warehouse. May be the same person as the operator. */
   picker: ContactSchema.optional(),
+  /** Where the site is, for its map and directions (AC 74). The UI ignores a point out of range or at 0,0. */
+  location: z.object({ lat: z.number(), lng: z.number() }).optional(),
 });
 
 export const SitesFileSchema = z.object({
