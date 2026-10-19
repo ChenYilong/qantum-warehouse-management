@@ -7,6 +7,9 @@ import { HEAD_SCRIPT } from "@/ui/sidebar";
 import styles from "@/ui/primitives.module.css";
 import "./globals.css";
 
+/** The browser's own toolbar matches the black chrome. */
+export const viewport = { themeColor: "#000000" };
+
 export const metadata = {
   title: { default: "Team leader", template: "%s · Team leader" },
   description: "Site readiness and shortage decisions",

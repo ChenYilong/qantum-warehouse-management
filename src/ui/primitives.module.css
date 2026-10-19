@@ -125,6 +125,25 @@
   align-items: center;
 }
 
+/* The chrome, black in both themes (the company's black and yellow): the page tokens are swapped inside it, so
+   everything within reads light on black, and the yellow marks the current entry, the chosen theme and focus. */
+.connectionBar,
+.appBar,
+.bottomTabs,
+.sideMenu {
+  --bg: var(--chrome-bg);
+  --text: var(--chrome-text);
+  --text-secondary: var(--chrome-text-secondary);
+  --surface: var(--chrome-surface);
+  --border: var(--chrome-border);
+  --input-border: #9a9a9a;
+  --link: var(--brand-yellow);
+  --focus: var(--brand-yellow);
+  --warning-text: #ffd98a;
+  background: var(--bg);
+  color: var(--text);
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -716,9 +735,10 @@ button.signal:active {
   gap: 0.5rem;
   align-self: center;
   box-sizing: border-box;
-  width: min(100%, 45rem);
+  /* The black runs across the column; the content lines up with the 45rem page. */
+  width: 100%;
   height: var(--app-bar-height);
-  padding: 0 var(--space);
+  padding: 0 max(var(--space), calc((100% - 45rem) / 2 + var(--space)));
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   color: var(--text);
@@ -1089,9 +1109,9 @@ section:has(> .stickyHeading) {
 }
 
 .themeOption:has(input:checked) {
-  background: var(--bg);
-  box-shadow: 0 0 0 1px var(--border);
-  color: var(--text);
+  background: var(--button-bg);
+  box-shadow: 0 0 0 1px var(--button-bg);
+  color: var(--button-text);
   font-weight: 600;
 }
 
@@ -1269,11 +1289,9 @@ section:has(> .stickyHeading) {
   gap: 0.25rem 0.75rem;
   align-self: center;
   box-sizing: border-box;
-  width: min(100%, 45rem);
-  padding: 0.25rem var(--space);
+  width: 100%;
+  padding: 0.25rem max(var(--space), calc((100% - 45rem) / 2 + var(--space)));
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
 }
 
 .connectionPicker {
@@ -1330,7 +1348,7 @@ section:has(> .stickyHeading) {
 }
 
 .connectionSwitch[aria-checked="true"]::before {
-  background: var(--text);
+  background: var(--brand-yellow);
 }
 
 .connectionKnob {
