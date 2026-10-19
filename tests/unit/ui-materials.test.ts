@@ -53,6 +53,6 @@ describe("AC 42: the material page's back control", () => {
   });
 
   it("returns to Materials otherwise", () => {
-    expect(materialBack(null)).toEqual({ href: "/materials", name: "Materials" });
+    expect(materialBack(null)).toEqual({ href: "/materials", name: "Inventory" });
   });
 });

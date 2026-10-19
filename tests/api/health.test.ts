@@ -29,7 +29,7 @@ describe("AC 48: the connection bar's health check", () => {
 });
 
 describe("AC 49: sites carry who to call", () => {
-  it("lists each sample site's operator and picker, and Kingsway's one person does both", async () => {
+  it("lists each sample site's operator and picker, and Northgate's one person does both", async () => {
     setDependenciesForTests(testDependencies());
     const { body } = await readResponse(await getSites());
     const sites = body.sites as { id: string; operator?: { name: string; phone: string }; picker?: { name: string; phone: string } }[];

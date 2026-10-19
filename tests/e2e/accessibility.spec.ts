@@ -25,13 +25,13 @@ test("axe reports no serious or critical violations in light and dark", async ({
 
 async function openEscalate(page: Page): Promise<void> {
   await gotoApp(page, "/materials/MAT-COLLAR-25");
-  await page.getByRole("button", { name: "Escalate Pipe collar for 25 mm pipe at Harbour Point, Levels 3 to 5" }).click();
+  await page.getByRole("button", { name: "Escalate Pipe collar for 25 mm pipe at Quayside House, Levels 3 to 5" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
 }
 
 async function openWait(page: Page): Promise<void> {
   await gotoApp(page, "/materials/MAT-MASTIC");
-  await page.getByRole("button", { name: "Wait Fire mastic tube at Kingsway Works, Phase 2" }).click();
+  await page.getByRole("button", { name: "Wait Fire mastic tube at Northgate Depot, Phase 2" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
 }
 

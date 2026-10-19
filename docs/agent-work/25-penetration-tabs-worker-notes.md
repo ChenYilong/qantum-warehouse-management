@@ -51,7 +51,7 @@ Removed with the popover: "latest decision for".
 
 ## Stock-down penetration page
 
-Inferred from the load order, not from a browser run. `getCachedCandidates` calls stock before the page loads the log. With stock down that throws, and the page returns the existing site-unavailable screen: h1 "Harbour Point, Levels 3 to 5", banner "Can't check this site right now. Don't assume it's clear. Try again.", no Penetration tab bar, no count, no "Nothing recorded". `tests/e2e/stock-down.spec.ts` asserts that.
+Inferred from the load order, not from a browser run. `getCachedCandidates` calls stock before the page loads the log. With stock down that throws, and the page returns the existing site-unavailable screen: h1 "Quayside House, Levels 3 to 5", banner "Can't check this site right now. Don't assume it's clear. Try again.", no Penetration tab bar, no count, no "Nothing recorded". `tests/e2e/stock-down.spec.ts` asserts that.
 
 ## Gates
 

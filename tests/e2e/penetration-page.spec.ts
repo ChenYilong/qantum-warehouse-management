@@ -18,8 +18,8 @@ test("a penetration page is titled by its place and split into Nominated solutio
   const substitutes = page.getByRole("region", { name: "Substitutes" });
   await expect(substitutes.getByText("No catalogue match for this penetration. Escalate instead.")).toBeVisible();
   await expect(substitutes.getByRole("button", { name: /Escalate/ })).toBeVisible();
-  await expect(page.getByRole("banner").getByRole("link", { name: "Back to Kingsway Works, Phase 2" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /^Actions log/ })).toHaveCount(0);
+  await expect(page.getByRole("banner").getByRole("link", { name: "Back to Northgate Depot, Phase 2" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Decisions/ })).toHaveCount(0);
   await assertTargets(page);
   await assertNoOverflow(page);
 
@@ -57,7 +57,7 @@ test("AC 40: a shortage on the penetration page is a line with this site's figur
   await expect(page).toHaveURL(/\/materials\/MAT-COLLAR-25\?from=pen-b-01#site-site-b$/);
   await expect(page.getByRole("heading", { level: 1, name: "Pipe collar for 25 mm pipe" })).toBeVisible();
   await expect(page.getByText("On hand, shared, not reserved")).toBeVisible();
-  const harbour = page.getByRole("region", { name: "Harbour Point, Levels 3 to 5" });
+  const harbour = page.getByRole("region", { name: "Quayside House, Levels 3 to 5" });
   await expect(harbour.getByText("Needs 4, short 2", { exact: true })).toBeVisible();
   await expect(page.locator("#site-site-b")).toBeInViewport();
 
@@ -79,7 +79,7 @@ test("AC 42: a material page returns to the penetration that opened it, and othe
   // repeated value: all go back to Materials.
   for (const query of ["?from=pen-c-05", "?from=pen-none", "?from=constructor", "?from=not%20an%20id", "?from=pen-b-01&from=pen-b-02", ""]) {
     await gotoApp(page, `/materials/MAT-COLLAR-25${query}`);
-    await expect(page.getByRole("link", { name: "Back to Materials" }), query).toHaveAttribute("href", "/materials");
+    await expect(page.getByRole("link", { name: "Back to Inventory" }), query).toHaveAttribute("href", "/materials");
   }
   await assertTargets(page);
   await assertNoOverflow(page);
@@ -91,7 +91,7 @@ test("AC 42: a material page returns to the penetration that opened it, and othe
 test("AC 41: the old site-scoped material URL opens the material page at that site", async ({ page }) => {
   await gotoApp(page, "/sites/site-b/materials/MAT-SEALANT");
   await expect(page).toHaveURL(/\/materials\/MAT-SEALANT#site-site-b$/);
-  await expect(page.getByRole("region", { name: "Harbour Point, Levels 3 to 5" }).getByText("Needs 10, short 2 cartridges", { exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Quayside House, Levels 3 to 5" }).getByText("Needs 10, short 2 cartridges", { exact: true })).toBeVisible();
   await expect(page.locator("#site-site-b")).toBeInViewport();
 
   // Bad ids, and a material no site plans, are not found.
@@ -152,7 +152,7 @@ test("AC 45: a penetration page has Solution and Actions log tabs", async ({ pag
   await gotoApp(page, "/sites/site-c/penetrations/pen-c-03");
   const tabs = page.getByRole("navigation", { name: "Penetration" });
   await expect(tabs.getByRole("link", { name: "Solution" })).toHaveAttribute("aria-current", "page");
-  await expect(tabs.getByRole("link", { name: /Actions log/ })).toBeVisible();
+  await expect(tabs.getByRole("link", { name: /Decisions/ })).toBeVisible();
   const nominated = page.getByRole("region", { name: "Nominated solution 9999" });
   await expect(nominated.getByText("Solution code 9999 isn't in the catalogue")).toBeVisible();
   await expect(nominated.getByRole("table")).toHaveCount(0);
@@ -160,7 +160,7 @@ test("AC 45: a penetration page has Solution and Actions log tabs", async ({ pag
   await expect(nominated.getByText("60 min integrity, 60 min insulation")).toBeVisible();
 
   await gotoApp(page, "/sites/site-c/penetrations/pen-c-03?tab=log");
-  await expect(page.getByRole("navigation", { name: "Penetration" }).getByRole("link", { name: /Actions log/ })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("navigation", { name: "Penetration" }).getByRole("link", { name: /Decisions/ })).toHaveAttribute("aria-current", "page");
   await expect(page.getByText("Nothing recorded for this penetration yet.")).toBeVisible();
   await expect(page.getByRole("region", { name: "Nominated solution 9999" })).toHaveCount(0);
 
@@ -171,7 +171,7 @@ test("AC 45: a penetration page has Solution and Actions log tabs", async ({ pag
   await gotoApp(page, "/sites/site-c/penetrations/pen-c-03?fromLog=site-c");
   const kept = page.getByRole("navigation", { name: "Penetration" });
   await expect(kept.getByRole("link", { name: "Solution" })).toHaveAttribute("href", "/sites/site-c/penetrations/pen-c-03?fromLog=site-c");
-  await expect(kept.getByRole("link", { name: /Actions log/ })).toHaveAttribute("href", "/sites/site-c/penetrations/pen-c-03?tab=log&fromLog=site-c");
+  await expect(kept.getByRole("link", { name: /Decisions/ })).toHaveAttribute("href", "/sites/site-c/penetrations/pen-c-03?tab=log&fromLog=site-c");
 
   await page.setViewportSize({ width: 375, height: 800 });
   await gotoApp(page, "/sites/site-c/penetrations/pen-c-03?tab=log");
@@ -184,28 +184,28 @@ test("AC 39, AC 46: a material page has Stock and Actions log tabs", async ({ pa
   await gotoApp(page, "/materials/MAT-MASTIC");
   const tabs = page.getByRole("navigation", { name: "Material" });
   await expect(tabs.getByRole("link", { name: "Stock" })).toHaveAttribute("aria-current", "page");
-  await expect(tabs.getByRole("link", { name: /Actions log/ })).toBeVisible();
-  const kingsway = page.getByRole("region", { name: "Kingsway Works, Phase 2" });
+  await expect(tabs.getByRole("link", { name: /Decisions/ })).toBeVisible();
+  const kingsway = page.getByRole("region", { name: "Northgate Depot, Phase 2" });
   await expect(kingsway.getByText("Needs 1, stock unknown", { exact: true })).toBeVisible();
   await expect(kingsway.getByText("No decision yet", { exact: true })).toHaveCount(0);
 
   await gotoApp(page, "/materials/MAT-MASTIC?tab=log");
   const logTabs = page.getByRole("navigation", { name: "Material" });
-  await expect(logTabs.getByRole("link", { name: /Actions log/ })).toHaveAttribute("aria-current", "page");
-  await expect(logTabs.getByRole("link", { name: /Actions log/ })).toContainText("0");
+  await expect(logTabs.getByRole("link", { name: /Decisions/ })).toHaveAttribute("aria-current", "page");
+  await expect(logTabs.getByRole("link", { name: /Decisions/ })).toContainText("0");
   await expect(page.getByText("Nothing recorded for this material yet.")).toBeVisible();
-  await expect(page.getByRole("region", { name: "Kingsway Works, Phase 2" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Northgate Depot, Phase 2" })).toHaveCount(0);
 
   await gotoApp(page, "/materials/MAT-MASTIC?tab=junk");
   await expect(page.getByRole("navigation", { name: "Material" }).getByRole("link", { name: "Stock" })).toHaveAttribute("aria-current", "page");
-  await expect(page.getByRole("region", { name: "Kingsway Works, Phase 2" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Northgate Depot, Phase 2" })).toBeVisible();
 
   await gotoApp(page, "/materials/MAT-MASTIC?from=pen-c-05");
   const kept = page.getByRole("navigation", { name: "Material" });
   await expect(kept.getByRole("link", { name: "Stock" })).toHaveAttribute("href", "/materials/MAT-MASTIC?from=pen-c-05");
-  await expect(kept.getByRole("link", { name: /Actions log/ })).toHaveAttribute("href", "/materials/MAT-MASTIC?tab=log&from=pen-c-05");
+  await expect(kept.getByRole("link", { name: /Decisions/ })).toHaveAttribute("href", "/materials/MAT-MASTIC?tab=log&from=pen-c-05");
   await expect(page.getByRole("link", { name: "Back to L2, Plant room" })).toBeVisible();
-  await kept.getByRole("link", { name: /Actions log/ }).click();
+  await kept.getByRole("link", { name: /Decisions/ }).click();
   await expect(page).toHaveURL(/\/materials\/MAT-MASTIC\?tab=log&from=pen-c-05$/);
   await expect(page.getByRole("link", { name: "Back to L2, Plant room" })).toBeVisible();
   await expect(page.getByText("Nothing recorded for this material yet.")).toBeVisible();

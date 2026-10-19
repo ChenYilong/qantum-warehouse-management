@@ -6,7 +6,7 @@ import { assertNoOverflow, assertTargets, gotoApp } from "./support";
 test("AC 34: a blocked site has no summary banner; the chips filter the rows", async ({ page }) => {
   await gotoApp(page, "/sites/site-c");
   await expect(page.getByText("Blocked: hold the crew.")).toHaveCount(0);
-  await expect(page.locator("main p").filter({ hasText: "Job ref KW-P2" })).toHaveText(/^Job ref KW-P2\s*5 penetrations, 5 solutions$/);
+  await expect(page.locator("main p").filter({ hasText: "Job ref ND-P2" })).toHaveText(/^Job ref ND-P2\s*5 penetrations, 5 solutions$/);
   await expect(page.getByRole("heading", { level: 2, name: "Penetrations 5" })).toBeVisible();
   await expect(page.getByRole("link", { name: /5 penetrations, 5 solutions/ })).toHaveCount(0);
   const filters = page.getByRole("navigation", { name: "Filter penetrations" });
@@ -20,7 +20,7 @@ test("AC 34: a blocked site has no summary banner; the chips filter the rows", a
   await expect(page.locator("a[href$='/penetrations/pen-c-05']")).toContainText("Stock unknown");
   await expect(page.locator("a[href$='/penetrations/pen-c-03']")).toContainText("Unknown solution");
   await expect(page.locator("a[href$='/penetrations/pen-c-04']")).toContainText("No materials");
-  await expect(page.getByRole("button", { name: /^Actions log/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Decisions/ })).toHaveCount(0);
   await assertTargets(page);
   await assertNoOverflow(page);
 
@@ -38,8 +38,8 @@ test("AC 34: a blocked site has no summary banner; the chips filter the rows", a
   await assertTargets(page);
   await assertNoOverflow(page);
 
-  await expect(page.getByRole("link", { name: "Back to sites" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /^Actions log/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Back to projects" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Decisions/ })).toHaveCount(0);
 
   await page.setViewportSize({ width: 1280, height: 800 });
   await assertNoOverflow(page);
@@ -54,7 +54,7 @@ test("a clear site still reads Crew can go, and an empty filter says so", async 
 
   await gotoApp(page, "/sites/site-a");
   await expect(page.locator("main a[href*='/penetrations/pen-a-']")).toHaveCount(6);
-  await expect(page.locator("main p").filter({ hasText: "Job ref RP-A2" })).toHaveText(/^Job ref RP-A2\s*6 penetrations, 3 solutions$/);
+  await expect(page.locator("main p").filter({ hasText: "Job ref CC-A2" })).toHaveText(/^Job ref CC-A2\s*6 penetrations, 3 solutions$/);
   await expect(page.getByText("On hand, shared, not reserved")).toBeVisible();
 
   await gotoApp(page, "/sites/site-d");
@@ -62,7 +62,7 @@ test("a clear site still reads Crew can go, and an empty filter says so", async 
   await expect(page.getByText("No penetrations planned for this site.")).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "Penetrations 0" })).toBeVisible();
   await expect(page.getByText("On hand, shared, not reserved")).toHaveCount(0);
-  await expect(page.getByText("Job ref OM-01", { exact: true })).toBeVisible();
+  await expect(page.getByText("Job ref FL-01", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Shortages 0" })).toBeVisible();
 });
 
@@ -70,7 +70,7 @@ test("the back control stays in the header while the list scrolls", async ({ pag
   await page.setViewportSize({ width: 375, height: 500 });
   await gotoApp(page, "/sites/site-b");
   await expect(page.getByRole("link", { name: "Shortages 12" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /^Actions log/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Decisions/ })).toHaveCount(0);
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -80,7 +80,7 @@ test("the back control stays in the header while the list scrolls", async ({ pag
     )
     .toBe(true);
   const header = page.getByRole("banner");
-  await expect(header.getByRole("link", { name: "Back to Sites" })).toBeInViewport();
+  await expect(header.getByRole("link", { name: "Back to Projects" })).toBeInViewport();
 });
 
 test("the site page is the penetration list, and old list URLs redirect onto it", async ({ page }) => {
@@ -97,12 +97,12 @@ test("the site page is the penetration list, and old list URLs redirect onto it"
 
   await gotoApp(page, "/sites/site-c/penetrations");
   await expect(page).toHaveURL(/\/sites\/site-c$/);
-  await expect(page.getByRole("main").getByRole("heading", { level: 1, name: "Kingsway Works, Phase 2" })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("heading", { level: 1, name: "Northgate Depot, Phase 2" })).toBeVisible();
 
   await gotoApp(page, "/sites/site-c/actions");
   await expect(page).toHaveURL(/\/actions#site-site-c$/);
   const kingsway = page.locator("#site-site-c");
-  await expect(kingsway.getByRole("link", { name: "Kingsway Works, Phase 2" })).toHaveAttribute("href", "/sites/site-c?fromLog=site-c");
+  await expect(kingsway.getByRole("link", { name: "Northgate Depot, Phase 2" })).toHaveAttribute("href", "/sites/site-c?fromLog=site-c");
   await expect(kingsway.getByText("Nothing recorded for this site yet.")).toBeVisible();
 
   // A repeated material filter is not one material: full list, with the note.

@@ -7,28 +7,28 @@ test("AC 30: a material page shows need, short, who it is planned on, and its st
   await expect(page.getByRole("heading", { level: 1, name: "Intumescent sealant, 310 ml cartridge" })).toBeVisible();
   // AC 39: the shared stock once, against every site's need; then each site that plans it.
   await expect(page.getByText("On hand 8 cartridges · planned across sites 12 cartridges", { exact: true })).toBeVisible();
-  const harbour = page.getByRole("region", { name: "Harbour Point, Levels 3 to 5" });
+  const harbour = page.getByRole("region", { name: "Quayside House, Levels 3 to 5" });
   await expect(harbour.getByText("Needs 10, short 2 cartridges", { exact: true })).toBeVisible();
   // Identical places are one line; none is a link, so the page never loops back to a penetration.
   await expect(harbour.getByText("L3, Riser 2 · PEX Pipe Ø25mm ×4", { exact: true })).toBeVisible();
   await expect(harbour.getByText("L5, Plant room · Steel Pipe Ø28mm", { exact: true })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: /L3, Riser 2/ })).toHaveCount(0);
-  const riverside = page.getByRole("region", { name: "Riverside Plaza, Block A" });
+  const riverside = page.getByRole("region", { name: "Cedar Court, Block A" });
   await expect(riverside.getByText("Needs 2, not short for this site alone", { exact: true })).toBeVisible();
   await expect(riverside.getByRole("button")).toHaveCount(0);
 
   await gotoApp(page, "/materials/MAT-COLLAR-25");
-  const collar = page.getByRole("region", { name: "Harbour Point, Levels 3 to 5" });
+  const collar = page.getByRole("region", { name: "Quayside House, Levels 3 to 5" });
   await expect(collar.getByText("Needs 4, short 2", { exact: true })).toBeVisible();
   // A wait or escalate covers the whole site's need, not one penetration.
   await expect(collar.getByText("For all 4 penetrations at this site", { exact: true })).toBeVisible();
   // AC 39: the decision state label is gone. The scope line, the need, and the buttons stay.
   await expect(collar.getByText("No decision yet", { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Wait Pipe collar for 25 mm pipe at Harbour Point, Levels 3 to 5" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Escalate Pipe collar for 25 mm pipe at Harbour Point, Levels 3 to 5" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Wait Pipe collar for 25 mm pipe at Quayside House, Levels 3 to 5" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Escalate Pipe collar for 25 mm pipe at Quayside House, Levels 3 to 5" })).toBeVisible();
   await expect(collar.getByText("L3, Riser 2 · PEX Pipe Ø25mm ×4", { exact: true })).toHaveCount(1);
   // Each site heading goes up to that site.
-  await expect(collar.getByRole("link", { name: "Harbour Point, Levels 3 to 5" })).toHaveAttribute(
+  await expect(collar.getByRole("link", { name: "Quayside House, Levels 3 to 5" })).toHaveAttribute(
     "href",
     "/sites/site-b?fromMaterial=MAT-COLLAR-25",
   );
@@ -61,7 +61,7 @@ test("AC 30: a material page shows need, short, who it is planned on, and its st
   await gotoApp(page, "/materials/MAT-MASTIC");
   await expect(page.getByRole("heading", { level: 1, name: "Fire mastic tube" })).toBeVisible();
   await expect(page.getByText("Stock unknown · planned across sites 1 tube", { exact: true })).toBeVisible();
-  const kingsway = page.getByRole("region", { name: "Kingsway Works, Phase 2" });
+  const kingsway = page.getByRole("region", { name: "Northgate Depot, Phase 2" });
   await expect(kingsway.getByText("Needs 1, stock unknown", { exact: true })).toBeVisible();
   await expect(kingsway.getByText("For the 1 penetration at this site", { exact: true })).toBeVisible();
   await expect(kingsway.getByText("No decision yet", { exact: true })).toHaveCount(0);

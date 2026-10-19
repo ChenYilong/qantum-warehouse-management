@@ -4,29 +4,29 @@
   /* The bottom tab bar's row, and the room it takes (row, top border, safe area) at the foot of a top-level page; 0 elsewhere. */
   --tab-bar-height: 3.5rem;
   --tab-bar-space: 0px;
-  --text: #1a1a1a;
-  --text-secondary: #55595e;
+  --text: #000000;
+  --text-secondary: #4a4a4a;
   --bg: #ffffff;
-  --surface: #f6f7f8;
-  --border: #d5d8dc;
-  --input-border: #5c6570;
-  --focus: #0b57d0;
-  --link: #0b57d0;
-  --button-bg: #0b57d0;
-  --button-text: #ffffff;
+  --surface: #fff8d1;
+  --border: #e6d27a;
+  --input-border: #4d4d4d;
+  --focus: #000000;
+  --link: #000000;
+  --button-bg: #fed105;
+  --button-text: #000000;
   --success-bg: #e6f4ea;
   --success-text: #0d5c27;
-  --danger-bg: #fdecea;
+  --danger-bg: #ffffff;
   --danger-text: #8a1c13;
-  --warning-bg: #fff4d6;
+  --warning-bg: #fff1b8;
   --warning-text: #6b4500;
-  --neutral-bg: #f1f2f4;
-  --neutral-text: #4a4f55;
+  --neutral-bg: #fffbe6;
+  --neutral-text: #3d3d3d;
   /* Decisions: neither "can go" nor an alarm. */
-  --info-bg: #e8f0fe;
-  --info-text: #0b4f9e;
-  --escalation-bg: #f3ecfb;
-  --escalation-text: #6b2fa3;
+  --info-bg: #fff8d1;
+  --info-text: #000000;
+  --escalation-bg: #fed105;
+  --escalation-text: #000000;
   /* The site signal (AC 52, 53): a big I/O switch. Fill, the ink of its label and knob, and its edge.
      Colour is never alone: the knob's shape, mark and side say the state too. Go is a bright green with dark
      ink and stop a deep red with white ink in both themes, so they also differ in lightness: a leader who
@@ -38,16 +38,25 @@
   --signal-stop-fill: #b3001b;
   --signal-stop-ink: #ffffff;
   --signal-stop-edge: #7a0012;
-  --signal-unknown-fill: #ffc107;
-  --signal-unknown-ink: #1a1a1a;
-  --signal-unknown-edge: #1a1a1a;
-  --signal-idle-fill: #e3e5e8;
-  --signal-idle-ink: #1a1a1a;
-  --signal-idle-edge: #5c6570;
+  --signal-unknown-fill: #fed105;
+  --signal-unknown-ink: #000000;
+  --signal-unknown-edge: #000000;
+  --signal-idle-fill: #ffffff;
+  --signal-idle-ink: #000000;
+  --signal-idle-edge: #5c5c5c;
   --backdrop: rgb(18 19 22 / 55%);
   --shadow: 0 8px 24px rgb(18 19 22 / 18%);
   --space: 1rem;
   --radius: 8px;
+  /* The company's colours: black and yellow. The chrome (connection bar, headers, tab bar, side menu) is black
+     in both themes, with the yellow marking what is current and where focus is. */
+  --brand-black: #000000;
+  --brand-yellow: #fed105;
+  --chrome-bg: #000000;
+  --chrome-text: #ffffff;
+  --chrome-text-secondary: #cfcfcf;
+  --chrome-surface: #1a1a1a;
+  --chrome-border: #333333;
   color-scheme: light;
 }
 
@@ -55,40 +64,40 @@
    The two blocks must stay identical. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --text: #ececec;
-    --text-secondary: #c4c8ce;
-    --bg: #121316;
-    --surface: #1b1d21;
-    --border: #34383e;
-    --input-border: #8b939e;
-    --focus: #8ab4f8;
-    --link: #8ab4f8;
-    --button-bg: #8ab4f8;
-    --button-text: #121316;
+    --text: #f5f5f5;
+    --text-secondary: #cfcfcf;
+    --bg: #000000;
+    --surface: #141414;
+    --border: #3a3a3a;
+    --input-border: #9a9a9a;
+    --focus: #fed105;
+    --link: #fed105;
+    --button-bg: #fed105;
+    --button-text: #000000;
     --success-bg: #12351e;
     --success-text: #8fe0a5;
     --danger-bg: #3b1512;
     --danger-text: #ffb3ab;
     --warning-bg: #3d2e08;
     --warning-text: #ffd98a;
-    --neutral-bg: #24272c;
-    --neutral-text: #c4c8ce;
-    --info-bg: #102a4c;
-    --info-text: #9ec5ff;
-    --escalation-bg: #2e1a45;
-    --escalation-text: #d3b4f5;
+    --neutral-bg: #1f1f1f;
+    --neutral-text: #cfcfcf;
+    --info-bg: #1f1f1f;
+    --info-text: #fff3a0;
+    --escalation-bg: #4a3d00;
+    --escalation-text: #fed105;
     --signal-go-fill: #3ddc6c;
     --signal-go-ink: #04130a;
     --signal-go-edge: #3ddc6c;
     --signal-stop-fill: #b3001b;
     --signal-stop-ink: #ffffff;
     --signal-stop-edge: #ff6b5e;
-    --signal-unknown-fill: #ffca3a;
-    --signal-unknown-ink: #1a1200;
-    --signal-unknown-edge: #ffca3a;
-    --signal-idle-fill: #3a3f46;
-    --signal-idle-ink: #ececec;
-    --signal-idle-edge: #8b939e;
+    --signal-unknown-fill: #fed105;
+    --signal-unknown-ink: #000000;
+    --signal-unknown-edge: #fed105;
+    --signal-idle-fill: #2a2a2a;
+    --signal-idle-ink: #f5f5f5;
+    --signal-idle-edge: #9a9a9a;
     --backdrop: rgb(0 0 0 / 65%);
     --shadow: 0 8px 24px rgb(0 0 0 / 45%);
     color-scheme: dark;
@@ -96,40 +105,40 @@
 }
 
 :root[data-theme="dark"] {
-  --text: #ececec;
-  --text-secondary: #c4c8ce;
-  --bg: #121316;
-  --surface: #1b1d21;
-  --border: #34383e;
-  --input-border: #8b939e;
-  --focus: #8ab4f8;
-  --link: #8ab4f8;
-  --button-bg: #8ab4f8;
-  --button-text: #121316;
+  --text: #f5f5f5;
+  --text-secondary: #cfcfcf;
+  --bg: #000000;
+  --surface: #141414;
+  --border: #3a3a3a;
+  --input-border: #9a9a9a;
+  --focus: #fed105;
+  --link: #fed105;
+  --button-bg: #fed105;
+  --button-text: #000000;
   --success-bg: #12351e;
   --success-text: #8fe0a5;
   --danger-bg: #3b1512;
   --danger-text: #ffb3ab;
   --warning-bg: #3d2e08;
   --warning-text: #ffd98a;
-  --neutral-bg: #24272c;
-  --neutral-text: #c4c8ce;
-  --info-bg: #102a4c;
-  --info-text: #9ec5ff;
-  --escalation-bg: #2e1a45;
-  --escalation-text: #d3b4f5;
+  --neutral-bg: #1f1f1f;
+  --neutral-text: #cfcfcf;
+  --info-bg: #1f1f1f;
+  --info-text: #fff3a0;
+  --escalation-bg: #4a3d00;
+  --escalation-text: #fed105;
   --signal-go-fill: #3ddc6c;
   --signal-go-ink: #04130a;
   --signal-go-edge: #3ddc6c;
   --signal-stop-fill: #b3001b;
   --signal-stop-ink: #ffffff;
   --signal-stop-edge: #ff6b5e;
-  --signal-unknown-fill: #ffca3a;
-  --signal-unknown-ink: #1a1200;
-  --signal-unknown-edge: #ffca3a;
-  --signal-idle-fill: #3a3f46;
-  --signal-idle-ink: #ececec;
-  --signal-idle-edge: #8b939e;
+  --signal-unknown-fill: #fed105;
+  --signal-unknown-ink: #000000;
+  --signal-unknown-edge: #fed105;
+  --signal-idle-fill: #2a2a2a;
+  --signal-idle-ink: #f5f5f5;
+  --signal-idle-edge: #9a9a9a;
   --backdrop: rgb(0 0 0 / 65%);
   --shadow: 0 8px 24px rgb(0 0 0 / 45%);
   color-scheme: dark;
@@ -214,6 +223,13 @@ main {
 main > * {
   min-width: 0;
   max-width: 100%;
+}
+
+/* Links take the theme's link colour (black on light, yellow on dark), never the browser's default blue. */
+a {
+  color: var(--link);
+  text-decoration-thickness: 0.1em;
+  text-underline-offset: 0.15em;
 }
 
 :focus-visible {
