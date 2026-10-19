@@ -133,6 +133,38 @@ jobs:
           echo "cc01d2ab3fd65a29d95ef42fd04648682e116b1142700300fab9074a30b5e805  data/solutions-excerpt.csv" | sha256sum -c -
       - run: npx vercel@62.2.0 pull --yes --environment=production --token "$VERCEL_TOKEN"
       - run: npx vercel@62.2.0 build --prod --token "$VERCEL_TOKEN"
+      - name: Migrate the production database
+        # After the build and before the deploy, so a failed build never touches the database. Migrations only add
+        # (tables, columns with defaults, wider checks), so the version still live keeps working until the deploy.
+        # Fail closed: without the admin password nothing is deployed, since the new code may need a new table.
+        # Host, admin user and database come from the Vercel production settings pulled above: DB_HOST, DB_USER
+        # (qantum_slice.<project-ref>, so the admin is postgres.<project-ref>) and DB_NAME, on the session pooler
+        # (port 5432). Repository or environment variables MIGRATION_DB_HOST and MIGRATION_DB_USER override them.
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          MIGRATION_DB_HOST: ${{ vars.MIGRATION_DB_HOST }}
+          MIGRATION_DB_USER: ${{ vars.MIGRATION_DB_USER }}
+        run: |
+          if [ -z "$SUPABASE_DB_PASSWORD" ]; then
+            echo "::error::Secret SUPABASE_DB_PASSWORD is missing, so nothing was deployed. Set the Supabase database password once: gh secret set SUPABASE_DB_PASSWORD --env production"
+            exit 1
+          fi
+          pulled=.vercel/.env.production.local
+          # Never fails: a missing file or key is an empty value, reported below (steps run with -e -o pipefail).
+          pulled_value() { { grep -m 1 "^$1=" "$pulled" 2>/dev/null || true; } | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//'; }
+          host="${MIGRATION_DB_HOST:-$(pulled_value DB_HOST)}"
+          name="$(pulled_value DB_NAME)"
+          user="$MIGRATION_DB_USER"
+          app_user="$(pulled_value DB_USER)"
+          if [ -z "$user" ] && [ "${app_user#*.}" != "$app_user" ]; then
+            ref="${app_user##*.}"
+            case "$ref" in ''|*[!a-z0-9]*) ;; *) user="postgres.$ref" ;; esac
+          fi
+          if [ -z "$host" ] || [ -z "$user" ]; then
+            echo "::error::Can't tell the database host or admin user from the Vercel production settings, so nothing was deployed. Set the variables MIGRATION_DB_HOST and MIGRATION_DB_USER (postgres.<project-ref>)."
+            exit 1
+          fi
+          DB_HOST="$host" DB_PORT=5432 DB_USER="$user" DB_PASSWORD="$SUPABASE_DB_PASSWORD" DB_NAME="${name:-qantum_slice}" DB_SSL=require npm run db:migrate
       - run: npx vercel@62.2.0 deploy --prebuilt --prod --token "$VERCEL_TOKEN"
       - name: Smoke
         env:
