@@ -34,6 +34,7 @@ The app's own HTTP API, as built. Requirements are in `slice-specification.md`, 
 { sites: Array<{ id, name, reference, address?,
   operator?: { name, phone }, picker?: { name, phone },
   location?: { lat: number, lng: number },              // degrees, for the project map (AC 74)
+  date?: string,                                         // the deadline, YYYY-MM-DD (AC 80)
   crewStatus: "clear" | "blocked" | "nothing_planned" | "unavailable",
   shortageCount: number, dataProblemCount: number,
   shortages: Array<{ materialId, name, unit, kind: "short" | "unknown",
@@ -41,6 +42,8 @@ The app's own HTTP API, as built. Requirements are in `slice-specification.md`, 
 ```
 
 `location` comes with the site from upstream too (AC 74): latitude and longitude in degrees, invented points in Auckland in the sample. Like every upstream field its structure is strict (a wrong type rejects the response) and its values lenient: the projects list ignores a point out of range or at 0,0, and then shows no map, no Directions and no distance. The API never computes travel: the page asks Mapbox for the drive itself, from the demo's default address until the phone shares its location, and from the phone only after a tap or the phone's own permission (AC 75).
+
+`date` comes with the site from upstream too (AC 80): the project's deadline, a calendar date written `YYYY-MM-DD`, invented in the sample. Its structure is strict (anything but a string rejects the response) and its value lenient: the projects list shows no deadline for a date that isn't a real one (`2026-02-30`, `23/10/2026`).
 
 `operator` and `picker` come with the site from upstream (AC 49). `phone` is international, a `+` then digits and spaces. Either may be missing; the operator and the picker may be the same person.
 

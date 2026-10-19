@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { siteAction, SITE_ACTIONS, type SiteActionInput } from "./contacts";
+import { DEADLINE, type Deadline } from "./deadline";
 import { sitePath } from "./format";
 import { Icon } from "./Icon";
 import { KindIcon } from "./KindIcon";
@@ -15,18 +16,21 @@ import styles from "./primitives.module.css";
  * calls the operator when tapped, a blocked site lists what is short, and the operator can be texted or called.
  * Action names never repeat the site name: the card's title already says it. A project with a location has its map
  * under its name, above the signal and as wide as it, and ends with the trip there and Directions (AC 74, 75).
- * `idPrefix` keeps its ids unique when today's panel shows the same card again above the list (AC 79).
+ * `idPrefix` keeps its ids unique when today's panel shows the same card again above the list (AC 79). A project
+ * with a deadline ends with it, in English (AC 80).
  */
 export function SiteCard({
   site,
   status,
   place,
   idPrefix = "site-card",
+  deadline = null,
 }: {
   site: SiteActionInput;
   status: StatusView;
   place?: { readonly location: LatLng; readonly token: string; readonly colour: string };
   idPrefix?: string;
+  deadline?: Deadline | null;
 }) {
   const action = siteAction(site);
   const titleId = `${idPrefix}-${site.id}`;
@@ -66,6 +70,15 @@ export function SiteCard({
         </div>
       ) : null}
       {place ? <SitePlace siteId={site.id} titleId={titleId} location={place.location} /> : null}
+      {deadline ? (
+        <p className={styles.siteDeadline} data-deadline={site.id}>
+          <Icon name="calendar" />
+          <span>
+            {`${DEADLINE.label} · `}
+            <time dateTime={deadline.iso}>{deadline.text}</time>
+          </span>
+        </p>
+      ) : null}
     </div>
   );
 }
