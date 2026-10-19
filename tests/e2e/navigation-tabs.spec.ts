@@ -14,7 +14,7 @@ test("AC 37: the landing page shows the same tab bar, and About this demo is cur
   const tabs = tabsOf(page);
   await expect(tabs.getByRole("link", { name: "Guide" })).toHaveAttribute("aria-current", "page");
   await expect(tabs.getByRole("link", { name: "Projects" })).not.toHaveAttribute("aria-current", "page");
-  await expect(tabs.getByRole("link", { name: "Inventory" })).not.toHaveAttribute("aria-current", "page");
+  await expect(tabs.getByRole("link", { name: "Map" })).not.toHaveAttribute("aria-current", "page");
   await tabs.getByRole("link", { name: "Projects" }).click();
   await expect(page).toHaveURL(/\/sites$/);
   await expect(tabsOf(page).getByRole("link", { name: "Projects" })).toHaveAttribute("aria-current", "page");
@@ -26,9 +26,10 @@ test("AC 37: the tab bar is fixed to the foot of the screen with every entry, th
   await expect(page.getByRole("banner").getByRole("link", { name: /^Back to / })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /menu/i })).toHaveCount(0);
   const tabs = tabsOf(page);
-  await expect(tabs.getByRole("link")).toHaveText(["Projects", "Inventory", "Decisions", "Guide"]);
+  // AC 83: Projects, Map, Calendar and Guide.
+  await expect(tabs.getByRole("link")).toHaveText(["Projects", "Map", "Calendar", "Guide"]);
   await expect(tabs.getByRole("link", { name: "Projects" })).toHaveAttribute("aria-current", "page");
-  await expect(tabs.getByRole("link", { name: "Inventory" })).not.toHaveAttribute("aria-current", "page");
+  await expect(tabs.getByRole("link", { name: "Map" })).not.toHaveAttribute("aria-current", "page");
   await expect(tabs.getByRole("link", { name: "Guide" })).toHaveAttribute("href", "/about-this-demo");
 
   // Pinned to the bottom of the viewport, full width, and it stays there while the page scrolls.
@@ -47,17 +48,19 @@ test("AC 37: the tab bar is fixed to the foot of the screen with every entry, th
   await assertAxe(page);
   await assertNoOverflow(page);
 
-  await tabTo(page, /^Inventory\s*$/);
+  await tabTo(page, /^Map\s*$/);
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/materials$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Inventory" })).toBeVisible();
-  await expect(tabsOf(page).getByRole("link", { name: "Inventory" })).toHaveAttribute("aria-current", "page");
+  await expect(page).toHaveURL(/\/map$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Map" })).toHaveCount(1);
+  await expect(tabsOf(page).getByRole("link", { name: "Map" })).toHaveAttribute("aria-current", "page");
+  await tabsOf(page).getByRole("link", { name: "Calendar" }).click();
+  await expect(page).toHaveURL(/\/calendar$/);
+  await expect(tabsOf(page).getByRole("link", { name: "Calendar" })).toHaveAttribute("aria-current", "page");
 });
 
 test("AC 37: inner screens drop the tab bar and lead with the back control", async ({ page }) => {
-  await gotoApp(page, "/sites");
-  await tabsOf(page).getByRole("link", { name: "Decisions" }).click();
-  await expect(page).toHaveURL(/\/actions$/);
+  // Decisions is a top-level page with no tab of its own (AC 83).
+  await gotoApp(page, "/actions");
   await expect(page.getByRole("banner").getByRole("link", { name: /^Back to / })).toHaveCount(0);
 
   for (const path of ["/sites/site-b", "/sites/site-b/penetrations/pen-b-01", "/materials/MAT-COLLAR-25"]) {

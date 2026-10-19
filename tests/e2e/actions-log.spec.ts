@@ -10,18 +10,17 @@ const SITES = [
   ["site-d", "Foundry Lane Annex"],
 ] as const;
 
-test("AC 43: the tab bar opens the actions log, one section per site", async ({ page }) => {
-  await gotoApp(page, "/sites");
-  const item = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Decisions" });
+test("AC 43, AC 83: the Guide opens the actions log, one section per site; it has no tab of its own", async ({ page }) => {
+  await gotoApp(page, "/about-this-demo");
+  const item = page.getByRole("main").getByRole("link", { name: "Decisions", exact: true }).first();
   await expect(item).toBeVisible();
   await item.click();
   await expect(page).toHaveURL(/\/actions$/);
   await expect(page.getByRole("heading", { level: 1, name: "Decisions" })).toBeVisible();
 
-  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Decisions" })).toHaveAttribute(
-    "aria-current",
-    "page",
-  );
+  const tabs = page.getByRole("navigation", { name: "Main" });
+  await expect(tabs.getByRole("link")).toHaveText(["Projects", "Map", "Calendar", "Guide"]);
+  await expect(tabs.locator('[aria-current="page"]')).toHaveCount(0);
 
   for (const [id, name] of SITES) {
     const section = page.locator(`#site-${id}`);

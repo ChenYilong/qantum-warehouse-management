@@ -1,6 +1,6 @@
 import styles from "./primitives.module.css";
 
-export type EntityKind = "site" | "material" | "solution" | "decision" | "penetration" | "about";
+export type EntityKind = "site" | "material" | "solution" | "decision" | "penetration" | "about" | "map" | "calendar";
 
 /**
  * Says what a thing is, never its state. Outline only, in the secondary text colour, and no shape the status
@@ -27,6 +27,8 @@ export function KindIcon({ kind }: { kind: EntityKind }) {
       {kind === "solution" ? <path d="M10 2.5 16 5v4.5c0 4-2.6 6.8-6 8-3.4-1.2-6-4-6-8V5z" /> : null}
       {kind === "decision" ? <path d="M6.5 4H4.5v13.5h11V4h-2 M7 2.5h6V5.5H7z M7.5 10h5 M7.5 13h5" /> : null}
       {kind === "penetration" ? <path d="M5 5.5h10v9H5z M2.5 10h15" /> : null}
+      {kind === "map" ? <path d="M2.5 5 7.5 3l5 2 5-2v12l-5 2-5-2-5 2z M7.5 3v12 M12.5 5v12" /> : null}
+      {kind === "calendar" ? <path d="M3.5 5h13v11.5h-13z M3.5 8.75h13 M7 3v3.5 M13 3v3.5" /> : null}
       {/* An "i" in a rounded square: about the app, unlike the clipboard of a decision or the page of a log. */}
       {kind === "about" ? (
         <>

@@ -121,9 +121,9 @@ test("AC 10, AC 18: scenario: escalate sealant, propose 0451, then Northgate sti
   await expect(proposed).toContainText("Proposed substitute");
   await expect(proposed.locator("span[aria-hidden='true']")).toHaveText("1");
 
-  // The actions log is a top-level page. This screen has no tab bar, so open it from the sites list.
-  await gotoApp(page, "/sites");
-  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Decisions" }).click();
+  // The actions log is a top-level page, linked from the Guide (AC 83).
+  await gotoApp(page, "/about-this-demo");
+  await page.getByRole("main").getByRole("link", { name: "Decisions", exact: true }).first().click();
   await expect(page).toHaveURL(/\/actions$/);
   const log = page.locator("#site-site-b");
   // Each entry links to the work it is about, marked so its back control returns here, and a proposal names its place.

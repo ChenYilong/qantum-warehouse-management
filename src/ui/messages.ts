@@ -18,13 +18,15 @@ export const PENETRATION_FILTER = {
   unknown: "That material is not a shortage on this site. Showing all penetrations.",
 } as const;
 
-/** The menu: the bottom tab bar, at every width (AC 37, AC 47). */
+/** The menu: the bottom tab bar, at every width (AC 37, AC 47): Projects, Map, Calendar, Guide (AC 83). */
 export const NAV = {
   title: "Team leader",
   label: "Main",
   sites: "Projects",
   materials: "Inventory",
   actions: "Decisions",
+  map: "Map",
+  calendar: "Calendar",
   about: "Guide",
 } as const;
 

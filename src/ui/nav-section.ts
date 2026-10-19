@@ -1,12 +1,13 @@
 import type { EntityKind } from "./KindIcon";
-import { ACTIONS_PATH, MATERIALS_PATH } from "./format";
+import { CALENDAR_PATH, MAP_PATH } from "./format";
 import { NAV } from "./messages";
 
-export type NavSection = "sites" | "materials" | "actions" | "about";
+/** Inventory and Decisions are top-level pages too, reached from the Guide and from links; they have no tab (AC 83). */
+export type NavSection = "sites" | "map" | "calendar" | "materials" | "actions" | "about";
 
 /** The work sections, in menu order. About this demo follows them, apart. */
 export const NAV_ITEMS: readonly { section: NavSection; href: string; label: string; kind: EntityKind }[] = [
   { section: "sites", href: "/sites", label: NAV.sites, kind: "site" },
-  { section: "materials", href: MATERIALS_PATH, label: NAV.materials, kind: "material" },
-  { section: "actions", href: ACTIONS_PATH, label: NAV.actions, kind: "decision" },
+  { section: "map", href: MAP_PATH, label: NAV.map, kind: "map" },
+  { section: "calendar", href: CALENDAR_PATH, label: NAV.calendar, kind: "calendar" },
 ];
