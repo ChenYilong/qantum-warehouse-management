@@ -23,6 +23,10 @@ async function width(locator: Locator): Promise<number> {
   return (await locator.boundingBox())?.width ?? 0;
 }
 
+// The crews are in New Zealand: the phone's today is New Zealand's, wherever the tests run (CI runs in UTC, where this
+// moment is still the 19th).
+test.use({ timezoneId: "Pacific/Auckland" });
+
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(NOW);
 });
