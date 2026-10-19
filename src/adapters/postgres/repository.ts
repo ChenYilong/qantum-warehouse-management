@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { ShortageAction, SubstitutionProposal } from "@/domain";
-import { UpstreamError, type ActionsRepository, type NewShortageAction, type NewSubstitutionProposal } from "@/ports";
+import type { PickReport, ShortageAction, SubstitutionProposal } from "@/domain";
+import { UpstreamError, type ActionsRepository, type NewPickReport, type NewShortageAction, type NewSubstitutionProposal } from "@/ports";
 
 const SYSTEM = "actions_store";
 
@@ -32,6 +32,38 @@ const SubstitutionProposalRowSchema = z.object({
   created_at: TimestampSchema,
   idempotency_key: z.string().min(1).max(128),
 });
+
+const PickReportRowSchema = z.object({
+  id: UuidSchema,
+  site_id: z.string().min(1),
+  line_id: z.string().min(1),
+  kind: z.enum(["wrong_spec", "missing_parts", "part_picked", "other"]),
+  planned_qty: z.union([z.number(), z.string(), z.null()]),
+  picked_qty: z.union([z.number(), z.string(), z.null()]),
+  missing_part: z.string().max(120).nullable(),
+  note: z.string().max(500).nullable(),
+  send_to_picker: z.boolean(),
+  send_to_purchasing: z.boolean(),
+  photo_attached: z.boolean(),
+  created_by: z.string().min(1),
+  created_at: TimestampSchema,
+  idempotency_key: z.string().min(1).max(128),
+});
+
+export interface PickReportInsert {
+  readonly site_id: string;
+  readonly line_id: string;
+  readonly kind: PickReport["kind"];
+  readonly planned_qty: number | null;
+  readonly picked_qty: number | null;
+  readonly missing_part: string | null;
+  readonly note: string | null;
+  readonly send_to_picker: boolean;
+  readonly send_to_purchasing: boolean;
+  readonly photo_attached: boolean;
+  readonly created_by: string;
+  readonly idempotency_key: string;
+}
 
 export interface ShortageActionInsert {
   readonly site_id: string;
@@ -67,6 +99,9 @@ export interface ActionsStore {
   insertSubstitutionProposal(row: SubstitutionProposalInsert): Promise<StoreResult>;
   selectSubstitutionProposalByKey(createdBy: string, idempotencyKey: string): Promise<StoreResult>;
   listSubstitutionProposals(siteId: string): Promise<StoreResult>;
+  insertPickReport(row: PickReportInsert): Promise<StoreResult>;
+  selectPickReportByKey(createdBy: string, idempotencyKey: string): Promise<StoreResult>;
+  listPickReports(siteId: string): Promise<StoreResult>;
 }
 
 function readQuantity(value: number | string | null): number | null {
@@ -148,6 +183,45 @@ export function substitutionProposalFromRow(row: unknown): SubstitutionProposal 
   };
 }
 
+export function pickReportToInsert(input: NewPickReport): PickReportInsert {
+  return {
+    site_id: input.siteId,
+    line_id: input.lineId,
+    kind: input.kind,
+    planned_qty: input.plannedQty,
+    picked_qty: input.pickedQty,
+    missing_part: input.missingPart,
+    note: input.note,
+    send_to_picker: input.sendToPicker,
+    send_to_purchasing: input.sendToPurchasing,
+    photo_attached: input.photoAttached,
+    created_by: input.createdBy,
+    idempotency_key: input.idempotencyKey,
+  };
+}
+
+export function pickReportFromRow(row: unknown): PickReport {
+  const parsed = PickReportRowSchema.safeParse(row);
+  if (!parsed.success) throw new UpstreamError("upstream_invalid", SYSTEM);
+  // The table refuses a report to no one; a row that says otherwise did not come from it.
+  if (!parsed.data.send_to_picker && !parsed.data.send_to_purchasing) throw new UpstreamError("upstream_invalid", SYSTEM);
+  return {
+    id: parsed.data.id,
+    siteId: parsed.data.site_id,
+    lineId: parsed.data.line_id,
+    kind: parsed.data.kind,
+    plannedQty: readQuantity(parsed.data.planned_qty),
+    pickedQty: readQuantity(parsed.data.picked_qty),
+    missingPart: parsed.data.missing_part,
+    note: parsed.data.note,
+    sendToPicker: parsed.data.send_to_picker,
+    sendToPurchasing: parsed.data.send_to_purchasing,
+    photoAttached: parsed.data.photo_attached,
+    createdBy: parsed.data.created_by,
+    createdAt: readTimestamp(parsed.data.created_at),
+  };
+}
+
 function byNewest<T extends { createdAt: string }>(left: T, right: T): number {
   const leftMs = Date.parse(left.createdAt);
   const rightMs = Date.parse(right.createdAt);
@@ -204,6 +278,17 @@ export function createActionsRepository(store: ActionsStore): ActionsRepository 
     async listSubstitutionProposals(siteId) {
       return rowsOf(await store.listSubstitutionProposals(siteId))
         .map((row) => substitutionProposalFromRow(row))
+        .sort(byNewest);
+    },
+    async appendPickReport(input) {
+      return writeOne(await store.insertPickReport(pickReportToInsert(input)), () => store.selectPickReportByKey(input.createdBy, input.idempotencyKey), pickReportFromRow);
+    },
+    async findPickReportByKey(createdBy, idempotencyKey) {
+      return readByKey(await store.selectPickReportByKey(createdBy, idempotencyKey), pickReportFromRow);
+    },
+    async listPickReports(siteId) {
+      return rowsOf(await store.listPickReports(siteId))
+        .map((row) => pickReportFromRow(row))
         .sort(byNewest);
     },
   };

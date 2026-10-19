@@ -1,11 +1,14 @@
 import { z } from "zod";
+import type { PickList } from "@/domain";
 import nominationsFile from "../../../data/sample/nominations.json";
+import picksFile from "../../../data/sample/picks.json";
 import sitesFile from "../../../data/sample/sites.json";
 import solutionMaterialsFile from "../../../data/sample/solution-materials.json";
 import stockFile from "../../../data/sample/stock.json";
 import {
   IdSchema,
   NominationsFileSchema,
+  PicksFileSchema,
   SitesFileSchema,
   SolutionMaterialsFileSchema,
   StockFileSchema,
@@ -13,6 +16,7 @@ import {
   type Material,
   type NominatedPenetration,
   type NominationsPort,
+  type PicksPort,
   type Site,
   type SitesPort,
   type SolutionMaterialsPort,
@@ -26,6 +30,7 @@ export interface StubOptions {
   readonly nominations?: StubMode;
   readonly stock?: StubMode;
   readonly solutionMaterials?: StubMode;
+  readonly picks?: StubMode;
 }
 
 export interface StubPorts {
@@ -33,6 +38,7 @@ export interface StubPorts {
   readonly nominations: NominationsPort;
   readonly stock: StockPort;
   readonly solutionMaterials: SolutionMaterialsPort;
+  readonly picks: PicksPort;
 }
 
 const EMPTY_STOCK_AS_OF = "2026-10-03T08:00:00Z";
@@ -42,6 +48,7 @@ const MALFORMED = {
   nominations: { bySite: { "site-a": [{ id: "pen-a-01" }] } },
   stock: { asOf: "2026-10-03T08:00:00Z", balances: [{ materialId: "MAT-SEALANT", location: "Warehouse", quantity: Number.POSITIVE_INFINITY }] },
   solutionMaterials: { materials: [{ id: "bad id", name: "Broken", unit: "each" }], items: [] },
+  picks: { bySite: { "site-b": { picker: null, lastAction: null, lastActionAt: null, lines: [{ id: "bad id" }] } } },
 } as const;
 
 function parseUpstream<T>(schema: z.ZodType<T>, data: unknown, system: string): T {
@@ -93,11 +100,20 @@ function solutionMaterialsData(mode: StubMode): { materials: Material[]; items: 
   return parsed;
 }
 
+function picksData(mode: StubMode, siteId: string): PickList | null {
+  refuseIfDown(mode, "picks");
+  const source = mode === "malformed" ? MALFORMED.picks : mode === "empty" ? { bySite: {} } : picksFile;
+  const parsed = parseUpstream(PicksFileSchema, source, "picks");
+  const record = parsed.bySite[siteId];
+  return record ? { siteId, ...record } : null;
+}
+
 export function makeStubs(options: StubOptions = {}): StubPorts {
   const sitesMode = options.sites ?? "normal";
   const nominationsMode = options.nominations ?? "normal";
   const stockMode = options.stock ?? "normal";
   const materialsMode = options.solutionMaterials ?? "normal";
+  const picksMode = options.picks ?? "normal";
 
   return {
     sites: {
@@ -131,6 +147,11 @@ export function makeStubs(options: StubOptions = {}): StubPorts {
         const used = new Set(items.map((item) => item.materialId));
         const materials = file.materials.filter((material) => used.has(material.id));
         return parseUpstream(SolutionMaterialsFileSchema, { materials, items }, "solution_materials");
+      },
+    },
+    picks: {
+      async getPicks(siteId) {
+        return picksData(picksMode, siteId);
       },
     },
   };

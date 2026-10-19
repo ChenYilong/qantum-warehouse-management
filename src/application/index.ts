@@ -12,6 +12,7 @@ export {
 } from "./materials";
 export { checkHealth, type HealthView } from "./health";
 export { STOCK_NOTICE, getSiteReadiness, loadSiteData, type SiteData, type SiteReadinessView } from "./readiness";
+export { getPickCheck, recordPickReport, type RecordPickReportInput, type SitePickCheck } from "./picks";
 export { recordEscalation, recordWait, type RecordEscalationInput, type RecordWaitInput } from "./shortages";
 export { listSites, type ListedSite } from "./sites";
 export { uniqueIds, type Dependencies } from "./types";

@@ -9,6 +9,8 @@ const finiteNumber = z.number().refine((value) => Number.isFinite(value));
 export const ContactSchema = z.object({
   name: z.string().trim().min(1).max(80),
   phone: z.string().regex(/^\+[0-9][0-9 ]{5,19}$/),
+  /** Optional: the picker card offers Email only when there is one (AC 62). */
+  email: z.string().regex(/^[^\s@<>"]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/).optional(),
 });
 
 export const SiteSchema = z.object({
@@ -87,3 +89,36 @@ export type SitesFile = z.infer<typeof SitesFileSchema>;
 export type NominationsFile = z.infer<typeof NominationsFileSchema>;
 export type StockFile = z.infer<typeof StockFileSchema>;
 export type SolutionMaterialsFile = z.infer<typeof SolutionMaterialsFileSchema>;
+
+/** A part that must go with a pick line's main item. Quantities are numbers as sent; the check blocks bad ones (AC 61). */
+export const RequiredPartSchema = z.object({
+  id: IdSchema,
+  name: z.string().trim().min(1).max(120),
+  plannedQty: z.number(),
+  pickedQty: z.number(),
+});
+
+export const PickLineSchema = z.object({
+  id: IdSchema,
+  materialName: z.string().trim().min(1).max(120),
+  unit: z.string().max(40),
+  usedAt: z.string().max(120).nullable(),
+  plannedQty: z.number(),
+  pickedQty: z.number(),
+  plannedSpec: z.string().max(80).nullable(),
+  pickedSpec: z.string().max(80).nullable(),
+  requiredParts: z.array(RequiredPartSchema),
+  warehouseStatus: z.string().max(40),
+});
+
+export const PickListRecordSchema = z.object({
+  picker: z.string().max(80).nullable(),
+  lastAction: z.string().max(80).nullable(),
+  lastActionAt: z.string().max(40).nullable(),
+  lines: z.array(PickLineSchema),
+});
+
+/** The warehouse pick system's lists, keyed by site id. */
+export const PicksFileSchema = z.object({
+  bySite: z.record(z.string(), PickListRecordSchema),
+});

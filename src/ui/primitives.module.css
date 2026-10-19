@@ -1740,3 +1740,410 @@ section:has(> .stickyHeading) {
   order: -1;
   align-self: flex-end;
 }
+
+/* The pick check on a site screen (AC 62, 63). The status card takes its tone's colours; every state is also
+   said in words and by its icon, never by colour alone. */
+.pickStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 2px solid currentColor;
+  border-radius: var(--radius);
+}
+
+.pickStatus p {
+  margin: 0;
+}
+
+.pickStatusTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.pickStatusTitle .icon {
+  margin-top: 0;
+}
+
+.pickStatus .button {
+  margin-top: 0.25rem;
+}
+
+.pickEyebrow {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pickWaiting {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.pickWaiting > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.pickerCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.pickerRow,
+.pickerStrip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pickerStrip {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--brand-black);
+  color: var(--brand-yellow);
+  font-weight: 800;
+}
+
+.pickerText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.pickerText p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.pickerName {
+  font-weight: 700;
+}
+
+.pickerFacts {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.pickerFacts > div {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pickerFacts dt {
+  flex: none;
+  width: 3.5rem;
+  color: var(--text-secondary);
+}
+
+.pickerFacts dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.iconButton {
+  flex: none;
+  width: 48px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.pickMaterials {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pickLines {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  list-style: none;
+}
+
+.pickLines > li + li {
+  border-top: 1px solid var(--border);
+}
+
+/* A whole row opens the Pick check at its card: a 64px target with the label on the right. */
+.pickLine {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 64px;
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.pickLineText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.pickLine .chip {
+  flex: none;
+  font-size: 0.875rem;
+}
+
+.crewGate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  text-align: center;
+}
+
+.crewGate p {
+  margin: 0;
+}
+
+/* The Pick check page (AC 64): one card per issue, its tone on the top edge. */
+.pickCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--danger-text);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.pickCard p {
+  margin: 0;
+}
+
+.pickCardTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pickCardTitle {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.specCompare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.specCompare > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  overflow-wrap: anywhere;
+}
+
+.specCompare > .danger {
+  border-color: var(--danger-text);
+}
+
+.pickProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.pickProgressLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pickBar {
+  height: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--input-border);
+  border-radius: 999px;
+  background: var(--bg);
+}
+
+.pickBarFill {
+  height: 100%;
+  background: var(--danger-text);
+}
+
+.pickParts {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  list-style: none;
+}
+
+.pickPart {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+}
+
+.pickPart + .pickPart {
+  border-top: 1px solid var(--border);
+}
+
+.pickPart .icon {
+  margin-top: 0;
+}
+
+.pickPartName {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pickActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.pickActions p {
+  margin: 0;
+  text-align: center;
+}
+
+.pickOutcome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.pickOutcome p {
+  margin: 0;
+}
+
+/* The report form's choices (AC 65): each row is the whole 48px target; the mark is drawn, the native input
+   covers the row, so arrow keys, Space and the group name stay the browser's. */
+.choiceGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choiceRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 48px;
+  cursor: pointer;
+}
+
+.choiceRow input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.choiceMark {
+  flex: none;
+  box-sizing: border-box;
+  width: 1.375rem;
+  height: 1.375rem;
+  border: 2px solid var(--input-border);
+  border-radius: 50%;
+}
+
+.choiceBox {
+  border-radius: 4px;
+}
+
+.choiceRow:has(input:checked) .choiceMark {
+  border-color: var(--text);
+  background: var(--button-bg);
+  box-shadow: inset 0 0 0 3px var(--bg);
+}
+
+.choiceRow:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.amountPair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+/* Add photo: the whole dashed button is the file input. */
+.photoButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px dashed var(--input-border);
+  border-radius: var(--radius);
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.photoButton input {
+  position: absolute;
+  /* Over the dashed border too, so the input is the whole 48px button. */
+  inset: -1.5px;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.photoButton:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
