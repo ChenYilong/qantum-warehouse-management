@@ -4,13 +4,15 @@ import {
   createActionsRepository,
   pickReportFromRow,
   pickReportToInsert,
+  pickReviewFromRow,
+  pickReviewToInsert,
   shortageActionFromRow,
   shortageActionToInsert,
   substitutionProposalFromRow,
   substitutionProposalToInsert,
   type ActionsStore,
 } from "@/adapters/postgres/repository";
-import { UpstreamError, type ActionsRepository, type NewPickReport, type NewShortageAction, type NewSubstitutionProposal } from "@/ports";
+import { UpstreamError, type ActionsRepository, type NewPickReport, type NewPickReview, type NewShortageAction, type NewSubstitutionProposal } from "@/ports";
 
 function actionInput(overrides: Partial<NewShortageAction> = {}): NewShortageAction {
   return {
@@ -46,6 +48,8 @@ function reportInput(overrides: Partial<NewPickReport> = {}): NewPickReport {
     kind: "missing_parts",
     plannedQty: 6,
     pickedQty: 6,
+    affectedQty: null,
+    request: "repick",
     missingPart: "Fixing kit × 6",
     note: "Crew goes Thursday",
     sendToPicker: true,
@@ -64,6 +68,8 @@ const reportRow = {
   kind: "missing_parts",
   planned_qty: "6",
   picked_qty: 6,
+  affected_qty: null,
+  request: "repick",
   missing_part: "Fixing kit × 6",
   note: null,
   send_to_picker: true,
@@ -73,6 +79,19 @@ const reportRow = {
   created_at: "2026-10-03T12:00:00.000Z",
   idempotency_key: "report-1",
 };
+
+const reviewRow = {
+  id: "44444444-4444-4444-8444-444444444444",
+  site_id: "site-a",
+  line_id: "a-collar",
+  created_by: "demo-leader",
+  created_at: "2026-10-19T02:00:00.000Z",
+  idempotency_key: "review-1",
+};
+
+function reviewInput(overrides: Partial<NewPickReview> = {}): NewPickReview {
+  return { siteId: "site-a", lineId: "a-collar", createdBy: "demo-leader", idempotencyKey: "review-1", ...overrides };
+}
 
 type ContractCase = (name: string, fn: () => Promise<void>) => void;
 
@@ -149,6 +168,27 @@ export function actionsRepositoryContract(factory: () => ActionsRepository, test
     expect(await repo.listPickReports("site-a")).toEqual([]);
     expect(await repo.findPickReportByKey("demo-leader", "report-1")).toEqual(first.record);
     expect(await repo.findPickReportByKey("demo-leader", "missing")).toBeNull();
+  });
+
+  test("AC 69: a pick report keeps what the site found, how many and what is needed", async () => {
+    const repo = factory();
+    const saved = await repo.appendPickReport(reportInput({ idempotencyKey: "found-1", kind: "damaged", affectedQty: 2, request: "same_day" }));
+    expect(saved.record).toMatchObject({ kind: "damaged", affectedQty: 2, request: "same_day" });
+    expect(await repo.findPickReportByKey("demo-leader", "found-1")).toEqual(saved.record);
+  });
+
+  test("AC 68, AC 71: a pick review repeated with the same key is one record, listed newest first by site", async () => {
+    const repo = factory();
+    const first = await repo.appendPickReview(reviewInput());
+    const resend = await repo.appendPickReview(reviewInput());
+    const later = await repo.appendPickReview(reviewInput({ idempotencyKey: "review-2", lineId: "a-sealant" }));
+    expect(first.created).toBe(true);
+    expect(first.record).toMatchObject({ siteId: "site-a", lineId: "a-collar", createdBy: "demo-leader" });
+    expect(resend).toEqual({ record: first.record, created: false });
+    expect((await repo.listPickReviews("site-a")).map((review) => review.id)).toEqual([later.record.id, first.record.id]);
+    expect(await repo.listPickReviews("site-b")).toEqual([]);
+    expect(await repo.findPickReviewByKey("demo-leader", "review-1")).toEqual(first.record);
+    expect(await repo.findPickReviewByKey("other-leader", "review-1")).toBeNull();
   });
 
   test("the same key for a different user creates a new proposal", async () => {
@@ -320,6 +360,15 @@ describe("actions repository mapping", () => {
       async listPickReports() {
         return { data: { not: "rows" }, error: null };
       },
+      async insertPickReview() {
+        return { data: null, error: { code: "42501" } };
+      },
+      async selectPickReviewByKey() {
+        return { data: [reviewRow], error: null };
+      },
+      async listPickReviews() {
+        return { data: null, error: { code: "XX000" } };
+      },
     };
     const repo = createActionsRepository(store);
     const saved = await repo.appendShortageAction(actionInput());
@@ -381,6 +430,16 @@ describe("actions repository mapping", () => {
       async listPickReports(siteId) {
         return { data: siteId === "site-b" ? [reportRow] : [], error: null };
       },
+      async insertPickReview() {
+        return { data: null, error: { code: "23505" } };
+      },
+      async selectPickReviewByKey(createdBy, idempotencyKey) {
+        selects.push({ table: "review", createdBy, idempotencyKey });
+        return { data: createdBy === "demo-leader" ? reviewRow : null, error: null };
+      },
+      async listPickReviews(siteId) {
+        return { data: siteId === "site-a" ? [reviewRow] : [], error: null };
+      },
     };
     const repo = createActionsRepository(store);
     const inserted = await repo.appendShortageAction(actionInput());
@@ -410,6 +469,8 @@ describe("actions repository mapping", () => {
       kind: "missing_parts",
       planned_qty: 6,
       picked_qty: 6,
+      affected_qty: null,
+      request: "repick",
       missing_part: "Fixing kit × 6",
       note: "Crew goes Thursday",
       send_to_picker: true,
@@ -424,8 +485,114 @@ describe("actions repository mapping", () => {
       { ...reportRow, planned_qty: "-1" },
       { ...reportRow, send_to_picker: false, send_to_purchasing: false },
       { ...reportRow, created_at: "not a time" },
+      { ...reportRow, request: "tomorrow" },
+      { ...reportRow, affected_qty: "-2" },
     ]) {
       expect(() => pickReportFromRow(bad)).toThrow(UpstreamError);
     }
+  });
+
+  it("AC 68, AC 69: maps the site's findings and reviews to the migration's columns and back", async () => {
+    expect(pickReportToInsert(reportInput({ kind: "wrong_item", affectedQty: 3, request: "same_day" }))).toMatchObject({
+      kind: "wrong_item",
+      affected_qty: 3,
+      request: "same_day",
+    });
+    expect(pickReportFromRow({ ...reportRow, kind: "unsuitable", affected_qty: "2", request: "same_day" })).toMatchObject({
+      kind: "unsuitable",
+      affectedQty: 2,
+      request: "same_day",
+    });
+    expect(pickReviewToInsert(reviewInput())).toEqual({ site_id: "site-a", line_id: "a-collar", created_by: "demo-leader", idempotency_key: "review-1" });
+    expect(pickReviewFromRow({ ...reviewRow, extra: "dropped" })).toEqual({
+      id: reviewRow.id,
+      siteId: "site-a",
+      lineId: "a-collar",
+      createdBy: "demo-leader",
+      createdAt: "2026-10-19T02:00:00.000Z",
+    });
+    for (const bad of [{ ...reviewRow, id: "not-a-uuid" }, { ...reviewRow, created_at: "never" }, { ...reviewRow, line_id: "" }]) {
+      expect(() => pickReviewFromRow(bad)).toThrow(UpstreamError);
+    }
+  });
+
+  it("AC 68: a review replays its unique violation, and store failures are upstream errors", async () => {
+    const selects: { table: string; createdBy: string; idempotencyKey: string }[] = [];
+    const base = {
+      async insertShortageAction() {
+        return { data: null, error: null };
+      },
+      async selectShortageActionByKey() {
+        return { data: null, error: null };
+      },
+      async listShortageActions() {
+        return { data: [], error: null };
+      },
+      async insertSubstitutionProposal() {
+        return { data: null, error: null };
+      },
+      async selectSubstitutionProposalByKey() {
+        return { data: null, error: null };
+      },
+      async listSubstitutionProposals() {
+        return { data: [], error: null };
+      },
+      async insertPickReport() {
+        return { data: null, error: null };
+      },
+      async selectPickReportByKey() {
+        return { data: null, error: null };
+      },
+      async listPickReports() {
+        return { data: [], error: null };
+      },
+    };
+    const replaying = createActionsRepository({
+      ...base,
+      async insertPickReview() {
+        return { data: null, error: { code: "23505" } };
+      },
+      async selectPickReviewByKey(createdBy: string, idempotencyKey: string) {
+        selects.push({ table: "review", createdBy, idempotencyKey });
+        return { data: reviewRow, error: null };
+      },
+      async listPickReviews(siteId: string) {
+        return { data: siteId === "site-a" ? [reviewRow] : [], error: null };
+      },
+    });
+    expect(await replaying.appendPickReview(reviewInput())).toMatchObject({ created: false, record: { id: reviewRow.id } });
+    expect(selects).toEqual([{ table: "review", createdBy: "demo-leader", idempotencyKey: "review-1" }]);
+    expect(await replaying.findPickReviewByKey("demo-leader", "review-1")).toMatchObject({ id: reviewRow.id });
+    expect((await replaying.listPickReviews("site-a")).map((review) => review.lineId)).toEqual(["a-collar"]);
+
+    const failing = createActionsRepository({
+      ...base,
+      async insertPickReview() {
+        return { data: null, error: { code: "42501" } };
+      },
+      async selectPickReviewByKey() {
+        return { data: [reviewRow], error: null };
+      },
+      async listPickReviews() {
+        return { data: null, error: { code: "XX000" } };
+      },
+    });
+    await expect(failing.appendPickReview(reviewInput())).rejects.toMatchObject({ code: "upstream_unavailable", system: "actions_store" });
+    await expect(failing.findPickReviewByKey("demo-leader", "review-1")).rejects.toBeInstanceOf(UpstreamError);
+    await expect(failing.listPickReviews("site-a")).rejects.toBeInstanceOf(UpstreamError);
+    const inserted = createActionsRepository({
+      ...base,
+      async insertPickReview() {
+        return { data: reviewRow, error: null };
+      },
+      async selectPickReviewByKey() {
+        return { data: null, error: null };
+      },
+      async listPickReviews() {
+        return { data: [], error: null };
+      },
+    });
+    expect(await inserted.appendPickReview(reviewInput())).toMatchObject({ created: true, record: { id: reviewRow.id } });
+    expect(await inserted.findPickReviewByKey("demo-leader", "nope")).toBeNull();
   });
 });

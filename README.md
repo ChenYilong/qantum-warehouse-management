@@ -28,6 +28,7 @@ The live demo uses invented sample data and has no login. Decisions are stored i
 7. **Decisions**, from the menu on the Sites list: every site's decisions and proposals with time and author, and whether each still applies. On a site's list, rows mark escalated and waiting penetrations; each penetration page has its own Decisions tab.
 8. **Offline.** The bar above every screen shows the picker's last action and an Online switch. Switch it off to work offline: the bar says Offline with when the phone last heard from the server, a banner at the foot says how old the screen is, decisions are not sent, and Offline details has Sync now with the last sync time.
 9. **Materials**, from the menu on the Sites list. Each material against the one shared stock, across sites. The pipe collar shows 2 on hand against 6 planned across sites, short at one site: Cedar Court on its own is not short, but the sites together need more than there is.
+10. **Review on site.** On Cedar Court, under Materials · planned vs picked, every line has its own Review beside its label, the lines that match the plan too: the warehouse can mark a line right and the site still find it wrong. Review the pipe collar and tap **No, something's wrong**, then say what the site found (Damaged, 2 affected, Same-day delivery) and send it. Back on the site the line reads Reported on site with what was found, Picks says Not ready and Send the crew is locked. Review it again and tap **Yes, it's right**: the picks match the plan again and the line reads Checked on site. Offline, Yes waits on the phone like a report and sends itself once you are back online.
 
 ## Run locally
 
@@ -70,6 +71,8 @@ CI deploys `main` to Vercel after the checks, database and browser jobs pass, th
    Type passwords at prompts or read them from a password manager. Do not leave them in shell history.
 2. **Vercel project** (framework Next.js, region `syd1` from `vercel.json`) with `ACTIONS_STORE=postgres`, `DB_HOST`, `DB_PORT=6543`, `DB_USER=qantum_slice.<project-ref>`, `DB_NAME=qantum_slice`, `DB_SSL=require`, `DB_POOL_MAX=1`, and `DB_PASSWORD` as a sensitive variable.
 3. **GitHub:** secret `VERCEL_TOKEN`; variables `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `PRODUCTION_URL`.
+
+Schema changes ship as new files in `db/migrations/`; the latest, `0003_site_review.sql`, adds the reviews on site and the site's report fields. Run step 1's `npm run db:migrate` again before deploying a change that adds one: it applies only the files not yet recorded in `schema_migrations`, and the app's role cannot change the schema itself.
 
 Every runtime variable of the app is listed in `.env.example` and explained in `docs/api.md` (Configuration). The test and CI variables above (`TEST_DB_ADMIN_URL`, `REQUIRE_DB_CONTRACT`, `PRODUCTION_URL`, `VERCEL_*`) are not.
 

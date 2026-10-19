@@ -1,5 +1,5 @@
 import type { Pool, QueryResultRow } from "pg";
-import type { ActionsStore, PickReportInsert, ShortageActionInsert, StoreResult, SubstitutionProposalInsert } from "./repository";
+import type { ActionsStore, PickReportInsert, PickReviewInsert, ShortageActionInsert, StoreResult, SubstitutionProposalInsert } from "./repository";
 
 type SqlValue = string | number | boolean | null;
 
@@ -22,13 +22,20 @@ const SELECT_PROPOSAL = "select * from public.substitution_proposal where create
 const LIST_PROPOSAL = "select * from public.substitution_proposal where site_id = $1 order by created_at desc, id desc";
 
 const INSERT_REPORT = `insert into public.pick_report (
-  site_id, line_id, kind, planned_qty, picked_qty, missing_part, note, send_to_picker, send_to_purchasing, photo_attached, created_by, idempotency_key
-) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+  site_id, line_id, kind, planned_qty, picked_qty, affected_qty, request, missing_part, note, send_to_picker, send_to_purchasing, photo_attached, created_by, idempotency_key
+) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 returning *`;
 
 const SELECT_REPORT = "select * from public.pick_report where created_by = $1 and idempotency_key = $2";
 
 const LIST_REPORT = "select * from public.pick_report where site_id = $1 order by created_at desc, id desc";
+
+const INSERT_REVIEW = `insert into public.pick_review (site_id, line_id, created_by, idempotency_key) values ($1, $2, $3, $4)
+returning *`;
+
+const SELECT_REVIEW = "select * from public.pick_review where created_by = $1 and idempotency_key = $2";
+
+const LIST_REVIEW = "select * from public.pick_review where site_id = $1 order by created_at desc, id desc";
 
 export function createPgActionsStore(pool: Pool): ActionsStore {
   return {
@@ -59,6 +66,15 @@ export function createPgActionsStore(pool: Pool): ActionsStore {
     listPickReports(siteId) {
       return many(pool, LIST_REPORT, [siteId]);
     },
+    insertPickReview(row) {
+      return one(pool, INSERT_REVIEW, reviewValues(row));
+    },
+    selectPickReviewByKey(createdBy, idempotencyKey) {
+      return maybeOne(pool, SELECT_REVIEW, [createdBy, idempotencyKey]);
+    },
+    listPickReviews(siteId) {
+      return many(pool, LIST_REVIEW, [siteId]);
+    },
   };
 }
 
@@ -86,6 +102,8 @@ function reportValues(row: PickReportInsert): SqlValue[] {
     row.kind,
     row.planned_qty,
     row.picked_qty,
+    row.affected_qty,
+    row.request,
     row.missing_part,
     row.note,
     row.send_to_picker,
@@ -147,4 +165,8 @@ function failed(error: unknown): StoreResult {
 function codeOf(error: unknown): string | undefined {
   if (typeof error !== "object" || error === null || !("code" in error)) return undefined;
   return typeof error.code === "string" ? error.code : undefined;
+}
+
+function reviewValues(row: PickReviewInsert): SqlValue[] {
+  return [row.site_id, row.line_id, row.created_by, row.idempotency_key];
 }
