@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { register, ROLES, signIn, type Role } from "./auth";
+import { register, restoreStamp, ROLES, signIn, type Role } from "./auth";
 import { Button } from "./Button";
 import { AUTH } from "./messages";
 import { authStorage, notifyAuth, useSignedIn, useStoredRole, useStoredUser } from "./useAuth";
@@ -43,6 +43,7 @@ export function LoginGate() {
   useEffect(() => {
     const shell = document.querySelector("[data-app-shell]");
     if (signedIn) {
+      restoreStamp(document.documentElement, authStorage());
       shell?.removeAttribute("inert");
       wasSignedIn.current = true;
       return;
