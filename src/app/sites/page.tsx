@@ -8,6 +8,8 @@ import { SiteFilterForm } from "@/ui/SiteFilterForm";
 import { filterSites, isFiltered, parseSiteFilters, type SiteFilters } from "@/ui/site-filters";
 import { siteChip } from "@/ui/status";
 import { markerColour, validLocation } from "@/ui/travel";
+import { buildCalendar } from "@/ui/calendar";
+import { CalendarPanel } from "@/ui/CalendarPanel";
 import { deadlineOf } from "@/ui/deadline";
 import { buildToday, TODAY } from "@/ui/today";
 import { TodayPanel } from "@/ui/TodayPanel";
@@ -37,8 +39,12 @@ export default async function SitesPage({ searchParams }: PageProps) {
         ) : sites.length === 0 ? (
           <p>{EMPTY.sites}</p>
         ) : (
-          // One trip provider for the panel's card and the list's, so the same project says the same thing in both.
+          // One trip provider for the panels' cards and the list's, so the same project says the same thing in each.
           <TravelProvider token={token} places={placesOf(sites)}>
+            <CalendarPanel
+              calendar={buildCalendar(sites)}
+              cards={Object.fromEntries(sites.map((site) => [site.id, <ProjectCard key={site.id} site={site} token={token} idPrefix="calendar-card" />]))}
+            />
             <TodayPanel
               today={buildToday(sites)}
               token={token}
@@ -62,8 +68,8 @@ function placesOf(sites: readonly ListedSite[]): Place[] {
 }
 
 /**
- * One project's card, exactly as the list shows it (AC 49, 74, 80): today's panel shows the same card under its map
- * (AC 79), with its own ids.
+ * One project's card, exactly as the list shows it (AC 49, 74, 80): the deadline calendar and today's panel show the
+ * same card under the calendar and the map (AC 79, 81), each with its own ids.
  */
 function ProjectCard({ site, token, idPrefix }: { site: ListedSite; token: string; idPrefix?: string }) {
   const location = validLocation(site.location);
