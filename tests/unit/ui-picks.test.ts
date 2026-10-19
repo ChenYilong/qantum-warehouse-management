@@ -1,22 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { checkPickLine, type PickLine } from "@/domain";
-import { addToOutbox, afterSend, OUTBOX_KEY, parseOutbox, readOutbox, removeFromOutbox, waitingFor, type OutboxEntry } from "@/ui/pick-outbox";
-import {
-  crewGate,
-  initials,
-  missingPartText,
-  pickAmountLine,
-  pickCardTitle,
-  pickEmailHref,
-  pickLineAnchor,
-  parseAmount,
-  pickLineLabel,
-  pickReportPath,
-  picksPath,
-  reportKindFor,
-} from "@/ui/picks";
+import { checkPickLine, PICK_REPORT_KINDS, type PickLine } from "@/domain";
+import { addToOutbox, afterSend, OUTBOX_KEY, outboxUrl, parseOutbox, readOutbox, removeFromOutbox, waitingCounts, waitingFor, type OutboxEntry } from "@/ui/pick-outbox";
+import { crewGate, initials, missingPartText, parseAmount, pickAmountLine, pickCardTitle, pickEmailHref, pickLineAnchor, pickLineLabel, pickReportPath, pickReviewPath, picksPath, reportFinding, reportKindFor, reportKinds } from "@/ui/picks";
 import { AUTH, PICKS } from "@/ui/messages";
-import { pickReportUrl } from "@/ui/decisions/api-client";
+import { pickReportUrl, pickReviewUrl } from "@/ui/decisions/api-client";
 
 function line(overrides: Partial<PickLine> = {}): PickLine {
   return {
@@ -174,10 +161,10 @@ describe("AC 61 to 66: the pick wording", () => {
     expect(PICKS.notReady(3)).toBe("Not ready · 3 pick issues");
     expect(PICKS.offlineText(1)).toMatch(/^Last known: 1 pick issue\. /);
     expect(PICKS.offlineText(3)).toMatch(/^Last known: 3 pick issues\. /);
-    expect(PICKS.waiting(1)).toBe("1 report waiting to send");
-    expect(PICKS.waiting(2)).toBe("2 reports waiting to send");
-    expect(PICKS.outboxSent(1)).toBe("1 pick report sent");
-    expect(PICKS.outboxSent(2)).toBe("2 pick reports sent");
+    expect(PICKS.waitingAll(1, 0)).toBe("1 report waiting to send");
+    expect(PICKS.waitingAll(2, 0)).toBe("2 reports waiting to send");
+    expect(PICKS.outboxSentAll(1, 0)).toBe("1 pick report sent");
+    expect(PICKS.outboxSentAll(2, 0)).toBe("2 pick reports sent");
     expect(PICKS.checkTitle(0)).toBe("Pick check");
     expect(PICKS.checkTitle(1)).toBe("Pick check · 1 issue");
     expect(PICKS.checkTitle(3)).toBe("Pick check · 3 issues");
@@ -206,5 +193,70 @@ describe("AC 61 to 66: the pick wording", () => {
     for (const text of texts) expect(text).not.toMatch(/compatible|approved/i);
     expect(PICKS.sendCrew).not.toMatch(/crew can go/i);
     for (const text of [PICKS.crewLocked, PICKS.crewNotClear, PICKS.crewOffline, PICKS.crewTell]) expect(text).not.toMatch(/crew can go/i);
+  });
+});
+
+describe("AC 67, AC 69, AC 70: the site review's labels, paths and wording", () => {
+  const found = { kind: "damaged" as const, affectedQty: 2, request: "same_day" as const };
+
+  it("labels a line reported from site red, and Was reported on site in amber from saved data", () => {
+    expect(pickLineLabel("reported", false)).toEqual({ label: "Reported on site", tone: "danger", icon: "stop" });
+    expect(pickLineLabel("reported", true)).toEqual({ label: "Was reported on site", tone: "warning", icon: "warning" });
+    expect(pickCardTitle({ ...checkPickLine(line()), kind: "reported" })).toBe("Reported on site");
+  });
+
+  it("opens the review on its line, and the report from a review with no kind chosen", () => {
+    expect(pickReviewPath("site-b", "b collar")).toBe("/sites/site-b/picks/review?line=b%20collar");
+    expect(pickReportPath("site-b", "b-wrap", true)).toBe("/sites/site-b/picks/report?line=b-wrap&from=review");
+    expect(pickReportPath("site-b", "b-wrap")).toBe("/sites/site-b/picks/report?line=b-wrap");
+    expect(pickReviewUrl("a/b")).toBe("/api/sites/a%2Fb/pick-reviews");
+  });
+
+  it("lists what the site finds first when the report comes from a review, what the check finds first otherwise", () => {
+    expect(reportKinds(true)).toEqual(["unsuitable", "wrong_item", "damaged", "wrong_spec", "missing_parts", "part_picked", "other"]);
+    expect(reportKinds(false)).toEqual(["wrong_spec", "missing_parts", "part_picked", "unsuitable", "wrong_item", "damaged", "other"]);
+    for (const fromReview of [true, false]) expect([...reportKinds(fromReview)].sort()).toEqual([...PICK_REPORT_KINDS].sort());
+  });
+
+  it("says what the site found, how many and what was asked for; unknown or no amount is left out", () => {
+    expect(reportFinding(found)).toBe("Damaged · 2 affected · same-day delivery asked");
+    expect(reportFinding({ kind: "wrong_item", affectedQty: null, request: "repick" })).toBe("Wrong item · re-pick asked");
+    expect(reportFinding({ kind: "unsuitable", affectedQty: 0, request: "repick" })).toBe("Doesn't fit · 0 affected · re-pick asked");
+    expect(reportFinding({ kind: "part_picked", affectedQty: Number.NaN, request: "same_day" })).toBe("Partly picked · same-day delivery asked");
+    for (const kind of PICK_REPORT_KINDS) expect(PICKS.foundKinds[kind], kind).toMatch(/\S/);
+    expect(PICKS.kinds.unsuitable).toBe("Doesn't fit on site");
+    expect(PICKS.kinds.wrong_item).toBe("Wrong item");
+    expect(PICKS.kinds.damaged).toBe("Damaged, on the way or during the work");
+    expect(PICKS.requests).toEqual({ repick: "Re-pick for the next delivery", same_day: "Same-day delivery" });
+  });
+
+  it("counts what waits to send by kind: reports and reviews apart", () => {
+    expect(PICKS.waitingAll(1, 0)).toBe("1 report waiting to send");
+    expect(PICKS.waitingAll(2, 0)).toBe("2 reports waiting to send");
+    expect(PICKS.waitingAll(0, 1)).toBe("1 review waiting to send");
+    expect(PICKS.waitingAll(1, 1)).toBe("1 report and 1 review waiting to send");
+    expect(PICKS.waitingAll(2, 3)).toBe("2 reports and 3 reviews waiting to send");
+    expect(PICKS.outboxSentAll(0, 1)).toBe("1 review sent");
+    expect(PICKS.outboxSentAll(1, 2)).toBe("1 pick report and 2 reviews sent");
+    expect(PICKS.checkedOnSite("14:32")).toBe("Checked on site 14:32");
+    expect(PICKS.reportedOnSite("14:32", "Damaged · same-day delivery asked")).toBe("Reported 14:32 · Damaged · same-day delivery asked");
+  });
+});
+
+describe("AC 71: reviews wait on the phone with reports", () => {
+  it("keeps a review's type, counts reviews and reports apart, and sends each to its own address", () => {
+    const store = storage();
+    const review: OutboxEntry = { key: "v-1", siteId: "site-b", body: { lineId: "b-wrap" }, savedAt: 3, type: "review" };
+    addToOutbox(store, entry);
+    addToOutbox(store, review);
+    const saved = readOutbox(store);
+    expect(saved).toEqual([entry, review]);
+    expect(waitingCounts(saved, "site-b")).toEqual({ reports: 1, reviews: 1 });
+    expect(waitingCounts(saved, "site-a")).toEqual({ reports: 0, reviews: 0 });
+    expect(waitingFor(saved, "site-b")).toBe(2);
+    expect(outboxUrl(entry)).toBe("/api/sites/site-b/pick-reports");
+    expect(outboxUrl(review)).toBe("/api/sites/site-b/pick-reviews");
+    // An entry of a type this app never wrote is dropped, never sent somewhere.
+    expect(parseOutbox(JSON.stringify([{ ...review, type: "approve" }, { ...entry, type: "report" }]))).toEqual([entry]);
   });
 });

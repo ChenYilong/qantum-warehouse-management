@@ -1,7 +1,9 @@
+import { pickReportUrl, pickReviewUrl } from "./decisions/api-client";
+
 /**
- * Pick-error reports waiting on this phone (AC 66). A report written offline is kept here with its idempotency
- * key and sent once the phone is back online; a resend after a lost answer carries the same key, so the server
- * records it once. Kept in this browser only.
+ * Pick-error reports and reviews on site waiting on this phone (AC 66, 71). One written offline is kept here with its
+ * idempotency key and sent once the phone is back online; a resend after a lost answer carries the same key, so the
+ * server records it once. Kept in this browser only.
  */
 export const OUTBOX_KEY = "team-leader:pick-report-outbox";
 export const OUTBOX_CHANGED = "team-leader:outbox-change";
@@ -12,6 +14,8 @@ export interface OutboxEntry {
   readonly body: Record<string, unknown>;
   /** When it was saved, ms since the epoch. */
   readonly savedAt: number;
+  /** A review on site (AC 71). A report has no type, as reports saved before reviews existed. */
+  readonly type?: "review";
 }
 
 interface OutboxStorage {
@@ -30,11 +34,14 @@ export function parseOutbox(raw: string | null): OutboxEntry[] {
     if (!Array.isArray(parsed)) return [];
     return parsed.flatMap((item: unknown) => {
       if (typeof item !== "object" || item === null) return [];
-      const { key, siteId, body, savedAt } = item as Record<string, unknown>;
+      const { key, siteId, body, savedAt, type } = item as Record<string, unknown>;
       if (typeof key !== "string" || !KEY.test(key) || typeof siteId !== "string" || !SITE.test(siteId)) return [];
       if (typeof body !== "object" || body === null || Array.isArray(body)) return [];
       if (typeof savedAt !== "number" || !Number.isFinite(savedAt)) return [];
-      return [{ key, siteId, body: body as Record<string, unknown>, savedAt }];
+      // Only types this app knows: anything else is dropped, never sent somewhere it was not meant for.
+      if (type !== undefined && type !== "review" && type !== "report") return [];
+      const entry: OutboxEntry = { key, siteId, body: body as Record<string, unknown>, savedAt };
+      return [type === "review" ? { ...entry, type } : entry];
     });
   } catch {
     return [];
@@ -72,6 +79,18 @@ export function removeFromOutbox(storage: OutboxStorage, key: string): void {
 
 export function waitingFor(entries: readonly OutboxEntry[], siteId: string): number {
   return entries.filter((entry) => entry.siteId === siteId).length;
+}
+
+/** What waits for a site, reports and reviews apart (AC 71). */
+export function waitingCounts(entries: readonly OutboxEntry[], siteId: string): { readonly reports: number; readonly reviews: number } {
+  const mine = entries.filter((entry) => entry.siteId === siteId);
+  const reviews = mine.filter((entry) => entry.type === "review").length;
+  return { reports: mine.length - reviews, reviews };
+}
+
+/** Where an entry is sent: a review to the reviews, anything else to the reports. */
+export function outboxUrl(entry: OutboxEntry): string {
+  return entry.type === "review" ? pickReviewUrl(entry.siteId) : pickReportUrl(entry.siteId);
 }
 
 /** Codes the server answers only for a report it will never accept: the report leaves the outbox. */

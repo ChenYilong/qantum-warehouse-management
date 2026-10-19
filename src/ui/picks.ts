@@ -1,4 +1,4 @@
-import type { CheckedPickLine, PickCheck, PickIssueKind, PickReportKind, PickStatus } from "@/domain";
+import type { CheckedPickLine, PickCheck, PickIssueKind, PickReport, PickReportKind, PickStatus } from "@/domain";
 import { sitePath } from "./format";
 import { PICKS } from "./messages";
 import type { StatusView } from "./status";
@@ -16,10 +16,16 @@ export function picksPath(siteId: string): string {
   return `${sitePath(siteId)}/picks`;
 }
 
-/** The report form, opened on one pick line when given (AC 65). */
-export function pickReportPath(siteId: string, lineId?: string): string {
+/** The report form, opened on one pick line when given (AC 65); from a review it asks what the site found (AC 69). */
+export function pickReportPath(siteId: string, lineId?: string, fromReview = false): string {
   const base = `${picksPath(siteId)}/report`;
-  return lineId ? `${base}?line=${encodeURIComponent(lineId)}` : base;
+  if (!lineId) return base;
+  return `${base}?line=${encodeURIComponent(lineId)}${fromReview ? "&from=review" : ""}`;
+}
+
+/** The review on site of one pick line (AC 67). */
+export function pickReviewPath(siteId: string, lineId: string): string {
+  return `${picksPath(siteId)}/review?line=${encodeURIComponent(lineId)}`;
 }
 
 /** An anchor for a line's card on the Pick check page. */
@@ -32,6 +38,7 @@ const LABELS: Record<PickIssueKind, { readonly live: string; readonly saved: str
   part_picked: { live: "Part-picked", saved: "Was part-picked" },
   missing_parts: { live: "Missing parts", saved: "Was missing parts" },
   bad_data: { live: "Can't read", saved: "Was unreadable" },
+  reported: { live: "Reported on site", saved: "Was reported on site" },
 };
 
 /**
@@ -71,9 +78,32 @@ export function pickCardTitle(checked: CheckedPickLine): string {
       return "Marked picked, parts missing";
     case "bad_data":
       return "Can't read this line";
+    case "reported":
+      return "Reported on site";
     default:
       return "Matches plan";
   }
+}
+
+/**
+ * What the site found, how many and what it asked for (AC 70): "Damaged · 2 affected · same-day delivery asked". An
+ * amount that is not a whole number is left out, never shown as a figure.
+ */
+export function reportFinding(report: Pick<PickReport, "kind" | "affectedQty" | "request">): string {
+  const parts: string[] = [PICKS.foundKinds[report.kind]];
+  if (report.affectedQty !== null && Number.isInteger(report.affectedQty) && report.affectedQty >= 0) parts.push(PICKS.affected(report.affectedQty));
+  parts.push(PICKS.requestAsked[report.request]);
+  return parts.join(" · ");
+}
+
+/**
+ * The kinds as the report form lists them (AC 65, 69): from the Pick check, what the check finds first; from a review
+ * on site, what the site finds first. "Something else" is last either way.
+ */
+export function reportKinds(fromReview: boolean): readonly PickReportKind[] {
+  return fromReview
+    ? ["unsuitable", "wrong_item", "damaged", "wrong_spec", "missing_parts", "part_picked", "other"]
+    : ["wrong_spec", "missing_parts", "part_picked", "unsuitable", "wrong_item", "damaged", "other"];
 }
 
 /** The report kind a line's issue suggests. Untrusted data has no kind of its own, so it is "something else". */

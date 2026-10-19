@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useId, useState, type FormEvent } from "react";
-import type { PickReportKind } from "@/domain";
+import type { PickReportKind, PickRequest } from "@/domain";
 import { useConnection } from "./ConnectionBar";
 import { announce, pickReportUrl, postDecision } from "./decisions/api-client";
 import { apiErrorMessage, PICKS } from "./messages";
 import { notifyOutbox } from "./PickOutboxSync";
 import { addToOutbox, afterSend } from "./pick-outbox";
-import { parseAmount, picksPath } from "./picks";
+import { sitePath } from "./format";
+import { parseAmount, picksPath, reportKinds } from "./picks";
 import { useStamp } from "./PickSummary";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
@@ -25,7 +26,7 @@ export interface ReportLine {
   readonly missingPart: string;
 }
 
-const KINDS: readonly PickReportKind[] = ["wrong_spec", "missing_parts", "part_picked", "other"];
+const REQUESTS: readonly PickRequest[] = ["repick", "same_day"];
 
 type Outcome = { readonly state: "sent" | "queued" } | { readonly state: "failed"; readonly message: string } | null;
 
@@ -34,8 +35,9 @@ function amountText(value: number): string {
 }
 
 /**
- * Report a pick error (AC 65, 66). Online it is sent at once with a new idempotency key; offline, or when the send
- * gets no answer, it waits on this phone with that key and sends itself once back online, never twice.
+ * Report a pick error (AC 65, 66), or what the site found on a review (AC 69). Online it is sent at once with a new
+ * idempotency key; offline, or when the send gets no answer, it waits on this phone with that key and sends itself
+ * once back online, never twice. From a review no kind is chosen for the leader: the site has to say what it found.
  */
 export function PickReportForm({
   siteId,
@@ -45,6 +47,7 @@ export function PickReportForm({
   lastActionAt,
   lines,
   initialLineId,
+  fromReview = false,
 }: {
   siteId: string;
   siteName: string;
@@ -53,20 +56,33 @@ export function PickReportForm({
   lastActionAt: string | null;
   lines: readonly ReportLine[];
   initialLineId: string;
+  /** Opened from a review on site (AC 69): what the site finds first, and no kind chosen. */
+  fromReview?: boolean;
 }) {
   const connection = useConnection();
-  const ids = { planned: useId(), picked: useId(), missing: useId(), note: useId(), line: useId(), photo: useId(), errors: useId() };
+  const ids = {
+    planned: useId(),
+    picked: useId(),
+    affected: useId(),
+    missing: useId(),
+    note: useId(),
+    line: useId(),
+    photo: useId(),
+    errors: useId(),
+  };
   const start = lines.find((line) => line.id === initialLineId) ?? lines[0]!;
   const [lineId, setLineId] = useState(start.id);
-  const [kind, setKind] = useState<PickReportKind>(start.kind);
+  const [kind, setKind] = useState<PickReportKind | null>(fromReview ? null : start.kind);
   const [planned, setPlanned] = useState(amountText(start.plannedQty));
   const [picked, setPicked] = useState(amountText(start.pickedQty));
+  const [affected, setAffected] = useState("");
+  const [request, setRequest] = useState<PickRequest>("repick");
   const [missingPart, setMissingPart] = useState(start.missingPart);
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [toPicker, setToPicker] = useState(true);
   const [toPurchasing, setToPurchasing] = useState(false);
-  const [errors, setErrors] = useState<Partial<Record<"planned" | "picked" | "recipients", string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<"kind" | "planned" | "picked" | "affected" | "recipients", string>>>({});
   const [sending, setSending] = useState(false);
   const [outcome, setOutcome] = useState<Outcome>(null);
   const lastActionLabel = useStamp(lastActionAt);
@@ -75,7 +91,8 @@ export function PickReportForm({
     const line = lines.find((item) => item.id === id);
     if (!line) return;
     setLineId(line.id);
-    setKind(line.kind);
+    // From a review the site says what it found; a line's computed issue never answers for it.
+    if (!fromReview) setKind(line.kind);
     setPlanned(amountText(line.plannedQty));
     setPicked(amountText(line.pickedQty));
     setMissingPart(line.missingPart);
@@ -85,12 +102,15 @@ export function PickReportForm({
     event.preventDefault();
     const plannedQty = parseAmount(planned);
     const pickedQty = parseAmount(picked);
+    const affectedQty = parseAmount(affected);
     const found: typeof errors = {};
+    if (kind === null) found.kind = PICKS.chooseKind;
     if (plannedQty === "bad") found.planned = PICKS.badAmount;
     if (pickedQty === "bad") found.picked = PICKS.badAmount;
+    if (affectedQty === "bad") found.affected = PICKS.badAmount;
     if (!toPicker && !toPurchasing) found.recipients = PICKS.noRecipient;
     setErrors(found);
-    if (Object.keys(found).length > 0 || plannedQty === "bad" || pickedQty === "bad") return;
+    if (Object.keys(found).length > 0 || kind === null || plannedQty === "bad" || pickedQty === "bad" || affectedQty === "bad") return;
 
     const key = crypto.randomUUID();
     const body = {
@@ -98,6 +118,8 @@ export function PickReportForm({
       lineId,
       plannedQty,
       pickedQty,
+      affectedQty,
+      request,
       missingPart: missingPart.trim(),
       note: note.trim(),
       sendToPicker: toPicker,
@@ -136,9 +158,9 @@ export function PickReportForm({
           <p>
             <strong>{outcome.state === "sent" ? PICKS.sent : PICKS.queued}</strong>
           </p>
-          <p>{PICKS.footer}</p>
-          <Link className={`${styles.button} ${styles.fullWidth}`} href={picksPath(siteId)}>
-            {PICKS.backToCheck}
+          <p>{fromReview ? PICKS.reportFromSiteFooter : PICKS.footer}</p>
+          <Link className={`${styles.button} ${styles.fullWidth}`} href={fromReview ? sitePath(siteId) : picksPath(siteId)}>
+            {fromReview ? PICKS.backToSite : PICKS.backToCheck}
           </Link>
         </div>
       </div>
@@ -154,15 +176,20 @@ export function PickReportForm({
         </p>
       ) : null}
       <form className={dialogStyles.form} noValidate onSubmit={(event) => void onSubmit(event)} aria-describedby={outcome ? ids.errors : undefined}>
-        <fieldset className={styles.choiceGroup}>
-          <legend className={dialogStyles.label}>{PICKS.whatsWrong}</legend>
-          {KINDS.map((choice) => (
+        <fieldset className={styles.choiceGroup} aria-describedby={errors.kind ? `${ids.errors}-kind` : undefined}>
+          <legend className={dialogStyles.label}>{fromReview ? PICKS.whatsFound : PICKS.whatsWrong}</legend>
+          {reportKinds(fromReview).map((choice) => (
             <label key={choice} className={styles.choiceRow}>
               <input type="radio" name="kind" value={choice} checked={kind === choice} onChange={() => setKind(choice)} />
               <span className={styles.choiceMark} aria-hidden="true" />
               <span>{PICKS.kinds[choice]}</span>
             </label>
           ))}
+          {errors.kind ? (
+            <p id={`${ids.errors}-kind`} className={dialogStyles.fieldError} role="alert">
+              {errors.kind}
+            </p>
+          ) : null}
         </fieldset>
 
         <div className={dialogStyles.field}>
@@ -218,6 +245,37 @@ export function PickReportForm({
             ) : null}
           </div>
         </div>
+
+        <div className={dialogStyles.field}>
+          <label className={dialogStyles.label} htmlFor={ids.affected}>
+            {PICKS.affectedQty}
+          </label>
+          <input
+            id={ids.affected}
+            className={dialogStyles.control}
+            inputMode="numeric"
+            value={affected}
+            onChange={(event) => setAffected(event.target.value)}
+            aria-invalid={errors.affected ? true : undefined}
+            aria-describedby={errors.affected ? `${ids.affected}-error` : undefined}
+          />
+          {errors.affected ? (
+            <p id={`${ids.affected}-error`} className={dialogStyles.fieldError} role="alert">
+              {errors.affected}
+            </p>
+          ) : null}
+        </div>
+
+        <fieldset className={styles.choiceGroup}>
+          <legend className={dialogStyles.label}>{PICKS.whatsNeeded}</legend>
+          {REQUESTS.map((choice) => (
+            <label key={choice} className={styles.choiceRow}>
+              <input type="radio" name="request" value={choice} checked={request === choice} onChange={() => setRequest(choice)} />
+              <span className={styles.choiceMark} aria-hidden="true" />
+              <span>{PICKS.requests[choice]}</span>
+            </label>
+          ))}
+        </fieldset>
 
         <div className={dialogStyles.field}>
           <label className={dialogStyles.label} htmlFor={ids.missing}>
@@ -277,7 +335,7 @@ export function PickReportForm({
         <Button type="submit" className={`${styles.primary} ${styles.fullWidth}`} disabled={sending}>
           {sending ? PICKS.sending : PICKS.send}
         </Button>
-        <p className={styles.muted}>{PICKS.footer}</p>
+        <p className={styles.muted}>{fromReview ? PICKS.reportFromSiteFooter : PICKS.footer}</p>
       </form>
     </>
   );

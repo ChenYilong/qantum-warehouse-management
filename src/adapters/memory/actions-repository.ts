@@ -1,5 +1,5 @@
-import type { PickReport, ShortageAction, SubstitutionProposal } from "@/domain";
-import type { ActionsRepository, NewPickReport, NewShortageAction, NewSubstitutionProposal } from "@/ports";
+import type { PickReport, PickReview, ShortageAction, SubstitutionProposal } from "@/domain";
+import type { ActionsRepository, NewPickReport, NewPickReview, NewShortageAction, NewSubstitutionProposal } from "@/ports";
 
 export interface MemoryActionsOptions {
   readonly now?: () => Date;
@@ -27,6 +27,13 @@ interface StoredReport {
   readonly sequence: number;
 }
 
+interface StoredReview {
+  readonly record: PickReview;
+  readonly createdBy: string;
+  readonly idempotencyKey: string;
+  readonly sequence: number;
+}
+
 function byNewest(left: { record: { createdAt: string }; sequence: number }, right: { record: { createdAt: string }; sequence: number }): number {
   const leftMs = Date.parse(left.record.createdAt);
   const rightMs = Date.parse(right.record.createdAt);
@@ -40,6 +47,7 @@ export function createMemoryActionsRepository(options: MemoryActionsOptions = {}
   const actions: StoredAction[] = [];
   const proposals: StoredProposal[] = [];
   const reports: StoredReport[] = [];
+  const reviews: StoredReview[] = [];
   let sequence = 0;
 
   return {
@@ -115,6 +123,8 @@ export function createMemoryActionsRepository(options: MemoryActionsOptions = {}
         kind: input.kind,
         plannedQty: input.plannedQty,
         pickedQty: input.pickedQty,
+        affectedQty: input.affectedQty,
+        request: input.request,
         missingPart: input.missingPart,
         note: input.note,
         sendToPicker: input.sendToPicker,
@@ -135,6 +145,33 @@ export function createMemoryActionsRepository(options: MemoryActionsOptions = {}
 
     async listPickReports(siteId: string) {
       return reports
+        .filter((item) => item.record.siteId === siteId)
+        .sort(byNewest)
+        .map((item) => ({ ...item.record }));
+    },
+
+    async appendPickReview(input: NewPickReview) {
+      const existing = reviews.find((item) => item.createdBy === input.createdBy && item.idempotencyKey === input.idempotencyKey);
+      if (existing) return { record: { ...existing.record }, created: false };
+      const record: PickReview = {
+        id: newId(),
+        siteId: input.siteId,
+        lineId: input.lineId,
+        createdBy: input.createdBy,
+        createdAt: now().toISOString(),
+      };
+      reviews.push({ record, createdBy: input.createdBy, idempotencyKey: input.idempotencyKey, sequence: sequence });
+      sequence += 1;
+      return { record: { ...record }, created: true };
+    },
+
+    async findPickReviewByKey(createdBy: string, idempotencyKey: string) {
+      const existing = reviews.find((item) => item.createdBy === createdBy && item.idempotencyKey === idempotencyKey);
+      return existing ? { ...existing.record } : null;
+    },
+
+    async listPickReviews(siteId: string) {
+      return reviews
         .filter((item) => item.record.siteId === siteId)
         .sort(byNewest)
         .map((item) => ({ ...item.record }));

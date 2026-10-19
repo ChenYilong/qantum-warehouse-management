@@ -33,7 +33,7 @@ test("AC 61, AC 62: the site screen checks picks against the plan, not the wareh
   await expect(rows.nth(2)).toContainText("Plan FRR −/120/120 · picked FRR −/60/60");
   await expect(rows.nth(2)).toContainText("Wrong spec");
   await expect(rows.nth(3)).toContainText("Matches plan");
-  await expect(rows.nth(1).getByRole("link")).toHaveAttribute("href", "/sites/site-b/picks#pick-b-collar");
+  await expect(rows.nth(1).getByRole("link", { name: /Pipe collar for 25 mm pipe/ })).toHaveAttribute("href", "/sites/site-b/picks#pick-b-collar");
 
   // Locked while any pick is wrong, and never worded as the go state.
   const send = section.getByRole("button", { name: "Send the crew" });
@@ -134,4 +134,65 @@ test("AC 64: the Pick check page explains each issue and leads to the report", a
   await expect(page.getByText("These issues are the last known.", { exact: false })).toBeVisible();
   await page.getByRole("switch", { name: "Online" }).click();
   await expect(page.locator("[data-connection]")).toHaveAttribute("data-connection", "online");
+});
+
+test("AC 67: every material has its own Review, the lines that match the plan too, and the review asks with two big answers", async ({ page }) => {
+  await gotoApp(page, "/sites/site-b");
+  const rows = picks(page).getByRole("listitem");
+  await expect(rows).toHaveCount(4);
+  const lines = [
+    ["b-sealant", "Intumescent sealant, 310 ml cartridge", "Part-picked"],
+    ["b-collar", "Pipe collar for 25 mm pipe", "Missing parts"],
+    ["b-batt", "Mineral wool batt", "Wrong spec"],
+    ["b-wrap", "Intumescent wrap strip", "Matches plan"],
+  ] as const;
+  for (const [index, [id, name, label]] of lines.entries()) {
+    const row = rows.nth(index);
+    await expect(row, name).toContainText(label);
+    const review = row.getByRole("link", { name: "Review", exact: true });
+    await expect(review, name).toHaveAttribute("href", `/sites/site-b/picks/review?line=${id}`);
+    await expect(review, name).toHaveAccessibleDescription(name);
+    const box = await review.boundingBox();
+    expect(box?.height ?? 0, name).toBeGreaterThanOrEqual(48);
+  }
+  await assertTargets(page);
+  await assertNoOverflow(page);
+
+  // Offline the rows still offer it: a review can wait on the phone (AC 71).
+  await page.getByRole("switch", { name: "Online" }).click();
+  await expect(page.locator("[data-connection]")).toHaveAttribute("data-connection", "offline");
+  await expect(picks(page).getByRole("link", { name: "Review", exact: true })).toHaveCount(4);
+  await page.getByRole("switch", { name: "Online" }).click();
+  await expect(page.locator("[data-connection]")).toHaveAttribute("data-connection", "online");
+
+  // Each Pick check card offers it too.
+  await gotoApp(page, "/sites/site-b/picks");
+  await expect(page.getByRole("article").getByRole("link", { name: "Review", exact: true })).toHaveCount(3);
+
+  // The review of a line that matches the plan: what was picked, then Yes in green and No in red, both big.
+  await gotoApp(page, "/sites/site-a");
+  await picks(page).getByRole("listitem").filter({ hasText: "Pipe collar for 25 mm pipe" }).getByRole("link", { name: "Review", exact: true }).click();
+  await expect(page).toHaveURL(/\/sites\/site-a\/picks\/review\?line=a-collar$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Review on site" })).toBeVisible();
+  const card = page.getByRole("region", { name: "Pipe collar for 25 mm pipe" });
+  await expect(card.getByText("Need 4 · picked 4")).toBeVisible();
+  await expect(card.getByText("Matches plan")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Is it right on site?" })).toBeVisible();
+  const yes = page.getByRole("button", { name: /^Yes, it's right/ });
+  const no = page.getByRole("link", { name: /^No, something's wrong/ });
+  await expect(no).toHaveAttribute("href", "/sites/site-a/picks/report?line=a-collar&from=review");
+  for (const answer of [yes, no]) {
+    const box = await answer.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(88);
+    expect(box?.width ?? 0).toBeGreaterThanOrEqual(300);
+  }
+  await expect(page.getByRole("link", { name: "Back to Cedar Court, Block A" })).toHaveAttribute("href", "/sites/site-a");
+  await assertTargets(page);
+  await assertNoOverflow(page);
+  await assertAxe(page);
+
+  // A line that is not on this site's pick list has nothing to review.
+  await gotoApp(page, "/sites/site-a/picks/review?line=b-collar");
+  await expect(page.getByText("That line is not on this site's pick list.")).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Yes, it's right/ })).toHaveCount(0);
 });

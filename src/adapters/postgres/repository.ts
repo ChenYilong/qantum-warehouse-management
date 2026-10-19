@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { PickReport, ShortageAction, SubstitutionProposal } from "@/domain";
-import { UpstreamError, type ActionsRepository, type NewPickReport, type NewShortageAction, type NewSubstitutionProposal } from "@/ports";
+import type { PickReport, PickReview, ShortageAction, SubstitutionProposal } from "@/domain";
+import { UpstreamError, type ActionsRepository, type NewPickReport, type NewPickReview, type NewShortageAction, type NewSubstitutionProposal } from "@/ports";
 
 const SYSTEM = "actions_store";
 
@@ -37,9 +37,11 @@ const PickReportRowSchema = z.object({
   id: UuidSchema,
   site_id: z.string().min(1),
   line_id: z.string().min(1),
-  kind: z.enum(["wrong_spec", "missing_parts", "part_picked", "other"]),
+  kind: z.enum(["wrong_spec", "missing_parts", "part_picked", "unsuitable", "wrong_item", "damaged", "other"]),
   planned_qty: z.union([z.number(), z.string(), z.null()]),
   picked_qty: z.union([z.number(), z.string(), z.null()]),
+  affected_qty: z.union([z.number(), z.string(), z.null()]),
+  request: z.enum(["repick", "same_day"]),
   missing_part: z.string().max(120).nullable(),
   note: z.string().max(500).nullable(),
   send_to_picker: z.boolean(),
@@ -50,12 +52,30 @@ const PickReportRowSchema = z.object({
   idempotency_key: z.string().min(1).max(128),
 });
 
+const PickReviewRowSchema = z.object({
+  id: UuidSchema,
+  site_id: z.string().min(1),
+  line_id: z.string().min(1),
+  created_by: z.string().min(1),
+  created_at: TimestampSchema,
+  idempotency_key: z.string().min(1).max(128),
+});
+
+export interface PickReviewInsert {
+  readonly site_id: string;
+  readonly line_id: string;
+  readonly created_by: string;
+  readonly idempotency_key: string;
+}
+
 export interface PickReportInsert {
   readonly site_id: string;
   readonly line_id: string;
   readonly kind: PickReport["kind"];
   readonly planned_qty: number | null;
   readonly picked_qty: number | null;
+  readonly affected_qty: number | null;
+  readonly request: PickReport["request"];
   readonly missing_part: string | null;
   readonly note: string | null;
   readonly send_to_picker: boolean;
@@ -102,6 +122,9 @@ export interface ActionsStore {
   insertPickReport(row: PickReportInsert): Promise<StoreResult>;
   selectPickReportByKey(createdBy: string, idempotencyKey: string): Promise<StoreResult>;
   listPickReports(siteId: string): Promise<StoreResult>;
+  insertPickReview(row: PickReviewInsert): Promise<StoreResult>;
+  selectPickReviewByKey(createdBy: string, idempotencyKey: string): Promise<StoreResult>;
+  listPickReviews(siteId: string): Promise<StoreResult>;
 }
 
 function readQuantity(value: number | string | null): number | null {
@@ -190,6 +213,8 @@ export function pickReportToInsert(input: NewPickReport): PickReportInsert {
     kind: input.kind,
     planned_qty: input.plannedQty,
     picked_qty: input.pickedQty,
+    affected_qty: input.affectedQty,
+    request: input.request,
     missing_part: input.missingPart,
     note: input.note,
     send_to_picker: input.sendToPicker,
@@ -212,11 +237,29 @@ export function pickReportFromRow(row: unknown): PickReport {
     kind: parsed.data.kind,
     plannedQty: readQuantity(parsed.data.planned_qty),
     pickedQty: readQuantity(parsed.data.picked_qty),
+    affectedQty: readQuantity(parsed.data.affected_qty),
+    request: parsed.data.request,
     missingPart: parsed.data.missing_part,
     note: parsed.data.note,
     sendToPicker: parsed.data.send_to_picker,
     sendToPurchasing: parsed.data.send_to_purchasing,
     photoAttached: parsed.data.photo_attached,
+    createdBy: parsed.data.created_by,
+    createdAt: readTimestamp(parsed.data.created_at),
+  };
+}
+
+export function pickReviewToInsert(input: NewPickReview): PickReviewInsert {
+  return { site_id: input.siteId, line_id: input.lineId, created_by: input.createdBy, idempotency_key: input.idempotencyKey };
+}
+
+export function pickReviewFromRow(row: unknown): PickReview {
+  const parsed = PickReviewRowSchema.safeParse(row);
+  if (!parsed.success) throw new UpstreamError("upstream_invalid", SYSTEM);
+  return {
+    id: parsed.data.id,
+    siteId: parsed.data.site_id,
+    lineId: parsed.data.line_id,
     createdBy: parsed.data.created_by,
     createdAt: readTimestamp(parsed.data.created_at),
   };
@@ -289,6 +332,17 @@ export function createActionsRepository(store: ActionsStore): ActionsRepository 
     async listPickReports(siteId) {
       return rowsOf(await store.listPickReports(siteId))
         .map((row) => pickReportFromRow(row))
+        .sort(byNewest);
+    },
+    async appendPickReview(input) {
+      return writeOne(await store.insertPickReview(pickReviewToInsert(input)), () => store.selectPickReviewByKey(input.createdBy, input.idempotencyKey), pickReviewFromRow);
+    },
+    async findPickReviewByKey(createdBy, idempotencyKey) {
+      return readByKey(await store.selectPickReviewByKey(createdBy, idempotencyKey), pickReviewFromRow);
+    },
+    async listPickReviews(siteId) {
+      return rowsOf(await store.listPickReviews(siteId))
+        .map((row) => pickReviewFromRow(row))
         .sort(byNewest);
     },
   };

@@ -38,7 +38,7 @@ const readSpecs = [
   "**/pick-check.spec.ts",
 ];
 
-const writeSpecs = ["**/ac31-keyboard.spec.ts", "**/idempotency-key.spec.ts", "**/scenario.spec.ts", "**/pick-report.spec.ts"];
+const writeSpecs = ["**/ac31-keyboard.spec.ts", "**/idempotency-key.spec.ts", "**/scenario.spec.ts", "**/pick-report.spec.ts", "**/pick-review.spec.ts"];
 
 function devServer(portNumber: number, distDir: string, stockMode?: string) {
   const stock = stockMode ? `STUB_STOCK_MODE=${stockMode} ` : "";

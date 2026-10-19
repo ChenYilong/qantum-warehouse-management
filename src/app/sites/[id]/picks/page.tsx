@@ -37,6 +37,7 @@ export default async function PickCheckPage({ params }: PageProps) {
   const view = load.value;
   const issues = view.check.lines.filter((checked) => checked.kind !== null);
   const intro = view.check.status === "unknown" ? PICKS.noListText : issues.length > 0 ? PICKS.checkIntro : PICKS.checkReadyIntro;
+  const reported = issues.some((checked) => checked.openReport !== null);
   return (
     <>
       <AppBar backHref={sitePath(id)} backName={view.siteName} />
@@ -44,8 +45,9 @@ export default async function PickCheckPage({ params }: PageProps) {
         <h1>{PICKS.checkTitle(view.check.issueCount)}</h1>
         <PickOfflineNote text={PICKS.checkOffline} />
         <p>{intro}</p>
+        {reported ? <p>{PICKS.checkReportedIntro}</p> : null}
         {issues.map((checked, index) => (
-          <PickIssueCard key={checked.line.id} checked={checked} index={index + 1} />
+          <PickIssueCard key={checked.line.id} siteId={id} checked={checked} index={index + 1} />
         ))}
         {view.picker ? (
           <section className={styles.pickerStrip} aria-label={PICKS.pickedBy}>
