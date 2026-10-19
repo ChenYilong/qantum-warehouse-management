@@ -61,7 +61,7 @@ They check idempotent writes, ordering and constraints against a real database, 
 
 ## Deploy
 
-CI deploys `main` to Vercel after the checks, database and browser jobs pass, then runs `scripts/smoke.mjs` against the production URL. The setup, done once:
+CI deploys `main` to Vercel after the checks, database and browser jobs pass: it builds, applies any new migration to the production database, deploys, then runs `scripts/smoke.mjs` against the production URL. The setup, done once:
 
 1. **Database.** A database `qantum_slice` on an existing Supabase Postgres server, reached as plain Postgres through the transaction pooler. Supabase Auth and the Data API are not used. As the Supabase admin, through the session pooler (port 5432):
    ```bash
@@ -70,11 +70,11 @@ CI deploys `main` to Vercel after the checks, database and browser jobs pass, th
    ```
    Type passwords at prompts or read them from a password manager. Do not leave them in shell history.
 2. **Vercel project** (framework Next.js, region `syd1` from `vercel.json`) with `ACTIONS_STORE=postgres`, `DB_HOST`, `DB_PORT=6543`, `DB_USER=qantum_slice.<project-ref>`, `DB_NAME=qantum_slice`, `DB_SSL=require`, `DB_POOL_MAX=1`, and `DB_PASSWORD` as a sensitive variable.
-3. **GitHub:** secret `VERCEL_TOKEN`; variables `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `PRODUCTION_URL`.
+3. **GitHub:** secret `VERCEL_TOKEN`; variables `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `PRODUCTION_URL`; and in the `production` environment the secret `SUPABASE_DB_PASSWORD`, the Supabase database (admin) password, which CI uses only to migrate. Set it with `gh secret set SUPABASE_DB_PASSWORD --env production` and paste it at the prompt.
 
-Schema changes ship as new files in `db/migrations/`; the latest, `0003_site_review.sql`, adds the reviews on site and the site's report fields. Run step 1's `npm run db:migrate` again before deploying a change that adds one: it applies only the files not yet recorded in `schema_migrations`, and the app's role cannot change the schema itself.
+Schema changes ship as new files in `db/migrations/`; the latest, `0003_site_review.sql`, adds the reviews on site and the site's report fields. CI applies them on every deploy from `main`, after the build and before `vercel deploy`: `npm run db:migrate` as `postgres.<project-ref>` through the session pooler (port 5432), with the host, project ref and database read from the Vercel production settings it has just pulled (the repository or environment variables `MIGRATION_DB_HOST` and `MIGRATION_DB_USER` override them). It applies only the files not yet recorded in `schema_migrations`, since the app's role cannot change the schema itself. It fails closed: without the secret, or if a migration fails, nothing is deployed. Because the migration runs before the new version goes live, a migration must only add (tables, columns with defaults, wider checks), never drop or rename what the live version uses.
 
-Every runtime variable of the app is listed in `.env.example` and explained in `docs/api.md` (Configuration). The test and CI variables above (`TEST_DB_ADMIN_URL`, `REQUIRE_DB_CONTRACT`, `PRODUCTION_URL`, `VERCEL_*`) are not.
+Every runtime variable of the app is listed in `.env.example` and explained in `docs/api.md` (Configuration). The test and CI variables above (`TEST_DB_ADMIN_URL`, `REQUIRE_DB_CONTRACT`, `PRODUCTION_URL`, `VERCEL_*`, `SUPABASE_DB_PASSWORD`, `MIGRATION_DB_*`) are not.
 
 ## Sample data
 
