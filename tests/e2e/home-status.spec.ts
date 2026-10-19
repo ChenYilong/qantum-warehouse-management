@@ -20,7 +20,7 @@ test("landing page explains the demo, no screen carries a Demo tag, and there is
   await expect(page).toHaveURL(/\/about-this-demo$/);
   await expect(page.getByRole("heading", { level: 1, name: "Is the crew good to go?" })).toBeVisible();
   await expect(page.getByText("made up for the demo", { exact: false })).toBeVisible();
-  await expect(page.getByText("There is no sign-in", { exact: false })).toBeVisible();
+  await expect(page.getByText("The sign-in is only for show", { exact: false })).toBeVisible();
   await expect(page.getByText("the same set of decisions", { exact: false })).toBeVisible();
   // One pointer to the source, specs and agent briefs; a plain link in the list, not a menu item.
   await expect(page.getByRole("link", { name: "GitHub repository" })).toHaveAttribute(

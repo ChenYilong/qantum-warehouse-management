@@ -1294,6 +1294,27 @@ section:has(> .stickyHeading) {
   border-bottom: 1px solid var(--border);
 }
 
+/* The row says the connection by colour too (AC 58): green online, red offline, black while it checks. The words
+   stay, so colour is never alone, and the text flips to stay readable on each. */
+.connectionBar[data-connection="online"] {
+  --bg: var(--signal-go-fill);
+  --text: var(--signal-go-ink);
+  --text-secondary: var(--signal-go-ink);
+  --border: var(--signal-go-edge);
+  --focus: var(--signal-go-ink);
+  --switch-on: var(--signal-go-ink);
+}
+
+.connectionBar[data-connection="offline"] {
+  --bg: var(--signal-stop-fill);
+  --text: var(--signal-stop-ink);
+  --text-secondary: var(--signal-stop-ink);
+  --warning-text: var(--signal-stop-ink);
+  --border: var(--signal-stop-edge);
+  --focus: var(--signal-stop-ink);
+  --input-border: var(--signal-stop-ink);
+}
+
 .connectionPicker {
   flex: 1 1 10rem;
   min-width: 0;
@@ -1348,7 +1369,7 @@ section:has(> .stickyHeading) {
 }
 
 .connectionSwitch[aria-checked="true"]::before {
-  background: var(--brand-yellow);
+  background: var(--switch-on, var(--brand-yellow));
 }
 
 .connectionKnob {
@@ -1531,4 +1552,191 @@ section:has(> .stickyHeading) {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+}
+
+/* The demo sign-in (AC 59, 60): a black cover over every page, with the form on a card. Hidden before paint once
+   someone has signed in, so a returning user never sees it flash. */
+.loginGate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: max(1.5rem, env(safe-area-inset-top)) var(--space) max(1.5rem, env(safe-area-inset-bottom));
+  background: var(--chrome-bg);
+}
+
+.loginGate[hidden],
+:global(:root[data-auth="in"]) .loginGate {
+  display: none;
+}
+
+.loginPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  width: min(100%, 26rem);
+  margin: auto 0;
+  padding: 1.25rem;
+  border-top: 6px solid var(--brand-yellow);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.loginBrand {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.loginTitle {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.loginTitle:focus {
+  outline: none;
+}
+
+.loginIntro {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+/* Show password: the whole 48px row is the checkbox; the box is drawn, the native input covers the row. */
+.loginCheck {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  min-height: 48px;
+  padding-right: 0.5rem;
+  cursor: pointer;
+}
+
+.loginCheck input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.loginCheckBox {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  box-sizing: border-box;
+  border: 2px solid var(--input-border);
+  border-radius: 4px;
+}
+
+/* Checked: a yellow fill inside the dark edge, set off by a ring of the card's colour. */
+.loginCheck:has(input:checked) .loginCheckBox {
+  border-color: var(--text);
+  background: var(--button-bg);
+  box-shadow: inset 0 0 0 2px var(--bg);
+}
+
+.loginCheck:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.loginRoles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.loginRoleOptions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.loginRole {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.5rem;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.loginRole input {
+  position: absolute;
+  /* Over the border too, so the radio is the whole 48px option. */
+  inset: -1px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.loginRole:has(input:checked) {
+  border-color: var(--button-bg);
+  background: var(--button-bg);
+  color: var(--button-text);
+}
+
+.loginRole:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.loginSubmit {
+  width: 100%;
+  min-height: 3.5rem;
+}
+
+.loginLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.loginLinks p {
+  margin: 0;
+}
+
+/* A text control: looks like a link, is a button (it changes the view, it does not navigate). 48px tall. */
+.loginLink {
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--link);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+/* Sign out sits at the Guide's top right (AC 60): first on screen, after the heading in reading order. */
+.signOut {
+  order: -1;
+  align-self: flex-end;
 }

@@ -174,3 +174,36 @@ export function readinessBanner(status: string): StatusView {
       return UNAVAILABLE_BANNER;
   }
 }
+
+/** The demo sign-in (AC 59, 60). Any username and password work; nothing leaves this browser. */
+export const AUTH = {
+  brand: NAV.title,
+  signInTitle: "Sign in",
+  signInIntro: "This is a demo: any username and password will do. Nothing leaves this browser.",
+  username: "Username",
+  password: "Password",
+  showPassword: "Show password",
+  role: "Sign in as",
+  roles: { "team-leader": "Team leader", operator: "Operator" },
+  signIn: "Sign in",
+  forgot: "Forgot password?",
+  newHere: "New here?",
+  createAccount: "Create an account",
+  registerTitle: "Create an account",
+  email: "Email (optional)",
+  confirmPassword: "Confirm password",
+  create: "Create account",
+  haveAccount: "Already have an account?",
+  backToSignIn: "Back to sign in",
+  forgotTitle: "Reset your password",
+  forgotIntro: "Enter your username or email and we'll send a reset link.",
+  usernameOrEmail: "Username or email",
+  sendReset: "Send reset link",
+  resetSent: "This is a demo, so no email was sent. Go back and sign in with any password.",
+  missingUsername: "Enter your username.",
+  missingPassword: "Enter your password.",
+  missingUsernameOrEmail: "Enter your username or email.",
+  passwordsDiffer: "The passwords don't match.",
+  signOut: "Sign out",
+  greeting: (name: string) => `Hi, ${name}`,
+} as const;
