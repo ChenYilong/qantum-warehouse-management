@@ -38,7 +38,20 @@ export function appText(page: Page, text: string) {
   return page.locator("body > :not(script)").getByText(text, { exact: true });
 }
 
+// Every spec but the entry one starts mid-visit, so opening /sites shows the list (AC 84).
+const midVisit = new WeakSet<Page>();
+
 export async function gotoApp(page: Page, path: string): Promise<void> {
+  if (!midVisit.has(page)) {
+    midVisit.add(page);
+    await page.addInitScript(() => {
+      try {
+        sessionStorage.setItem("team-leader:entered", "1");
+      } catch {
+        // Storage blocked: the app then never moves the visit either.
+      }
+    });
+  }
   await page.goto(path);
   // A redirect route paints the loading shell, hydrates it, then navigates. Evaluating in that
   // gap loses the document. Wait until the page that landed has its own heading.
