@@ -2,6 +2,7 @@ import { Suspense, type ReactNode } from "react";
 import { Announcer } from "@/ui/Announcer";
 import { OfflineBanner } from "@/ui/ConnectionBar";
 import { HEAD_SCRIPT } from "@/ui/head-script";
+import { EntryTab } from "@/ui/EntryTab";
 import { NavHistory } from "@/ui/NavHistory";
 import { LoginGate } from "@/ui/LoginGate";
 import { PickOutboxSync } from "@/ui/PickOutboxSync";
@@ -31,6 +32,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Suspense fallback={null}>
           <NavHistory />
         </Suspense>
+        {/* A visit opened on the projects list starts on the first tab (AC 84). */}
+        <EntryTab />
         <div className={styles.appShell} data-app-shell="">
           <div className={styles.appContent}>
             {/* Every screen's own header holds the Online switch (AC 48); the tab bar is the menu at every width (AC 47). */}

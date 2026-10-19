@@ -36,6 +36,7 @@ const readSpecs = [
   "**/today.spec.ts",
   "**/deadline.spec.ts",
   "**/calendar.spec.ts",
+  "**/entry.spec.ts",
   "**/actions-log.spec.ts",
   "**/field-ui.spec.ts",
   "**/sign-in.spec.ts",

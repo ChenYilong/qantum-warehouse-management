@@ -432,6 +432,7 @@ From the author: split the projects page in three. The tab bar's Inventory entry
 | --- | --- |
 | Tab bar | Map (a folded-map icon), Calendar (a calendar page) and Projects, then Guide (reordered the same day at the author's request) |
 | Location | "Use my location" and its line ("Distances are from …") open each of the four tab pages, under the picker's line and the page's h1; on the Guide it asks Mapbox for nothing, as the Guide lists no projects |
+| Entry | A visit that opens `/sites` as its first page in a browser tab lands on the first tab, Map, replacing the entry (Back does not return to it); later in the visit Projects, a reload or a filtered link (`/sites?status=shortage`) shows the list. The first tab is the tab bar's first entry, not yet a setting (AC 84) |
 | Projects (`/sites`) | Its h1 shown again, then the filter, Use my location and the cards; no panel |
 | Map (`/map`) and Calendar (`/calendar`) | Each holds one panel, unchanged, with the list's own card under it and the same trip provider, so a project reads the same on all three pages |
 | Inventory and Decisions | Still top-level pages with the header and the tab bar, but no tab of their own, so none is marked there. The Guide links to both ("Inventory and Decisions are a link away"), and every link that reached them before still does |
