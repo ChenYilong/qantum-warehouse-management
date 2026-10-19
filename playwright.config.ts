@@ -36,6 +36,7 @@ const readSpecs = [
   "**/field-ui.spec.ts",
   "**/sign-in.spec.ts",
   "**/pick-check.spec.ts",
+  "**/sites-filter.spec.ts",
 ];
 
 const writeSpecs = ["**/ac31-keyboard.spec.ts", "**/idempotency-key.spec.ts", "**/scenario.spec.ts", "**/pick-report.spec.ts", "**/pick-review.spec.ts"];
