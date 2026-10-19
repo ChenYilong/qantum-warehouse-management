@@ -4,11 +4,14 @@ import {
   buildToday,
   firstProject,
   headline,
-  initialGroup,
+  initialTab,
+  inTab,
   nextTab,
   schematicPositions,
   segmentGroup,
+  segmentLit,
   shortName,
+  TODAY_TABS,
   todayGroup,
   totalsLine,
   type TodayInput,
@@ -16,30 +19,16 @@ import {
 
 // Today's panel on the projects list (AC 77 to 79), after the author's design "I · Verdict + tabs + map (B+D+E)".
 
-const operator = { name: "Mere Tane", phone: "+44 7700 900156" };
-
 function site(id: string, name: string, crewStatus: string, extra: Partial<TodayInput> = {}): TodayInput {
-  return { id, name, reference: `JOB-${id}`, crewStatus, shortageCount: 0, dataProblemCount: 0, operator, ...extra };
+  return { id, name, crewStatus, shortageCount: 0, dataProblemCount: 0, ...extra };
 }
 
 // The sample's four projects as the list shows them: two blocked, one clear, one with nothing planned.
 const SAMPLE: TodayInput[] = [
   site("site-a", "Cedar Court, Block A", "clear", { location: { lat: -36.8443, lng: 174.7676 } }),
-  site("site-b", "Quayside House, Levels 3 to 5", "blocked", {
-    shortageCount: 2,
-    shortages: [
-      { name: "Pipe collar for 25 mm pipe", kind: "short" },
-      { name: "Intumescent sealant, 310 ml cartridge", kind: "short" },
-    ],
-    location: { lat: -36.841, lng: 174.7571 },
-  }),
-  site("site-c", "Northgate Depot, Phase 2", "blocked", {
-    shortageCount: 1,
-    dataProblemCount: 4,
-    shortages: [{ name: "Fire mastic tube", kind: "unknown" }],
-    location: { lat: -36.7309, lng: 174.702 },
-  }),
-  site("site-d", "Foundry Lane Annex", "nothing_planned", { operator: undefined, location: { lat: -36.9228, lng: 174.786 } }),
+  site("site-b", "Quayside House, Levels 3 to 5", "blocked", { shortageCount: 2, location: { lat: -36.841, lng: 174.7571 } }),
+  site("site-c", "Northgate Depot, Phase 2", "blocked", { shortageCount: 1, dataProblemCount: 4, location: { lat: -36.7309, lng: 174.702 } }),
+  site("site-d", "Foundry Lane Annex", "nothing_planned", { location: { lat: -36.9228, lng: 174.786 } }),
 ];
 
 describe("AC 77: today's verdict", () => {
@@ -91,92 +80,92 @@ describe("AC 77: today's verdict", () => {
 });
 
 describe("AC 78: the tabs inside the verdict", () => {
-  it("holds Blocked 2, Can go 1 and Idle 1 for the sample, in that order, and opens on Can go", () => {
+  it("holds All 4, Blocked 2, Crew can go 1 and Other 1 for the sample, in that order, and opens on Crew can go", () => {
     const today = buildToday(SAMPLE);
-    expect(today.tabs.map((tab) => tab.label)).toEqual(["Blocked 2", "Can go 1", "Idle 1"]);
-    expect(today.tabs.map((tab) => tab.group)).toEqual(["blocked", "go", "idle"]);
-    expect(today.initialGroup).toBe("go");
+    expect(today.tabs.map((tab) => tab.label)).toEqual(["All 4", "Blocked 2", "Crew can go 1", "Other 1"]);
+    expect(today.tabs.map((tab) => tab.id)).toEqual(["all", "blocked", "go", "idle"]);
+    expect(TODAY_TABS).toEqual(["all", "blocked", "go", "idle"]);
+    expect(today.initialTab).toBe("go");
   });
 
-  it("puts every crew that can't go under Blocked, and opens on Blocked, then Idle, when Can go is empty", () => {
+  it("puts every crew that can't go under Blocked, and opens on Blocked, then Other, when Crew can go is empty", () => {
     expect(todayGroup("clear")).toBe("go");
     expect(todayGroup("blocked")).toBe("blocked");
     expect(todayGroup("unavailable")).toBe("blocked");
     expect(todayGroup("nothing_planned")).toBe("idle");
     expect(todayGroup("anything else")).toBe("blocked");
     const tabs = (blocked: number, go: number, idle: number) => [
-      { group: "blocked" as const, label: "", count: blocked },
-      { group: "go" as const, label: "", count: go },
-      { group: "idle" as const, label: "", count: idle },
+      { id: "all" as const, label: "", count: blocked + go + idle },
+      { id: "blocked" as const, label: "", count: blocked },
+      { id: "go" as const, label: "", count: go },
+      { id: "idle" as const, label: "", count: idle },
     ];
-    expect(initialGroup(tabs(2, 1, 1))).toBe("go");
-    expect(initialGroup(tabs(3, 0, 1))).toBe("blocked");
-    expect(initialGroup(tabs(0, 0, 1))).toBe("idle");
-    expect(initialGroup(tabs(0, 0, 0))).toBe("go");
-    expect(initialGroup([])).toBe("go");
+    expect(initialTab(tabs(2, 1, 1))).toBe("go");
+    expect(initialTab(tabs(3, 0, 1))).toBe("blocked");
+    expect(initialTab(tabs(0, 0, 1))).toBe("idle");
+    expect(initialTab(tabs(0, 0, 0))).toBe("all");
+    expect(initialTab([])).toBe("all");
   });
 
-  it("lights the bar's segments of the chosen tab: can go under Can go, blocked and unchecked under Blocked", () => {
+  it("shows every project under All, and each group under its own tab", () => {
+    const { projects } = buildToday(SAMPLE);
+    expect(projects.filter((project) => inTab(project, "all")).map((project) => project.id)).toEqual(["site-a", "site-b", "site-c", "site-d"]);
+    expect(projects.filter((project) => inTab(project, "blocked")).map((project) => project.id)).toEqual(["site-b", "site-c"]);
+    expect(projects.filter((project) => inTab(project, "go")).map((project) => project.id)).toEqual(["site-a"]);
+    expect(projects.filter((project) => inTab(project, "idle")).map((project) => project.id)).toEqual(["site-d"]);
+  });
+
+  it("lights the bar's segments of the chosen tab: every one under All, can go under Crew can go, blocked and unchecked under Blocked", () => {
     expect(segmentGroup("go")).toBe("go");
     expect(segmentGroup("blocked")).toBe("blocked");
     expect(segmentGroup("unchecked")).toBe("blocked");
+    for (const kind of ["go", "blocked", "unchecked"] as const) expect(segmentLit(kind, "all"), kind).toBe(true);
+    expect(segmentLit("go", "go")).toBe(true);
+    expect(segmentLit("blocked", "go")).toBe(false);
+    expect(segmentLit("unchecked", "blocked")).toBe(true);
+    expect(segmentLit("go", "idle")).toBe(false);
   });
 
-  it("moves between tabs with the arrow keys, Home and End, wrapping round, and ignores other keys", () => {
-    const groups = ["blocked", "go", "idle"] as const;
-    expect(nextTab(groups, "go", "ArrowRight")).toBe("idle");
-    expect(nextTab(groups, "idle", "ArrowRight")).toBe("blocked");
-    expect(nextTab(groups, "go", "ArrowLeft")).toBe("blocked");
-    expect(nextTab(groups, "blocked", "ArrowLeft")).toBe("idle");
-    expect(nextTab(groups, "go", "Home")).toBe("blocked");
-    expect(nextTab(groups, "go", "End")).toBe("idle");
-    expect(nextTab(groups, "go", "Enter")).toBeNull();
+  it("moves between the four tabs with the arrow keys, Home and End, wrapping round, and ignores other keys", () => {
+    expect(nextTab(TODAY_TABS, "go", "ArrowRight")).toBe("idle");
+    expect(nextTab(TODAY_TABS, "idle", "ArrowRight")).toBe("all");
+    expect(nextTab(TODAY_TABS, "go", "ArrowLeft")).toBe("blocked");
+    expect(nextTab(TODAY_TABS, "all", "ArrowLeft")).toBe("idle");
+    expect(nextTab(TODAY_TABS, "go", "Home")).toBe("all");
+    expect(nextTab(TODAY_TABS, "go", "End")).toBe("idle");
+    expect(nextTab(TODAY_TABS, "go", "Enter")).toBeNull();
     // With no tabs there is nowhere to move.
     for (const key of ["ArrowRight", "ArrowLeft", "Home", "End"]) expect(nextTab([], "go", key), key).toBeNull();
   });
 });
 
-describe("AC 79: the map's pins and the drawer", () => {
+describe("AC 79: the map's pins and the card under it", () => {
   it("chooses the tab's first project in list order, or none for an empty tab", () => {
     const { projects } = buildToday(SAMPLE);
+    expect(firstProject(projects, "all")?.id).toBe("site-a");
     expect(firstProject(projects, "blocked")?.id).toBe("site-b");
     expect(firstProject(projects, "go")?.id).toBe("site-a");
     expect(firstProject(projects, "idle")?.id).toBe("site-d");
     expect(firstProject(projects.slice(0, 1), "blocked")).toBeNull();
+    expect(firstProject([], "all")).toBeNull();
   });
 
-  it("gives each project what the drawer shows, in the project's own words", () => {
+  it("gives each pin its name, status, colour and point", () => {
     const [cedar, quayside, northgate, foundry] = buildToday(SAMPLE).projects;
-    expect(cedar).toMatchObject({
+    expect(cedar).toEqual({
       id: "site-a",
+      name: "Cedar Court, Block A",
       shortName: "Cedar Court",
-      href: "/sites/site-a",
       group: "go",
+      status: { label: "Crew can go", tone: "success", icon: "check" },
       colour: "#3ddc6c",
       location: { lat: -36.8443, lng: 174.7676 },
-      details: ["Materials for the planned work are on hand (shared, not reserved)."],
-      decide: null,
     });
-    expect(cedar?.status.label).toBe("Crew can go");
-    expect(cedar?.operator?.name).toBe("Mere Tane");
-    expect(cedar?.operator?.callHref).toBe("tel:+447700900156");
     expect(quayside?.status.label).toBe("Blocked · 2 shortages");
-    expect(quayside?.details).toEqual(["Short: Pipe collar for 25 mm pipe", "Short: Intumescent sealant, 310 ml cartridge"]);
-    expect(quayside?.decide).toEqual({ label: "Sort out shortages", href: "/sites/site-b#action-needed" });
     expect(northgate?.status.label).toBe("Blocked · 1 shortage, 4 data problems");
-    expect(northgate?.details).toEqual(["Short: Fire mastic tube (stock unknown)", "4 data problems to check"]);
-    expect(foundry).toMatchObject({ group: "idle", colour: "#5c5c5c", details: ["No work planned at this project."], operator: null, decide: null });
+    expect(foundry).toMatchObject({ group: "idle", colour: "#5c5c5c", status: { label: "Nothing planned" } });
     const unchecked = buildToday([site("u", "Unchecked Yard", "unavailable")]).projects[0];
-    expect(unchecked?.details).toEqual(["Stock can't be checked right now, so don't send the crew yet."]);
-    expect(unchecked?.colour).toBe("#fed105");
-    const many = buildToday([
-      site("m", "Many", "blocked", {
-        shortageCount: 5,
-        shortages: ["A", "B", "C", "D", "E"].map((name) => ({ name, kind: "short" as const })),
-      }),
-    ]).projects[0];
-    expect(many?.details).toEqual(["Short: A", "Short: B", "Short: C", "and 2 more"]);
-    expect(buildToday([site("p", "P", "blocked", { dataProblemCount: 1 })]).projects[0]?.details).toEqual(["1 data problem to check"]);
+    expect(unchecked).toMatchObject({ group: "blocked", colour: "#fed105", status: { label: "Can't check" } });
   });
 
   it("labels a pin with the name before its first comma, and keeps a project with no valid point off the map", () => {

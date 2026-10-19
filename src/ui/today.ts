@@ -1,44 +1,46 @@
-import { siteAction, type OperatorActions, type SiteActionInput } from "./contacts";
-import { sitePath } from "./format";
 import { siteChip, type StatusView } from "./status";
 import { markerColour, validLocation, type LatLng } from "./travel";
 
 /**
  * Today's panel on the projects list (AC 77 to 79), after the author's design "I · Verdict + tabs + map (B+D+E)":
- * the verdict, the tabs inside it, and the map and drawer of the chosen tab. Pure, so every word and number the
- * panel shows is tested here. Where the design and the project differ, the project's words and rules win: a crew
- * that can't be checked can't go (fail closed), and the drawer says what the project's cards say.
+ * the verdict, the tabs inside it, and the map of the chosen tab. Pure, so every word and number the panel shows is
+ * tested here. Where the design and the project differ, the project's words and rules win: a crew that can't be
+ * checked can't go (fail closed). The project under the map is shown by the list's own card, not from here.
  */
 
-/** A tab: the crews that can't go yet, the crews that can go, and the projects with nothing planned. */
+/** A group: the crews that can't go yet, the crews that can go, and the projects with nothing planned. */
 export type TodayGroup = "blocked" | "go" | "idle";
+
+/** A tab: every project, or one group. */
+export type TodayTabId = "all" | TodayGroup;
 
 /** One crew's segment of the bar. */
 export type SegmentKind = "go" | "blocked" | "unchecked";
 
-export interface TodayInput extends SiteActionInput {
+export interface TodayInput {
+  readonly id: string;
+  readonly name: string;
+  readonly crewStatus: string;
+  readonly shortageCount: number;
+  readonly dataProblemCount: number;
   readonly location?: unknown;
 }
 
+/** What a pin needs: its name, status, colour and point. */
 export interface TodayProject {
   readonly id: string;
   readonly name: string;
   /** The name before its first comma, beside the pin. */
   readonly shortName: string;
-  readonly href: string;
   readonly group: TodayGroup;
   readonly status: StatusView;
   /** The pin's colour: the project's signal colour, as on its card's map. */
   readonly colour: string;
   readonly location: LatLng | null;
-  /** What the drawer says under the name. */
-  readonly details: readonly string[];
-  readonly operator: OperatorActions | null;
-  readonly decide: { readonly label: string; readonly href: string } | null;
 }
 
 export interface TodayTab {
-  readonly group: TodayGroup;
+  readonly id: TodayTabId;
   readonly label: string;
   readonly count: number;
 }
@@ -54,21 +56,21 @@ export interface Today {
   readonly tabs: readonly TodayTab[];
   /** In list order. */
   readonly projects: readonly TodayProject[];
-  readonly initialGroup: TodayGroup;
+  readonly initialTab: TodayTabId;
 }
 
 export const TODAY = {
   today: "Today",
   tabsLabel: "Projects by status",
   mapLabel: "Map of projects",
-  drawerLabel: "Selected project",
+  cardLabel: "Selected project",
   empty: "No projects in this group.",
   allProjects: "All projects",
-  tabs: { blocked: "Blocked", go: "Can go", idle: "Idle" },
+  tabs: { all: "All", blocked: "Blocked", go: "Crew can go", idle: "Other" },
 } as const;
 
-/** The tabs in the design's order. */
-export const TODAY_GROUPS: readonly TodayGroup[] = ["blocked", "go", "idle"];
+/** The tabs in order: All first, then the design's three groups. */
+export const TODAY_TABS: readonly TodayTabId[] = ["all", "blocked", "go", "idle"];
 
 const SEGMENT_ORDER: readonly SegmentKind[] = ["go", "blocked", "unchecked"];
 
@@ -86,9 +88,19 @@ function segmentKind(crewStatus: string): SegmentKind | null {
   return "unchecked";
 }
 
-/** The tab whose segments a segment lights. */
+/** The group whose tab lights a segment. */
 export function segmentGroup(kind: SegmentKind): TodayGroup {
   return kind === "go" ? "go" : "blocked";
+}
+
+/** Whether a tab lights a segment: All lights every one, a group its own. */
+export function segmentLit(kind: SegmentKind, tab: TodayTabId): boolean {
+  return tab === "all" || segmentGroup(kind) === tab;
+}
+
+/** Whether a tab shows a project: All shows every one, a group its own. */
+export function inTab(project: TodayProject, tab: TodayTabId): boolean {
+  return tab === "all" || project.group === tab;
 }
 
 function counted(count: number, one: string, many: string): string {
@@ -119,12 +131,12 @@ function barText(segments: readonly SegmentKind[]): string {
   }).join(", ");
 }
 
-/** Can go first, so a leader sees the crews to send; then Blocked, then Idle; Can go if every tab is empty. */
-export function initialGroup(tabs: readonly TodayTab[]): TodayGroup {
-  for (const group of ["go", "blocked", "idle"] as const) {
-    if ((tabs.find((tab) => tab.group === group)?.count ?? 0) > 0) return group;
+/** Crew can go first, so a leader sees the crews to send; then Blocked, then Other; All if every group is empty. */
+export function initialTab(tabs: readonly TodayTab[]): TodayTabId {
+  for (const id of ["go", "blocked", "idle"] as const) {
+    if ((tabs.find((tab) => tab.id === id)?.count ?? 0) > 0) return id;
   }
-  return "go";
+  return "all";
 }
 
 /** The name before its first comma: "Quayside House" for "Quayside House, Levels 3 to 5". */
@@ -134,32 +146,15 @@ export function shortName(name: string): string {
   return head.length > 0 ? head : name.trim();
 }
 
-function details(site: TodayInput, short: { readonly items: readonly string[]; readonly more: number }): string[] {
-  if (site.crewStatus === "blocked") {
-    const lines = short.items.map((item) => `Short: ${item}`);
-    if (short.more > 0) lines.push(`and ${short.more} more`);
-    if (site.dataProblemCount > 0) lines.push(`${counted(site.dataProblemCount, "data problem", "data problems")} to check`);
-    return lines;
-  }
-  if (site.crewStatus === "clear") return ["Materials for the planned work are on hand (shared, not reserved)."];
-  if (site.crewStatus === "nothing_planned") return ["No work planned at this project."];
-  return ["Stock can't be checked right now, so don't send the crew yet."];
-}
-
 function project(site: TodayInput): TodayProject {
-  const action = siteAction(site);
   return {
     id: site.id,
     name: site.name,
     shortName: shortName(site.name),
-    href: sitePath(site.id),
     group: todayGroup(site.crewStatus),
     status: siteChip(site.crewStatus, site.shortageCount, site.dataProblemCount),
     colour: markerColour(site.crewStatus),
     location: validLocation(site.location),
-    details: details(site, action.short),
-    operator: action.operator,
-    decide: action.decide,
   };
 }
 
@@ -175,9 +170,9 @@ export function buildToday(sites: readonly TodayInput[]): Today {
   const blocked = sites.filter((site) => site.crewStatus === "blocked");
   const shortages = blocked.reduce((sum, site) => sum + site.shortageCount, 0);
   const problems = blocked.reduce((sum, site) => sum + site.dataProblemCount, 0);
-  const tabs = TODAY_GROUPS.map((group) => {
-    const count = projects.filter((item) => item.group === group).length;
-    return { group, label: `${TODAY.tabs[group]} ${count}`, count };
+  const tabs = TODAY_TABS.map((id) => {
+    const count = projects.filter((item) => inTab(item, id)).length;
+    return { id, label: `${TODAY.tabs[id]} ${count}`, count };
   });
   return {
     tone: segments.length === 0 ? "none" : cantGo > 0 ? "stop" : "go",
@@ -187,22 +182,22 @@ export function buildToday(sites: readonly TodayInput[]): Today {
     barLabel: barText(segments),
     tabs,
     projects,
-    initialGroup: initialGroup(tabs),
+    initialTab: initialTab(tabs),
   };
 }
 
-/** The project the drawer opens on for a tab: its first in list order. */
-export function firstProject(projects: readonly TodayProject[], group: TodayGroup): TodayProject | null {
-  return projects.find((item) => item.group === group) ?? null;
+/** The project a tab opens on: its first in list order. */
+export function firstProject(projects: readonly TodayProject[], tab: TodayTabId): TodayProject | null {
+  return projects.find((item) => inTab(item, tab)) ?? null;
 }
 
 /** The tab a key moves to (Left, Right, Home, End, wrapping round), or null for any other key. */
-export function nextTab(groups: readonly TodayGroup[], current: TodayGroup, key: string): TodayGroup | null {
-  const index = groups.indexOf(current);
-  if (key === "ArrowRight") return groups[(index + 1) % groups.length] ?? null;
-  if (key === "ArrowLeft") return groups[(index - 1 + groups.length) % groups.length] ?? null;
-  if (key === "Home") return groups[0] ?? null;
-  if (key === "End") return groups[groups.length - 1] ?? null;
+export function nextTab(tabs: readonly TodayTabId[], current: TodayTabId, key: string): TodayTabId | null {
+  const index = tabs.indexOf(current);
+  if (key === "ArrowRight") return tabs[(index + 1) % tabs.length] ?? null;
+  if (key === "ArrowLeft") return tabs[(index - 1 + tabs.length) % tabs.length] ?? null;
+  if (key === "Home") return tabs[0] ?? null;
+  if (key === "End") return tabs[tabs.length - 1] ?? null;
   return null;
 }
 
