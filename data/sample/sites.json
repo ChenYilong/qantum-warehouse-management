@@ -12,7 +12,8 @@
       },
       "picker": {
         "name": "Sam Lee",
-        "phone": "+44 7700 900157"
+        "phone": "+44 7700 900157",
+        "email": "sam.lee@example.com"
       }
     },
     {
@@ -26,7 +27,8 @@
       },
       "picker": {
         "name": "Sam Lee",
-        "phone": "+44 7700 900157"
+        "phone": "+44 7700 900157",
+        "email": "sam.lee@example.com"
       }
     },
     {
@@ -40,7 +42,8 @@
       },
       "picker": {
         "name": "Tama Rewi",
-        "phone": "+44 7700 900159"
+        "phone": "+44 7700 900159",
+        "email": "tama.rewi@example.com"
       }
     },
     {
@@ -54,7 +57,8 @@
       },
       "picker": {
         "name": "Sam Lee",
-        "phone": "+44 7700 900157"
+        "phone": "+44 7700 900157",
+        "email": "sam.lee@example.com"
       }
     }
   ]

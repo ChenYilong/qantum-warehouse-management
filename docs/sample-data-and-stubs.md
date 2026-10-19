@@ -111,6 +111,7 @@ The four upstream reads, as the app expects them. The stubs implement these. A r
 | `GET /sites/{id}/nominations` | `{ siteId, penetrations: Penetration[] }` |
 | `GET /stock?materialIds=a,b` | `{ asOf, balances: Balance[] }`, only the requested materials |
 | `GET /solution-materials?codes=x,y` | `{ materials: Material[], items: SolutionMaterial[] }`, only the requested codes |
+| `GET /sites/{id}/picks` | `{ picker, lastAction, lastActionAt, lines: PickLine[] }`, or none for a site without a pick list |
 
 Asking for stock and mappings by id keeps responses small and avoids fetching the whole inventory, as noted in the design review.
 
@@ -162,3 +163,16 @@ Does not show: real latency, real authentication, real data quality, concurrent 
 ## 9. Open questions
 
 Decided on approval (2026-10-03): the generic material names stay, one `Van 2` location is enough, and no fault switch is built now. A preview-only stock-down switch remains an option for the walkthrough.
+
+## 7. Pick lists (invented, 2026-10-19)
+
+`data/sample/picks.json` stands in for the warehouse pick system (AC 61). Every line is marked `picked` by the warehouse, so the pick check has to find the problems itself:
+
+| Site | Lines | Pick check |
+| --- | --- | --- |
+| Cedar Court (`site-a`) | sealant 2 of 2 with its nozzle, collar 4 of 4 with fixing kits | Matches the plan |
+| Quayside House (`site-b`) | sealant 6 of 10 and no nozzle (partly picked); collar 6 of 6 but no fixing kits (parts missing); batt FRR −/60/60 where −/120/120 is planned (wrong spec); wrap 2 of 2 | Not ready, 3 issues |
+| Northgate Depot (`site-c`) | mastic 1 of 1, collar 2 of 2 with kits | Matches the plan |
+| Foundry Lane Annex (`site-d`) | none | Can't check (no pick list) |
+
+The pickers in `sites.json` also carry an email at `example.com`, a domain reserved for documentation, so the Email links reach no one. The UI marks the picker "(sample)".

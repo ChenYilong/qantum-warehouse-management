@@ -1,4 +1,4 @@
-import type { ActionKind, EscalateTo, Penetration, ShortageAction, SubstitutionProposal } from "@/domain";
+import type { ActionKind, EscalateTo, Penetration, PickList, PickReport, PickReportKind, ShortageAction, SubstitutionProposal } from "@/domain";
 import type { SolutionMaterialRecord, StockBalanceRecord } from "./schemas";
 
 export type { InternalReason, UpstreamCode } from "./errors";
@@ -11,6 +11,7 @@ export {
   NotACandidateError,
   PayloadTooLargeError,
   PenetrationNotFoundError,
+  PickLineNotFoundError,
   MaterialNotFoundError,
   ShortageNotFoundError,
   SiteNotFoundError,
@@ -27,6 +28,10 @@ export {
   NominatedPenetrationSchema,
   NominationsFileSchema,
   NominationsResponseSchema,
+  PickLineSchema,
+  PickListRecordSchema,
+  PicksFileSchema,
+  RequiredPartSchema,
   SiteSchema,
   SitesFileSchema,
   SolutionMaterialSchema,
@@ -44,6 +49,7 @@ export interface NominatedPenetration extends Penetration {
 export interface Contact {
   readonly name: string;
   readonly phone: string;
+  readonly email?: string;
 }
 
 export interface Site {
@@ -77,6 +83,11 @@ export interface StockPort {
   getStock(materialIds: readonly string[]): Promise<{ asOf: string; balances: StockBalanceRecord[] }>;
 }
 
+/** The warehouse pick system (AC 61). Null means no pick list for the site yet: can't check, never ready. */
+export interface PicksPort {
+  getPicks(siteId: string): Promise<PickList | null>;
+}
+
 export interface SolutionMaterialsPort {
   getSolutionMaterials(codes: readonly string[]): Promise<{ materials: Material[]; items: SolutionMaterialRecord[] }>;
 }
@@ -102,6 +113,21 @@ export interface NewSubstitutionProposal {
   readonly idempotencyKey: string;
 }
 
+export interface NewPickReport {
+  readonly siteId: string;
+  readonly lineId: string;
+  readonly kind: PickReportKind;
+  readonly plannedQty: number | null;
+  readonly pickedQty: number | null;
+  readonly missingPart: string | null;
+  readonly note: string | null;
+  readonly sendToPicker: boolean;
+  readonly sendToPurchasing: boolean;
+  readonly photoAttached: boolean;
+  readonly createdBy: string;
+  readonly idempotencyKey: string;
+}
+
 export interface ActionsRepository {
   appendShortageAction(input: NewShortageAction): Promise<{ record: ShortageAction; created: boolean }>;
   appendSubstitutionProposal(input: NewSubstitutionProposal): Promise<{ record: SubstitutionProposal; created: boolean }>;
@@ -109,6 +135,10 @@ export interface ActionsRepository {
   findSubstitutionProposalByKey(createdBy: string, idempotencyKey: string): Promise<SubstitutionProposal | null>;
   listShortageActions(siteId: string): Promise<ShortageAction[]>;
   listSubstitutionProposals(siteId: string): Promise<SubstitutionProposal[]>;
+  /** Pick-error reports (AC 65): idempotent by (createdBy, idempotencyKey), like every other write. */
+  appendPickReport(input: NewPickReport): Promise<{ record: PickReport; created: boolean }>;
+  findPickReportByKey(createdBy: string, idempotencyKey: string): Promise<PickReport | null>;
+  listPickReports(siteId: string): Promise<PickReport[]>;
 }
 
 export type { SubstitutionProposal };

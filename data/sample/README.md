@@ -10,6 +10,7 @@ Everything in this folder is **invented** for the exercise. Only `../solutions-e
 | `nominations.json` | `GET /sites/{id}/nominations` (keyed by site id) |
 | `solution-materials.json` | materials and quantity per install per solution, which the supplied catalogue lacks |
 | `stock.json` | the inventory system's `GET /stock` |
+| `picks.json` | the warehouse pick system's pick lists, keyed by site id (planned and picked quantity, spec, required parts) |
 
 The scenario, the numbers and why they were chosen are in `docs/sample-data-and-stubs.md`.
 

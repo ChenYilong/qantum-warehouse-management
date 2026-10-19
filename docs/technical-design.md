@@ -61,7 +61,8 @@ Rules:
 | Sites, penetrations, nominations | Existing spec system | Read via stub of `GET /sites`, `GET /sites/{id}/nominations`. |
 | Stock balances | Upstream inventory | Read via stub of `GET /stock`. |
 | Solution to material quantities | Sample (not in CSV) | Read from a clearly labelled sample file. Same port shape as a future catalogue extension. |
-| Wait, escalation, substitution proposal | This app | Written to Postgres (`qantum_slice`). |
+| Warehouse pick lists (planned and picked quantity, spec, required parts) | Warehouse pick system | Read via a `PicksPort` stub of `GET /sites/{id}/picks`. The app computes the pick check itself and never trusts the list's own "Picked" status (AC 61). |
+| Wait, escalation, substitution proposal, pick-error report | This app | Written to Postgres (`qantum_slice`); pick reports in `pick_report` (migration `0002_pick_reports.sql`), append-only and idempotent by `(created_by, idempotency_key)` like the others. |
 
 Sample data lives under `data/sample/` with a README stating it is invented. Penetrations must reference real `internal_code` values from the CSV, and a test asserts that.
 

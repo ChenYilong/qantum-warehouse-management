@@ -33,6 +33,20 @@ export {
   type ShortageLookup,
 } from "./lifecycle";
 export { findCandidates } from "./candidates";
+export {
+  checkPickLine,
+  checkPicks,
+  PICK_REPORT_KINDS,
+  type CheckedPickLine,
+  type PickCheck,
+  type PickIssueKind,
+  type PickLine,
+  type PickList,
+  type PickReport,
+  type PickReportKind,
+  type PickStatus,
+  type RequiredPart,
+} from "./picks";
 export { solutionMismatches } from "./fit";
 export {
   describeCandidateAvailability,

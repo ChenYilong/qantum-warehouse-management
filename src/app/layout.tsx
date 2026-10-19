@@ -4,6 +4,7 @@ import { ConnectionBar, OfflineBanner } from "@/ui/ConnectionBar";
 import { NavHistory } from "@/ui/NavHistory";
 import { SideMenu } from "@/ui/SideMenu";
 import { LoginGate } from "@/ui/LoginGate";
+import { PickOutboxSync } from "@/ui/PickOutboxSync";
 import { HEAD_SCRIPT } from "@/ui/sidebar";
 import styles from "@/ui/primitives.module.css";
 import "./globals.css";
@@ -42,6 +43,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </div>
         {/* The demo sign-in covers every page until someone signs in (AC 59). */}
         <LoginGate />
+        {/* Sends pick reports saved offline once the phone is back online (AC 66). Renders nothing. */}
+        <PickOutboxSync />
       </body>
     </html>
   );

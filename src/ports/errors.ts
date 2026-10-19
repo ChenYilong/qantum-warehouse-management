@@ -53,6 +53,12 @@ export class WaitNotAllowedError extends AppError {
   }
 }
 
+export class PickLineNotFoundError extends AppError {
+  constructor() {
+    super(404, "pick_line_not_found", "That line is not on this site's pick list.");
+  }
+}
+
 export class StaleNominationError extends AppError {
   constructor() {
     super(409, "stale_nomination", "The nomination has changed.");

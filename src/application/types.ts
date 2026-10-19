@@ -1,11 +1,13 @@
 import type { Catalogue } from "@/domain";
-import type { ActionsRepository, NominationsPort, SitesPort, SolutionMaterialsPort, StockPort } from "@/ports";
+import type { ActionsRepository, NominationsPort, PicksPort, SitesPort, SolutionMaterialsPort, StockPort } from "@/ports";
 
 export interface Dependencies {
   readonly sites: SitesPort;
   readonly nominations: NominationsPort;
   readonly stock: StockPort;
   readonly solutionMaterials: SolutionMaterialsPort;
+  /** The warehouse pick lists (AC 61). */
+  readonly picks: PicksPort;
   readonly catalogue: Catalogue;
   readonly actions: ActionsRepository;
   readonly now: () => Date;

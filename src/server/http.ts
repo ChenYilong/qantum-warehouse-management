@@ -34,6 +34,19 @@ export const SubstitutionBodySchema = z.strictObject({
   reason: z.string().trim().min(1).max(500),
 });
 
+/** A pick-error report (AC 65). Amounts are whole, non-negative and finite; text is trimmed and capped. */
+export const PickReportBodySchema = z.strictObject({
+  kind: z.enum(["wrong_spec", "missing_parts", "part_picked", "other"]),
+  lineId: z.string().regex(/^[A-Za-z0-9._-]{1,64}$/),
+  plannedQty: z.number().int().min(0).max(100_000).nullable().optional(),
+  pickedQty: z.number().int().min(0).max(100_000).nullable().optional(),
+  missingPart: z.string().trim().max(120).optional(),
+  note: z.string().trim().max(500).optional(),
+  sendToPicker: z.boolean(),
+  sendToPurchasing: z.boolean(),
+  photoAttached: z.boolean().optional(),
+});
+
 export function json(body: unknown, status = 200): Response {
   return Response.json(body, {
     status,
