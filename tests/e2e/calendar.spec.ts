@@ -37,6 +37,8 @@ test("AC 81: the Calendar tab holds the deadline calendar, a copy of the Map tab
   await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Calendar", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(page.locator("[data-verdict]")).toHaveCount(0);
   await expect(page.getByRole("list", { name: "Projects" })).toHaveCount(0);
+  // Only the panel: main holds its h1 and the panel, nothing else.
+  await expect(page.locator("main > *")).toHaveCount(2);
   // The same verdict, totals, bar and tabs as the map panel.
   await expect(panel(page).getByRole("heading", { level: 2 })).toHaveText("2 of 3 crews can't go yet");
   await expect(panel(page).getByText("3 shortages · 4 data problems", { exact: true })).toBeVisible();

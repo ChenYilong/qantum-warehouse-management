@@ -58,6 +58,8 @@ test("AC 77: the Map tab opens with today's verdict: 2 of 3 crews can't go yet, 
   await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Map", exact: true })).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("list", { name: "Projects" })).toHaveCount(0);
   await expect(page.locator("[data-calendar-panel]")).toHaveCount(0);
+  // Only the panel: main holds its h1 and the panel, nothing else.
+  await expect(page.locator("main > *")).toHaveCount(2);
   await assertAxe(page);
   await assertTargets(page);
   await assertNoOverflow(page);
