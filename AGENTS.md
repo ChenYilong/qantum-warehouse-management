@@ -28,7 +28,7 @@ Project skills come from [Skill Forge](https://github.com/more-than-code/skill-f
 - Do not strip trailing commas from substrates. Incomplete substrates get no candidates.
 - Do not edit `data/solutions-excerpt.csv`. A test pins its hash.
 - Sample data lives only in `data/sample/` and is labelled invented.
-- No secrets in code, tests, logs or output. Server credentials never reach the browser. No `NEXT_PUBLIC_` for secrets.
+- No secrets in code, tests, logs or output. Server credentials never reach the browser. No `NEXT_PUBLIC_` for secrets. The one value that reaches the browser by design is the public Mapbox token (`MAPBOX_PUBLIC_TOKEN`, `pk.` only); a secret token fails the build (AC 76).
 
 ## Working rules
 

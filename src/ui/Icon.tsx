@@ -1,7 +1,7 @@
 import type { IconName } from "./status";
 import styles from "./primitives.module.css";
 
-export function Icon({ name }: { name: IconName | "chevron-left" | "chevron-right" | "menu" | "close" | "phone" }) {
+export function Icon({ name }: { name: IconName | "chevron-left" | "chevron-right" | "menu" | "close" | "phone" | "pin" }) {
   return (
     <svg className={styles.icon} viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false">
       {name === "check" ? <path d="M4 10.5 8.2 14.5 16 6" fill="none" stroke="currentColor" strokeWidth="2" /> : null}
@@ -24,6 +24,10 @@ export function Icon({ name }: { name: IconName | "chevron-left" | "chevron-righ
       ) : null}
       {name === "chevron-right" ? (
         <path d="M7.5 5 13 10l-5.5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      ) : null}
+      {name === "pin" ? (
+        // A map pin with a hole: where a project is (AC 74).
+        <path d="M10 18s5.75-5.6 5.75-9.75a5.75 5.75 0 0 0-11.5 0C4.25 12.4 10 18 10 18z M10 6.25a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
       ) : null}
       {name === "clock" ? (
         <path d="M10 2.75a7.25 7.25 0 1 0 0 14.5 7.25 7.25 0 0 0 0-14.5z M10 6v4.25l2.75 1.75" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

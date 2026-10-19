@@ -69,6 +69,9 @@ export async function assertTargets(page: Page): Promise<void> {
       if (element.getClientRects().length === 0) continue;
       // Inline links inside running text are exempt from the target size.
       if (element.tagName === "A" && element.closest("p") !== null) continue;
+      // Mapbox's wordmark and credits, required on every map, keep Mapbox's size. Nobody needs them to use the app:
+      // the map is a shortcut for touch, and Directions is the control (AC 74).
+      if (element.closest(".mapboxgl-ctrl") !== null) continue;
       // Content inside a closed disclosure cannot be tapped; the summary itself is checked.
       const details = element.closest("details");
       if (details !== null && !details.open && element.closest("summary") === null) continue;

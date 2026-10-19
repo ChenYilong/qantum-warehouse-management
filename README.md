@@ -29,6 +29,7 @@ The live demo uses invented sample data and has no login. Decisions are stored i
 8. **Offline.** The bar above every screen shows the picker's last action and an Online switch. Switch it off to work offline: the bar says Offline with when the phone last heard from the server, a banner at the foot says how old the screen is, decisions are not sent, and Offline details has Sync now with the last sync time.
 9. **Materials**, from the menu on the Sites list. Each material against the one shared stock, across sites. The pipe collar shows 2 on hand against 6 planned across sites, short at one site: Cedar Court on its own is not short, but the sites together need more than there is.
 10. **Review on site.** On Cedar Court, under Materials · planned vs picked, every line has its own Review beside its label, the lines that match the plan too: the warehouse can mark a line right and the site still find it wrong. Review the pipe collar and tap **No, something's wrong**, then say what the site found (Damaged, 2 affected, Same-day delivery) and send it. Back on the site the line reads Reported on site with what was found, Picks says Not ready and Send the crew is locked. Review it again and tap **Yes, it's right**: the picks match the plan again and the line reads Checked on site. Offline, Yes waits on the phone like a report and sends itself once you are back online.
+11. **Maps.** Each project ends with Directions, which opens Google Maps from where your phone is to the project. Tap "Show distance and time" and allow the location: each project says how far it is and how long the drive takes ("12.3 km · 18 min drive"), or the straight line when there is no route. With a Mapbox token set, each card also shows a map of the project; tap it for the same directions.
 
 ## Run locally
 
@@ -39,7 +40,7 @@ npm ci
 ACTIONS_STORE=memory npm run dev
 ```
 
-Open http://localhost:3000. Decisions are kept in memory and reset when the server restarts. No database or credentials are needed. To see the failure state, restart with `STUB_STOCK_MODE=down`: every site shows "Can't check", never "Crew can go".
+Open http://localhost:3000. Decisions are kept in memory and reset when the server restarts. No database or credentials are needed. For the project maps, put a public Mapbox token in `.env.local` (`MAPBOX_PUBLIC_TOKEN=pk.…`) and restart; without one there are no maps and everything else works. To see the failure state, restart with `STUB_STOCK_MODE=down`: every site shows "Can't check", never "Crew can go".
 
 ## Tests
 
@@ -70,11 +71,11 @@ CI deploys `main` to Vercel after the checks, database and browser jobs pass: it
    ```
    Type passwords at prompts or read them from a password manager. Do not leave them in shell history.
 2. **Vercel project** (framework Next.js, region `syd1` from `vercel.json`) with `ACTIONS_STORE=postgres`, `DB_HOST`, `DB_PORT=6543`, `DB_USER=qantum_slice.<project-ref>`, `DB_NAME=qantum_slice`, `DB_SSL=require`, `DB_POOL_MAX=1`, and `DB_PASSWORD` as a sensitive variable.
-3. **GitHub:** secret `VERCEL_TOKEN`; variables `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `PRODUCTION_URL`; and in the `production` environment the secret `SUPABASE_DB_PASSWORD`, the Supabase database (admin) password, which CI uses only to migrate. Set it with `gh secret set SUPABASE_DB_PASSWORD --env production` and paste it at the prompt.
+3. **GitHub:** secret `VERCEL_TOKEN`; variables `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `PRODUCTION_URL`; and in the `production` environment the secret `SUPABASE_DB_PASSWORD`, the Supabase database (admin) password, which CI uses only to migrate. Set it with `gh secret set SUPABASE_DB_PASSWORD --env production` and paste it at the prompt. For the project maps, the secret `MAPBOX_PUBLIC_TOKEN`: a **public** Mapbox token (`pk.`) created at account.mapbox.com → Tokens with the default public scopes and URL restrictions for the production URL and `http://localhost:3000`. Set it with `gh secret set MAPBOX_PUBLIC_TOKEN`. CI checks it is public, then bakes it into the build; without it the deploy has no maps, and a secret token (`sk.`) stops the deploy.
 
 Schema changes ship as new files in `db/migrations/`; the latest, `0003_site_review.sql`, adds the reviews on site and the site's report fields. CI applies them on every deploy from `main`, after the build and before `vercel deploy`: `npm run db:migrate` as `postgres.<project-ref>` through the session pooler (port 5432), with the host, project ref and database read from the Vercel production settings it has just pulled (the repository or environment variables `MIGRATION_DB_HOST` and `MIGRATION_DB_USER` override them). It applies only the files not yet recorded in `schema_migrations`, since the app's role cannot change the schema itself. It fails closed: without the secret, or if a migration fails, nothing is deployed. Because the migration runs before the new version goes live, a migration must only add (tables, columns with defaults, wider checks), never drop or rename what the live version uses.
 
-Every runtime variable of the app is listed in `.env.example` and explained in `docs/api.md` (Configuration). The test and CI variables above (`TEST_DB_ADMIN_URL`, `REQUIRE_DB_CONTRACT`, `PRODUCTION_URL`, `VERCEL_*`, `SUPABASE_DB_PASSWORD`, `MIGRATION_DB_*`) are not.
+Every runtime variable of the app is listed in `.env.example` and explained in `docs/api.md` (Configuration). The test and CI variables above (`TEST_DB_ADMIN_URL`, `REQUIRE_DB_CONTRACT`, `PRODUCTION_URL`, `VERCEL_*`, `SUPABASE_DB_PASSWORD`, `MIGRATION_DB_*`) are not, and `MAPBOX_PUBLIC_TOKEN` is listed there with how to set it.
 
 ## Sample data
 

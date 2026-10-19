@@ -57,6 +57,7 @@ export default defineConfig([
     ".next-e2e/**",
     ".next-e2e-stock-down/**",
     ".next-e2e-stock-malformed/**",
+    ".next-e2e-maps/**",
     "node_modules/**",
     "coverage/**",
     "playwright-report/**",
