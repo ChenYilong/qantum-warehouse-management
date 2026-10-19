@@ -8,8 +8,8 @@ export interface HealthView {
 }
 
 /**
- * The connection bar's check (AC 48). Answering at all means the phone can reach the server. A stock feed
- * that is down is not a failed check: the bar then shows the picker's last action as unknown, never a time.
+ * The header Online switch's check (AC 48). Answering at all means the phone can reach the server. A stock feed
+ * that is down is not a failed check: the line under the header then shows the picker's last action as unknown, never a time.
  */
 export async function checkHealth(deps: Pick<Dependencies, "stock">): Promise<HealthView> {
   try {

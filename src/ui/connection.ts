@@ -1,7 +1,7 @@
 /**
- * The connection bar's rules (AC 48). Pure, so the client island stays small and the wording is tested here.
+ * The header's Online switch's rules (AC 48). Pure, so the client island stays small and the wording is tested here.
  * Online needs three things: the browser says it has a network, the last health check answered, and the
- * person has not chosen to work offline. Until the first check answers the bar says "Checking", never Online.
+ * person has not chosen to work offline. Until the first check answers the switch says "Checking", never Online.
  */
 
 export type ConnectionState = "checking" | "online" | "offline";
@@ -17,7 +17,7 @@ export interface ConnectionFacts {
   readonly lastFailAt: number | null;
 }
 
-/** How often the bar asks the server whether it is there. */
+/** How often the switch asks the server whether it is there. */
 export const HEALTH_INTERVAL_MS = 30_000;
 
 /** sessionStorage: Online switched off on this tab. Cleared when the tab closes, so a forgotten choice cannot stick. */
@@ -45,7 +45,7 @@ function twoDigits(value: number): string {
 }
 
 /**
- * "08:02" today, "yesterday 17:40", or "3 Oct, 08:00", in the phone's own time zone (the bar renders on the
+ * "08:02" today, "yesterday 17:40", or "3 Oct, 08:00", in the phone's own time zone (the line renders on the
  * client only, so server and browser never disagree). Null for a missing or unreadable time.
  */
 export function clockLabel(value: number | string | null | undefined, now: number): string | null {
@@ -62,7 +62,7 @@ export function clockLabel(value: number | string | null | undefined, now: numbe
   return `${date.getDate()} ${MONTHS[date.getMonth()]}, ${time}`;
 }
 
-/** The bar's left side: when the warehouse last changed stock (the picker's latest scan in the stock feed). */
+/** The line under the header: when the warehouse last changed stock (the picker's latest scan in the stock feed). */
 export function pickerLine(stockAsOf: string | null | undefined, now: number): string {
   return `Picker last action · ${clockLabel(stockAsOf, now) ?? "unknown"}`;
 }

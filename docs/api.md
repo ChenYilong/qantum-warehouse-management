@@ -26,7 +26,7 @@ The app's own HTTP API, as built. Requirements are in `slice-specification.md`, 
 | `GET /api/sites/{id}/penetrations/{pid}/substitution-candidates` | Catalogue-similar substitutes | 200 |
 | `POST /api/sites/{id}/penetrations/{pid}/substitutions` | Record a proposed substitute | 201, or 200 |
 | `GET /api/sites/{id}/actions` | Recorded actions and proposals | 200 |
-| `GET /api/health` | The connection bar's check, with the stock feed's time | 200 |
+| `GET /api/health` | The header Online switch's check, with the stock feed's time | 200 |
 
 ### `GET /api/sites`
 

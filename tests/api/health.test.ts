@@ -9,7 +9,7 @@ afterEach(() => {
   setDependenciesForTests(null);
 });
 
-describe("AC 48: the connection bar's health check", () => {
+describe("AC 48: the Online switch's health check", () => {
   it("answers ok with the stock feed's time, and is never cached", async () => {
     setDependenciesForTests(testDependencies());
     const response = await readResponse(await getHealth());

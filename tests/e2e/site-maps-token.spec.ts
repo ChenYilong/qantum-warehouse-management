@@ -43,6 +43,30 @@ test("AC 74: each project has its map with a pin, and a tap on the map opens the
   await assertAxe(page);
 });
 
+test("AC 74: each project's map sits under its name and above its signal, exactly as wide as the signal", async ({ page }) => {
+  await answerMapbox(page);
+  for (const width of [375, 1280]) {
+    await page.setViewportSize({ width, height: 800 });
+    await gotoApp(page, "/sites");
+    for (const id of IDS) {
+      const where = `${id} at ${width}px`;
+      const map = page.locator(`[data-map="${id}"]`);
+      const signal = page.getByRole("listitem").filter({ has: map }).locator("[data-signal]");
+      await map.scrollIntoViewIfNeeded();
+      await expect(map, where).toHaveAttribute("data-map-state", "ready");
+      const [name, strip, box] = await Promise.all([page.locator(`#site-card-${id}`).boundingBox(), map.boundingBox(), signal.boundingBox()]);
+      if (!name || !strip || !box) throw new Error(`${where}: name, map or signal is not on the page`);
+      // In that order down the card: the name, the map, the signal.
+      expect(name.y + name.height, where).toBeLessThanOrEqual(strip.y + 0.5);
+      expect(strip.y + strip.height, where).toBeLessThanOrEqual(box.y + 0.5);
+      // The same left edge and the same width as the signal under it.
+      expect(Math.abs(strip.x - box.x), where).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(strip.width - box.width), where).toBeLessThanOrEqual(0.5);
+    }
+  }
+  await assertNoOverflow(page);
+});
+
 test("AC 75, AC 76: one driving-matrix request with the public token gives each project its drive; offline, the straight line", async ({ page }) => {
   const matrix = await answerMapbox(page);
   await gotoApp(page, "/sites");

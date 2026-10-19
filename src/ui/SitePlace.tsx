@@ -11,13 +11,15 @@ import styles from "./primitives.module.css";
 type MapState = "waiting" | "loading" | "ready" | "failed";
 
 /**
- * A project's map (AC 74): Mapbox GL JS, created only when the card nears the screen, centred on the project with a
- * pin in its signal colour. It does not pan or zoom. A link laid over it, under Mapbox's credits, opens the directions
- * for a tap; it is hidden from keyboards and screen readers, which have Directions below. If the map can't start (no
- * WebGL, Mapbox failing), it hides and Directions still works.
+ * A project's map (AC 74), under the project's name and above its signal, as wide as the signal: Mapbox GL JS,
+ * created only when the card nears the screen, centred on the project with a pin in its signal colour. It does not
+ * pan or zoom. A link laid over it, under Mapbox's credits, opens the directions for a tap; it is hidden from keyboards
+ * and screen readers, which have Directions at the card's foot. If the map can't start (no WebGL, Mapbox failing), it
+ * hides and Directions still works.
  */
-function SiteMap({ siteId, token, location, colour, href }: { siteId: string; token: string; location: LatLng; colour: string; href: string }) {
+export function SiteMap({ siteId, token, location, colour }: { siteId: string; token: string; location: LatLng; colour: string }) {
   const holder = useRef<HTMLDivElement>(null);
+  const href = directionsUrl(location);
   const [state, setState] = useState<MapState>("waiting");
 
   useEffect(() => {
@@ -78,22 +80,10 @@ function SiteMap({ siteId, token, location, colour, href }: { siteId: string; to
 }
 
 /**
- * Where a project is and how to get there (AC 74, 75): its map when there is a token, a line about the trip once the
- * phone's position is known, and Directions, which opens the phone's maps app from where it is to the project.
+ * How to get to a project (AC 74, 75), at the card's foot: a line about the trip once the phone's position is known,
+ * and Directions, which opens the phone's maps app from where it is to the project.
  */
-export function SitePlace({
-  siteId,
-  titleId,
-  location,
-  token,
-  colour,
-}: {
-  siteId: string;
-  titleId: string;
-  location: LatLng;
-  token: string;
-  colour: string;
-}) {
+export function SitePlace({ siteId, titleId, location }: { siteId: string; titleId: string; location: LatLng }) {
   const { fix, routeFor } = useTravel();
   const href = directionsUrl(location);
   let state: TravelState;
@@ -105,20 +95,17 @@ export function SitePlace({
   }
   const label = travelLabel(state);
   return (
-    <div className={styles.sitePlace}>
-      {token ? <SiteMap siteId={siteId} token={token} location={location} colour={colour} href={href} /> : null}
-      <div className={styles.sitePlaceRow}>
-        {label ? (
-          <p className={styles.siteTravel} data-travel={siteId}>
-            <Icon name="pin" />
-            <span>{label}</span>
-          </p>
-        ) : null}
-        <a className={styles.button} href={href} target="_blank" rel="noopener noreferrer" aria-describedby={titleId}>
-          {MAP.directions}
-          <Icon name="chevron-right" />
-        </a>
-      </div>
+    <div className={styles.sitePlaceRow}>
+      {label ? (
+        <p className={styles.siteTravel} data-travel={siteId}>
+          <Icon name="pin" />
+          <span>{label}</span>
+        </p>
+      ) : null}
+      <a className={styles.button} href={href} target="_blank" rel="noopener noreferrer" aria-describedby={titleId}>
+        {MAP.directions}
+        <Icon name="chevron-right" />
+      </a>
     </div>
   );
 }

@@ -18,10 +18,8 @@ export const PENETRATION_FILTER = {
   unknown: "That material is not a shortage on this site. Showing all penetrations.",
 } as const;
 
-/** The menu: the bottom tab bar (AC 37) and the side menu (AC 47). */
+/** The menu: the bottom tab bar, at every width (AC 37, AC 47). */
 export const NAV = {
-  collapse: "Collapse menu",
-  expand: "Expand menu",
   title: "Team leader",
   label: "Main",
   sites: "Projects",
@@ -132,7 +130,7 @@ export const ANNOUNCE = {
   replay: "Already recorded",
 } as const;
 
-/** The connection bar, the offline banner and Offline details (AC 48). */
+/** The header's Online switch, the offline banner and Offline details (AC 48). */
 export const CONNECTION = {
   online: "Online",
   offline: "Offline",
