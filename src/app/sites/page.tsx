@@ -8,6 +8,7 @@ import { SiteFilterForm } from "@/ui/SiteFilterForm";
 import { filterSites, isFiltered, parseSiteFilters, type SiteFilters } from "@/ui/site-filters";
 import { siteChip } from "@/ui/status";
 import { markerColour, validLocation } from "@/ui/travel";
+import { deadlineOf } from "@/ui/deadline";
 import { buildToday, TODAY } from "@/ui/today";
 import { TodayPanel } from "@/ui/TodayPanel";
 import { TravelButton, TravelProvider, type Place } from "@/ui/TravelProvider";
@@ -61,7 +62,7 @@ function placesOf(sites: readonly ListedSite[]): Place[] {
 }
 
 /**
- * One project's card, exactly as the list shows it (AC 49, 74): today's panel shows the same card under its map
+ * One project's card, exactly as the list shows it (AC 49, 74, 80): today's panel shows the same card under its map
  * (AC 79), with its own ids.
  */
 function ProjectCard({ site, token, idPrefix }: { site: ListedSite; token: string; idPrefix?: string }) {
@@ -72,6 +73,7 @@ function ProjectCard({ site, token, idPrefix }: { site: ListedSite; token: strin
       status={siteChip(site.crewStatus, site.shortageCount, site.dataProblemCount)}
       place={location ? { location, token, colour: markerColour(site.crewStatus) } : undefined}
       idPrefix={idPrefix}
+      deadline={deadlineOf(site.date)}
     />
   );
 }

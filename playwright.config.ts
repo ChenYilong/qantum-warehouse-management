@@ -34,6 +34,7 @@ const readSpecs = [
   "**/navigation-tabs.spec.ts",
   "**/wide-screen.spec.ts",
   "**/today.spec.ts",
+  "**/deadline.spec.ts",
   "**/actions-log.spec.ts",
   "**/field-ui.spec.ts",
   "**/sign-in.spec.ts",

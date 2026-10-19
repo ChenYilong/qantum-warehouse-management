@@ -6,6 +6,7 @@
       "name": "Cedar Court, Block A",
       "reference": "CC-A2",
       "address": "12 Quay Road",
+      "date": "2026-10-23",
       "operator": {
         "name": "Mere Tane",
         "phone": "+44 7700 900156"
@@ -25,6 +26,7 @@
       "name": "Quayside House, Levels 3 to 5",
       "reference": "QH-345",
       "address": "4 Dock Street",
+      "date": "2026-10-27",
       "operator": {
         "name": "Wiremu Ngata",
         "phone": "+44 7700 900158"
@@ -44,6 +46,7 @@
       "name": "Northgate Depot, Phase 2",
       "reference": "ND-P2",
       "address": "88 Northgate",
+      "date": "2026-11-03",
       "operator": {
         "name": "Tama Rewi",
         "phone": "+44 7700 900159"
@@ -63,6 +66,7 @@
       "name": "Foundry Lane Annex",
       "reference": "FL-01",
       "address": "1 Foundry Lane",
+      "date": "2026-11-13",
       "operator": {
         "name": "Mere Tane",
         "phone": "+44 7700 900156"

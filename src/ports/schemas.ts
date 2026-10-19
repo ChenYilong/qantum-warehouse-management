@@ -24,6 +24,8 @@ export const SiteSchema = z.object({
   picker: ContactSchema.optional(),
   /** Where the site is, for its map and directions (AC 74). The UI ignores a point out of range or at 0,0. */
   location: z.object({ lat: z.number(), lng: z.number() }).optional(),
+  /** The project's deadline (AC 80): a calendar date, YYYY-MM-DD. The UI shows none for a date that isn't real. */
+  date: z.string().optional(),
 });
 
 export const SitesFileSchema = z.object({
