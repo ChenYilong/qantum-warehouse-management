@@ -24,8 +24,8 @@ while (Date.now() <= deadline) {
     const homeText = await homeResponse.text();
     const listResponse = await fetch(new URL("/sites", raw), { cache: "no-store" });
     const listText = await listResponse.text();
-    // The Guide's heading and the list's name, as the pages read them (docs/ui-design.md, UI refresh 2026-10-19).
-    const homeOk = homeResponse.status === 200 && new URL(homeResponse.url).pathname === "/about-this-demo" && homeText.includes("Is the crew good to go?");
+    // The Guide's headline and the list's name, as the pages read them (docs/ui-design.md, section 19).
+    const homeOk = homeResponse.status === 200 && new URL(homeResponse.url).pathname === "/about-this-demo" && homeText.includes("Know which crews can roll out today");
     const listOk = listResponse.status === 200 && listText.includes("Projects");
     // The pick check also reads this app's reports and reviews, so a migration the code needs but the database lacks
     // shows here as "Can't check picks" (data-pick-status="unavailable") while every check above still passes.

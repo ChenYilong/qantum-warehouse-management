@@ -1,12 +1,34 @@
+import { ABOUT_PATH, ACTIONS_PATH, CALENDAR_PATH, MAP_PATH, MATERIALS_PATH } from "./format";
+import { NAV } from "./messages";
+
 /**
  * Same-document screens, oldest first. The back control pops when the screen it names is the one underneath,
  * so the browser restores that page instead of opening it as a new visit (which paints the Loading screen).
  */
 const stack: string[] = [];
+const listeners = new Set<() => void>();
+
+/** For `useSyncExternalStore`: the back control re-reads the screen underneath whenever the stack moves. */
+export function subscribeNavHistory(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function changed(): void {
+  for (const listener of listeners) listener();
+}
+
+/** The screen this visit came from, or null when this is the first one (opened directly, or reloaded). */
+export function previousScreen(): string | null {
+  return stack[stack.length - 2] ?? null;
+}
 
 /** Drops the stack. Tests call this between cases; a full page load starts empty on its own. */
 export function clearNavHistory(): void {
   stack.splice(0, stack.length);
+  changed();
 }
 
 export function noteNavigation(href: string, popped: boolean): void {
@@ -18,9 +40,36 @@ export function noteNavigation(href: string, popped: boolean): void {
     // so a later back control does not pretend to know the page under it.
     if (index >= 0) stack.splice(index + 1);
     else stack.splice(0, stack.length, key);
+    changed();
     return;
   }
-  if (stack[stack.length - 1] !== key) stack.push(key);
+  if (stack[stack.length - 1] !== key) {
+    stack.push(key);
+    changed();
+  }
+}
+
+/** The top-level pages a back control can name by where they are. */
+const TOP_LEVEL: Readonly<Record<string, string>> = {
+  [MAP_PATH]: NAV.map,
+  [CALENDAR_PATH]: NAV.calendar,
+  "/sites": NAV.sites,
+  [ABOUT_PATH]: NAV.about,
+  [MATERIALS_PATH]: NAV.materials,
+  [ACTIONS_PATH]: NAV.actions,
+};
+
+/**
+ * Where a back control leads (AC 85): back where the visit came from. The page's own target when nothing came before
+ * (opened directly), when the screen underneath is that target already (its link may carry a query or an anchor), or
+ * when it is a screen the control can't name; otherwise the top-level page underneath, by its name.
+ */
+export function backTarget(fallback: { readonly href: string; readonly name: string }, previous: string | null): { readonly href: string; readonly name: string } {
+  if (previous === null) return fallback;
+  const { pathname } = parts(previous);
+  if (pathname === parts(fallback.href).pathname) return fallback;
+  const name = TOP_LEVEL[pathname];
+  return name ? { href: previous, name } : fallback;
 }
 
 /** True when `backHref` is the screen under the current one. A link with no query still matches that screen. */
