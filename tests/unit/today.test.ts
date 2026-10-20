@@ -11,7 +11,9 @@ import {
   segmentGroup,
   segmentLit,
   shortName,
+  TODAY,
   TODAY_TABS,
+  todayText,
   todayGroup,
   totalsLine,
   type TodayInput,
@@ -219,5 +221,13 @@ describe("AC 79: the map's pins and the card under it", () => {
       site(sample.id, sample.name, ["clear", "blocked", "blocked", "nothing_planned"][index]!, { location: sample.location }),
     );
     expect(buildToday(sites).projects.map((project) => project.shortName)).toEqual(["Cedar Court", "Quayside House", "Northgate Depot", "Foundry Lane Annex"]);
+  });
+});
+
+describe("the panel's first line names the open tab, then today from the browser, in English", () => {
+  it("writes the weekday, day, month and year in full", () => {
+    expect(todayText(new Date(2026, 9, 20, 12))).toBe("Tuesday 20 October 2026");
+    expect(todayText(new Date(2027, 0, 1, 0, 5))).toBe("Friday 1 January 2027");
+    expect(TODAY.todayIs).toBe("today is");
   });
 });

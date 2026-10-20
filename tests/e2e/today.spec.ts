@@ -40,17 +40,17 @@ test("AC 77: the Map tab opens with today's verdict: 2 of 3 crews can't go yet, 
   // The page's h1 stays first in main, for structure; the verdict leads what you see.
   await expect(page.locator("main > h1")).toHaveText("Map");
   await expect(verdict(page).getByRole("heading", { level: 2 })).toHaveText("2 of 3 crews can't go yet");
-  await expect(verdict(page).getByText("Today", { exact: true })).toBeVisible();
+  await expect(verdict(page).locator("[data-today-label]")).toHaveText(/^Map · today is (Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday) \d{1,2} [A-Z][a-z]+ \d{4}$/);
   await expect(verdict(page).getByText("3 shortages · 4 data problems", { exact: true })).toBeVisible();
   const bar = verdict(page).getByRole("img", { name: "1 can go, 2 blocked" });
   await expect(bar.locator("[data-segment]")).toHaveCount(3);
-  expect(await segments(page)).toEqual(["go:1", "blocked:0.35", "blocked:0.35"]);
-  // The project's stop red with white text.
+  expect(await segments(page)).toEqual(["go:1", "blocked:0.5", "blocked:0.5"]);
+  // The app's theme, black with white text, whatever the verdict; only the segments are green and red.
   const colours = await verdict(page).evaluate((section) => {
     const style = getComputedStyle(section);
     return { background: style.backgroundColor, text: style.color };
   });
-  expect(colours).toEqual({ background: "rgb(179, 0, 27)", text: "rgb(255, 255, 255)" });
+  expect(colours).toEqual({ background: "rgb(0, 0, 0)", text: "rgb(255, 255, 255)" });
   // Full bleed on a phone, as in the design.
   const width = await verdict(page).evaluate((section) => [section.getBoundingClientRect().left, section.getBoundingClientRect().right]);
   expect(width).toEqual([0, 375]);
@@ -78,9 +78,9 @@ test("AC 78: four tabs inside the verdict open on Crew can go, and the chosen ta
   expect(await verdict(page).getByRole("tablist").count()).toBe(1);
   await tab(page, "Blocked 2").click();
   await expect(tab(page, "Blocked 2")).toHaveAttribute("aria-selected", "true");
-  await expect.poll(() => segments(page)).toEqual(["go:0.35", "blocked:1", "blocked:1"]);
+  await expect.poll(() => segments(page)).toEqual(["go:0.5", "blocked:1", "blocked:1"]);
   await tab(page, "Other 1").click();
-  await expect.poll(() => segments(page)).toEqual(["go:0.35", "blocked:0.35", "blocked:0.35"]);
+  await expect.poll(() => segments(page)).toEqual(["go:0.5", "blocked:0.5", "blocked:0.5"]);
   // All: no filter, every segment lit.
   await tab(page, "All 4").click();
   await expect.poll(() => segments(page)).toEqual(["go:1", "blocked:1", "blocked:1"]);

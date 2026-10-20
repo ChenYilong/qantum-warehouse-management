@@ -2212,41 +2212,23 @@ section:has(> .stickyHeading) {
 /*
  * Today's panel on the projects list (AC 77 to 79), after the author's design "I · Verdict + tabs + map (B+D+E)":
  * the verdict with its bar and tabs, then the chosen tab's map and, right under it, the chosen project's card. Full
- * bleed on a phone, as in the design; a rounded block in the column on a wider screen. The colours are the project's
- * signal tokens.
+ * bleed on a phone, as in the design; a rounded block in the column on a wider screen. The colours are the app's
+ * theme, black, yellow and white, whatever the verdict (2026-10-20, the author's decision): only the bar's segments
+ * keep the signal green and red, where they mean a crew can go or is blocked.
  */
 .today {
-  --verdict-bg: var(--signal-stop-fill);
-  --verdict-ink: var(--signal-stop-ink);
-  --verdict-soft: #ffd6d6;
-  --verdict-track: rgb(0 0 0 / 0.28);
-  --verdict-tab: #ffe5e5;
-  --verdict-tab-on-bg: #ffffff;
-  --verdict-tab-on-ink: var(--signal-stop-fill);
+  --verdict-bg: var(--chrome-bg);
+  --verdict-ink: var(--chrome-text);
+  --verdict-soft: var(--brand-yellow);
+  --verdict-track: var(--chrome-surface);
+  --verdict-tab: var(--chrome-text);
+  --verdict-tab-on-bg: var(--brand-yellow);
+  --verdict-tab-on-ink: var(--brand-black);
   /* Its own stacking context: the pins and the card stay under the sticky header and the tab bar. */
   isolation: isolate;
   /* Full bleed: the main column's max-width would otherwise keep the panel off the screen's right edge. */
   max-width: none;
   margin: 0 calc(-1 * var(--space)) 1.5rem;
-}
-
-.today[data-today="go"] {
-  --verdict-bg: var(--signal-go-fill);
-  --verdict-ink: var(--signal-go-ink);
-  --verdict-soft: var(--signal-go-ink);
-  --verdict-track: rgb(0 0 0 / 0.16);
-  --verdict-tab: var(--signal-go-ink);
-  --verdict-tab-on-ink: var(--signal-go-ink);
-}
-
-.today[data-today="none"] {
-  --verdict-bg: var(--surface);
-  --verdict-ink: var(--text);
-  --verdict-soft: var(--text-secondary);
-  --verdict-track: var(--neutral-bg);
-  --verdict-tab: var(--text);
-  --verdict-tab-on-bg: var(--brand-black);
-  --verdict-tab-on-ink: var(--brand-yellow);
 }
 
 @media (min-width: 48rem) {
@@ -2267,8 +2249,9 @@ section:has(> .stickyHeading) {
   color: var(--verdict-ink);
 }
 
-.today[data-today="none"] .verdict {
-  border-block: 1px solid var(--border);
+/* On a dark page the black panel keeps an edge. */
+.verdict {
+  border-block: 1px solid var(--chrome-border);
 }
 
 .verdictTop {
@@ -2283,6 +2266,10 @@ section:has(> .stickyHeading) {
 
 .verdictToday {
   font-weight: 700;
+}
+
+/* The tab's name leads, in capitals; the date follows in plain words. */
+.verdictTabName {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2307,7 +2294,7 @@ section:has(> .stickyHeading) {
   flex: 1 1 0;
   height: 10px;
   border-radius: 5px;
-  opacity: 0.35;
+  opacity: 0.5;
 }
 
 .verdictSegment[data-lit] {
@@ -2319,16 +2306,13 @@ section:has(> .stickyHeading) {
 }
 
 .verdictSegment[data-segment="blocked"] {
-  background: #ffb3b3;
+  background: var(--signal-stop-fill);
+  /* The stop red's bright edge, as on a dark page: the panel is always black. */
+  box-shadow: inset 0 0 0 1px #ff6b5e;
 }
 
 .verdictSegment[data-segment="unchecked"] {
   background: var(--signal-unknown-fill);
-}
-
-/* On the go green every segment is a crew that can go: dark, so it shows. */
-.today[data-today="go"] .verdictSegment {
-  background: var(--signal-go-ink);
 }
 
 .verdictTabs {
@@ -2397,7 +2381,7 @@ section:has(> .stickyHeading) {
   padding: 0 0.25rem 0 0;
   border: 0;
   background: transparent;
-  color: #16181d;
+  color: var(--brand-black);
   font: inherit;
   cursor: pointer;
   transform: translate(-24px, -50%);
@@ -2438,7 +2422,7 @@ section:has(> .stickyHeading) {
   padding: 3px 6px;
   border-radius: 6px;
   background: #ffffff;
-  color: #16181d;
+  color: var(--brand-black);
   font-size: 0.8125rem;
   font-weight: 700;
   line-height: 1.2;
@@ -2447,7 +2431,7 @@ section:has(> .stickyHeading) {
 }
 
 .pin[aria-pressed="true"] .pinLabel {
-  outline: 2px solid #16181d;
+  outline: 2px solid var(--brand-black);
 }
 
 /* The chosen project's card, right under the map (AC 79): the list's own card, as wide as the map, rounded as in the
