@@ -105,11 +105,11 @@ A line reports `short` if a single install needs more than the on-hand amount, o
 
 `penetration` is the summary rendered above the substitute list on the penetration page. Its two-column comparison view comes from a use case with no route, `describePenetration`. Likewise the materials pages (`listMaterialStock`, `describeMaterialStock`) and the cross-site Actions log (`listAllActions`) call use cases directly; any wait or escalate issued from those pages still goes through the shortage routes above. Their 404 `material_not_found` never leaves the page layer: no route can return it. `id` and `nominatedCode` duplicate top-level fields. `penetration` omits substrate, orientation and stock; orientation and substrate are given per candidate instead.
 
-Each candidate has one line per material, quantities aggregated by material. `notice` is returned for every status. Responses never contain the words "compatible" or "approved".
+Each candidate also carries `inventory: { internalCode, status: "READY" | "SHORTAGE", reason: "SUFFICIENT_QUANTITY" | "INSUFFICIENT_QUANTITY", availableQuantity: number | null, unit: string | null, capturedAt: string | null }`, its solution-level stock from the invented `solution-stock.json` (AC 90); a code without a count is SHORTAGE. Each candidate has one line per material, quantities aggregated by material. `notice` is returned for every status. Responses never contain the words "compatible" or "approved".
 
 ### `POST .../substitutions`
 
-Body: `{ fromInternalCode, toInternalCode, reason }`. If `from` is not the current nomination → 409 `stale_nomination`. If `to` is not among current candidates → 422 `not_a_candidate`. Returns `{ record, created }`; `status` is `proposed`, always. No other state changes.
+Body: `{ fromInternalCode, toInternalCode, reason }`. If `from` is not the current nomination → 409 `stale_nomination`. If `to` is not among current candidates → 422 `not_a_candidate`. If `to` is not READY in solution stock → 409 `substitute_not_in_stock` (AC 90), nothing written. Returns `{ record, created }`; `status` is `proposed`, always. No other state changes.
 
 ### `POST /api/sites/{id}/pick-reports`
 
@@ -166,7 +166,7 @@ Error bodies are exactly `{ code, message }`. No stack traces, paths, SQL, notes
 | `idempotency_key_required`, `invalid_json` | 400 |
 | `validation_failed` (lists only the invalid fields) | 422 |
 | `wait_not_allowed_for_blocker`, `not_a_candidate` | 422 |
-| `stale_nomination`, `idempotency_key_reused` | 409 |
+| `stale_nomination`, `idempotency_key_reused`, `substitute_not_in_stock` | 409 |
 | `payload_too_large` | 413 |
 | `upstream_unavailable`, `upstream_invalid` | 502 |
 | `internal_error` | 500 |

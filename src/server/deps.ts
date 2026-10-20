@@ -47,6 +47,7 @@ export function buildDependencies(): Dependencies {
     stock: stubs.stock,
     solutionMaterials: stubs.solutionMaterials,
     picks: stubs.picks,
+    solutionStock: stubs.solutionStock,
     catalogue,
     actions: actionsFor(env, production, now, newId),
     now,

@@ -23,6 +23,9 @@ import { parsePenetrationTab, penetrationTabHref } from "@/ui/penetration-tabs";
 import { candidateStatus, emptyCatalogueLabel, type StatusView } from "@/ui/status";
 import { StatusChip } from "@/ui/StatusChip";
 import { candidateFacts, penetrationFacts } from "@/ui/penetrations";
+import { formatReference } from "@/ui/format";
+import { inventoryView } from "@/ui/inventory";
+import type { EvidenceRequirement } from "@/ui/evidence";
 import styles from "@/ui/primitives.module.css";
 import { loadPage } from "../../../../_lib/load";
 
@@ -126,6 +129,7 @@ export default async function PenetrationPage({ params, searchParams }: PageProp
                 <FitTable
                   code={penetration.nominatedCode}
                   rows={fitRows(detail.penetration, { ...detail.nominated, materialNames: detail.materialNames }, detail.mismatches)}
+                  inventory={inventoryView(detail.inventory)}
                 />
               ) : (
                 <dl className={styles.fields}>
@@ -146,6 +150,15 @@ export default async function PenetrationPage({ params, searchParams }: PageProp
                     siteId={id}
                     penetrationId={pid}
                     fromCode={listed.nominatedCode}
+                    evidence={{
+                      context: {
+                        siteName: siteLoad.value.name,
+                        reference: formatReference(siteLoad.value.reference),
+                        penetration: `${detail.penetration.floor}, ${detail.penetration.location}`,
+                        nominatedCode: listed.nominatedCode,
+                      },
+                      requirements: blockingRequirements(readiness, pid),
+                    }}
                     choices={listed.candidates.map((candidate) => ({
                       code: candidate.internalCode,
                       facts: candidateFacts(candidate.availability, candidate.materials, readiness.shortages, { siteId: id, penetrationId: pid }),
@@ -157,6 +170,7 @@ export default async function PenetrationPage({ params, searchParams }: PageProp
                         },
                         candidate.mismatches,
                       ),
+                      inventory: inventoryView(candidate.inventory),
                     }))}
                   />
                 </>
@@ -195,6 +209,25 @@ function unavailable(title: string, backHref: string, backName: string) {
       </main>
     </>
   );
+}
+
+/** What this penetration waits on (AC 91): each shortage of the site that lists it, with the site's figures. */
+function blockingRequirements(readiness: SiteReadinessView, penetrationId: string): EvidenceRequirement[] {
+  return readiness.shortages
+    .filter((shortage) => shortage.penetrationIds.includes(penetrationId))
+    .map((shortage) => {
+      const material = readiness.materials[shortage.materialId];
+      return {
+        id: shortage.id,
+        status: shortage.kind === "short" ? ("SHORTAGE" as const) : ("UNKNOWN" as const),
+        name: material?.name ?? shortage.materialId,
+        unit: material?.unit ?? "",
+        required: shortage.requiredQty,
+        available: shortage.onHandQty,
+        missing: shortage.shortfallQty,
+        capturedAt: shortage.kind === "short" ? readiness.stockAsOf : null,
+      };
+    });
 }
 
 function blockerDecisions(readiness: SiteReadinessView, penetrationId: string): { id: string; target: string }[] {

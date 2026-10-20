@@ -91,6 +91,20 @@ export type MaterialRecord = z.infer<typeof MaterialSchema>;
 export type SolutionMaterialRecord = z.infer<typeof SolutionMaterialSchema>;
 export type SitesFile = z.infer<typeof SitesFileSchema>;
 export type NominationsFile = z.infer<typeof NominationsFileSchema>;
+/** Complete install kits on hand for one catalogue solution, keyed by its Internal Code (AC 90). Invented. */
+export const SolutionStockSchema = z.object({
+  internalCode: z.string().min(1).max(16),
+  availableQuantity: z.number(),
+  unit: z.string().min(1),
+  /** When the count was taken, an ISO timestamp. */
+  capturedAt: z.string().min(1),
+});
+
+export const SolutionStockFileSchema = z.object({
+  solutions: z.array(SolutionStockSchema),
+});
+
+export type SolutionStockRecord = z.infer<typeof SolutionStockSchema>;
 export type StockFile = z.infer<typeof StockFileSchema>;
 export type SolutionMaterialsFile = z.infer<typeof SolutionMaterialsFileSchema>;
 

@@ -28,7 +28,8 @@ test("a penetration page is titled by its place and split into Nominated solutio
   // A nominated solution that fits carries no mark anywhere in its comparison.
   const fitting = nominated0438.getByRole("table");
   await expect(fitting.getByText("doesn't fit")).toHaveCount(0);
-  await expect(fitting.locator("svg")).toHaveCount(0);
+  // No "doesn't fit" icon on a fitting row; the stock row's READY tick is not a fit mark (AC 90).
+  await expect(fitting.locator("tr:not([data-inventory-status]) svg")).toHaveCount(0);
   const subs = page.getByRole("region", { name: "Substitutes" });
   await expect(subs.getByText("Catalogue match, not verified")).toBeVisible();
   // The menu is the title. The shield is on the closed control; the heading underneath is gone.

@@ -1,5 +1,6 @@
 import type { ActionKind, EscalateTo, Penetration, PickList, PickReport, PickReportKind, PickRequest, PickReview, ShortageAction, SubstitutionProposal } from "@/domain";
-import type { SolutionMaterialRecord, StockBalanceRecord } from "./schemas";
+import type { SolutionMaterialRecord, SolutionStockRecord, StockBalanceRecord } from "./schemas";
+export type { SolutionStockRecord } from "./schemas";
 
 export type { InternalReason, UpstreamCode } from "./errors";
 export {
@@ -9,6 +10,7 @@ export {
   InternalError,
   InvalidJsonError,
   NotACandidateError,
+  NotInStockError,
   PayloadTooLargeError,
   PenetrationNotFoundError,
   PickLineNotFoundError,
@@ -36,6 +38,8 @@ export {
   SitesFileSchema,
   SolutionMaterialSchema,
   SolutionMaterialsFileSchema,
+  SolutionStockFileSchema,
+  SolutionStockSchema,
   StockBalanceSchema,
   StockFileSchema,
 } from "./schemas";
@@ -90,6 +94,11 @@ export interface StockPort {
 /** The warehouse pick system (AC 61). Null means no pick list for the site yet: can't check, never ready. */
 export interface PicksPort {
   getPicks(siteId: string): Promise<PickList | null>;
+}
+
+/** Solution-level stock (AC 90): install kits on hand per catalogue code. A code with no record has none. */
+export interface SolutionStockPort {
+  getSolutionStock(codes: readonly string[]): Promise<SolutionStockRecord[]>;
 }
 
 export interface SolutionMaterialsPort {

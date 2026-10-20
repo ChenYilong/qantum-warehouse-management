@@ -1,0 +1,893 @@
+{
+  "label": "INVENTED SAMPLE DATA. Stands in for a solution-level stock feed: complete install kits on hand per catalogue Internal Code, which the supplied catalogue does not have. Every solution is in stock for now; the quantities are random.",
+  "solutions": [
+    {
+      "internalCode": "0334",
+      "availableQuantity": 53,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0335",
+      "availableQuantity": 33,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0344",
+      "availableQuantity": 51,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0345",
+      "availableQuantity": 45,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0347",
+      "availableQuantity": 56,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0348",
+      "availableQuantity": 24,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0375",
+      "availableQuantity": 17,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0378",
+      "availableQuantity": 34,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0379",
+      "availableQuantity": 7,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0380",
+      "availableQuantity": 45,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0383",
+      "availableQuantity": 58,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0384",
+      "availableQuantity": 54,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0393",
+      "availableQuantity": 35,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0416",
+      "availableQuantity": 9,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0426",
+      "availableQuantity": 13,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0434",
+      "availableQuantity": 6,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0435",
+      "availableQuantity": 24,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0438",
+      "availableQuantity": 36,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0440",
+      "availableQuantity": 17,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0441",
+      "availableQuantity": 8,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0444",
+      "availableQuantity": 19,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0447",
+      "availableQuantity": 31,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0450",
+      "availableQuantity": 9,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0451",
+      "availableQuantity": 39,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0452",
+      "availableQuantity": 18,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0454",
+      "availableQuantity": 44,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0455",
+      "availableQuantity": 46,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0458",
+      "availableQuantity": 37,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0459",
+      "availableQuantity": 17,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0460",
+      "availableQuantity": 13,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0461",
+      "availableQuantity": 7,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0462",
+      "availableQuantity": 6,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0463",
+      "availableQuantity": 14,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0464",
+      "availableQuantity": 11,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0465",
+      "availableQuantity": 51,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0470",
+      "availableQuantity": 51,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0471",
+      "availableQuantity": 21,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0472",
+      "availableQuantity": 33,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0473",
+      "availableQuantity": 30,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0474",
+      "availableQuantity": 21,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0478",
+      "availableQuantity": 53,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0479",
+      "availableQuantity": 54,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0481",
+      "availableQuantity": 17,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0484",
+      "availableQuantity": 53,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0485",
+      "availableQuantity": 47,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0490",
+      "availableQuantity": 32,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0501",
+      "availableQuantity": 49,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0503",
+      "availableQuantity": 50,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0508",
+      "availableQuantity": 9,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0509",
+      "availableQuantity": 24,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0510",
+      "availableQuantity": 55,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0512",
+      "availableQuantity": 60,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0519",
+      "availableQuantity": 54,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0521",
+      "availableQuantity": 17,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0522",
+      "availableQuantity": 9,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0523",
+      "availableQuantity": 49,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0524",
+      "availableQuantity": 41,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0525",
+      "availableQuantity": 41,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0526",
+      "availableQuantity": 7,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0527",
+      "availableQuantity": 36,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0528",
+      "availableQuantity": 17,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0530",
+      "availableQuantity": 33,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0533",
+      "availableQuantity": 17,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0534",
+      "availableQuantity": 33,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0535",
+      "availableQuantity": 24,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0536",
+      "availableQuantity": 14,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0537",
+      "availableQuantity": 23,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0538",
+      "availableQuantity": 40,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0540",
+      "availableQuantity": 42,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0541",
+      "availableQuantity": 12,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0542",
+      "availableQuantity": 9,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0543",
+      "availableQuantity": 6,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0548",
+      "availableQuantity": 27,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0552",
+      "availableQuantity": 10,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0553",
+      "availableQuantity": 16,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0554",
+      "availableQuantity": 47,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0563",
+      "availableQuantity": 9,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0572",
+      "availableQuantity": 29,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0581",
+      "availableQuantity": 48,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0586",
+      "availableQuantity": 58,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0587",
+      "availableQuantity": 16,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0598",
+      "availableQuantity": 4,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0599",
+      "availableQuantity": 39,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0600",
+      "availableQuantity": 50,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0601",
+      "availableQuantity": 29,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0604",
+      "availableQuantity": 38,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0609",
+      "availableQuantity": 44,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0646",
+      "availableQuantity": 36,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0651",
+      "availableQuantity": 29,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0659",
+      "availableQuantity": 43,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0661",
+      "availableQuantity": 12,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0662",
+      "availableQuantity": 47,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0677",
+      "availableQuantity": 14,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0684",
+      "availableQuantity": 29,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0686",
+      "availableQuantity": 29,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0688",
+      "availableQuantity": 17,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0689",
+      "availableQuantity": 51,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0707",
+      "availableQuantity": 45,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0708",
+      "availableQuantity": 15,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0710",
+      "availableQuantity": 22,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0722",
+      "availableQuantity": 55,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0724",
+      "availableQuantity": 34,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0726",
+      "availableQuantity": 26,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0731",
+      "availableQuantity": 33,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0733",
+      "availableQuantity": 30,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0734",
+      "availableQuantity": 33,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0735",
+      "availableQuantity": 57,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0736",
+      "availableQuantity": 32,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0740",
+      "availableQuantity": 19,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0742",
+      "availableQuantity": 17,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0743",
+      "availableQuantity": 5,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0766",
+      "availableQuantity": 58,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0787",
+      "availableQuantity": 5,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0788",
+      "availableQuantity": 37,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0789",
+      "availableQuantity": 16,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0790",
+      "availableQuantity": 8,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0791",
+      "availableQuantity": 50,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0793",
+      "availableQuantity": 53,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0798",
+      "availableQuantity": 44,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0804",
+      "availableQuantity": 47,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0808",
+      "availableQuantity": 38,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0811",
+      "availableQuantity": 39,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0813",
+      "availableQuantity": 13,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0815",
+      "availableQuantity": 59,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0829",
+      "availableQuantity": 26,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0835",
+      "availableQuantity": 15,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0842",
+      "availableQuantity": 7,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0853",
+      "availableQuantity": 11,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0861",
+      "availableQuantity": 44,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0867",
+      "availableQuantity": 58,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0918",
+      "availableQuantity": 60,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0941",
+      "availableQuantity": 44,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0943",
+      "availableQuantity": 15,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0944",
+      "availableQuantity": 33,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0946",
+      "availableQuantity": 37,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0952",
+      "availableQuantity": 53,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0955",
+      "availableQuantity": 35,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0959",
+      "availableQuantity": 40,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0964",
+      "availableQuantity": 14,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0968",
+      "availableQuantity": 22,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0970",
+      "availableQuantity": 4,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0972",
+      "availableQuantity": 56,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0973",
+      "availableQuantity": 48,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0974",
+      "availableQuantity": 47,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0976",
+      "availableQuantity": 27,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0977",
+      "availableQuantity": 21,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0979",
+      "availableQuantity": 20,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    },
+    {
+      "internalCode": "0980",
+      "availableQuantity": 46,
+      "unit": "install kit",
+      "capturedAt": "2026-10-19T20:00:00Z"
+    }
+  ]
+}

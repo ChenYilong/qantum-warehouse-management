@@ -3,17 +3,22 @@
 import { useId, useState } from "react";
 import { ProposeDialog } from "./decisions/ProposeDialog";
 import { FactLine } from "./FactLine";
+import type { EvidenceContext, EvidenceRequirement } from "./evidence";
 import { FitTable } from "./FitTable";
+import { INVENTORY, type InventoryView } from "./inventory";
 import { Icon } from "./Icon";
 import type { FitRow } from "./fit";
 import { KindIcon } from "./KindIcon";
 import type { PenetrationFact } from "./penetrations";
+import { ShortageEvidence } from "./ShortageEvidence";
 import styles from "./primitives.module.css";
 
 export interface SubstituteChoice {
   readonly code: string;
   readonly facts: readonly PenetrationFact[];
   readonly rows: readonly FitRow[];
+  /** The solution's own stock (AC 90): only a READY one can be proposed. */
+  readonly inventory: InventoryView;
 }
 
 /**
@@ -26,11 +31,14 @@ export function SubstituteSwitcher({
   penetrationId,
   fromCode,
   choices,
+  evidence,
 }: {
   siteId: string;
   penetrationId: string;
   fromCode: string;
   choices: readonly SubstituteChoice[];
+  /** The site, penetration and blocking requirements for the portable summary (AC 91). */
+  evidence: { readonly context: Omit<EvidenceContext, "substituteCode" | "substituteStatus">; readonly requirements: readonly EvidenceRequirement[] };
 }) {
   const selectId = useId();
   const [code, setCode] = useState(choices[0]?.code ?? "");
@@ -77,8 +85,22 @@ export function SubstituteSwitcher({
             ))}
           </ul>
         )}
-        <FitTable code={selected.code} rows={selected.rows} />
-        <ProposeDialog siteId={siteId} penetrationId={penetrationId} fromCode={fromCode} toCode={selected.code} />
+        <FitTable code={selected.code} rows={selected.rows} inventory={selected.inventory} />
+        <p className={styles.planNotice} data-plan-notice="">
+          {INVENTORY.planNotice}
+        </p>
+        <ShortageEvidence
+          siteId={siteId}
+          context={{ ...evidence.context, substituteCode: selected.code, substituteStatus: selected.inventory.status.label }}
+          requirements={evidence.requirements}
+        />
+        <ProposeDialog
+          siteId={siteId}
+          penetrationId={penetrationId}
+          fromCode={fromCode}
+          toCode={selected.code}
+          unavailable={selected.inventory.ready ? undefined : INVENTORY.notInStock}
+        />
       </article>
     </>
   );

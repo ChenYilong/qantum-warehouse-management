@@ -71,6 +71,13 @@ export class NotACandidateError extends AppError {
   }
 }
 
+/** A substitute can be proposed only while it is in stock (AC 90). */
+export class NotInStockError extends AppError {
+  constructor() {
+    super(409, "substitute_not_in_stock", "That solution is not in stock.");
+  }
+}
+
 export class ValidationFailedError extends AppError {
   constructor(fields: readonly string[]) {
     const safe = fields.filter((field) => /^[A-Za-z0-9._]{1,80}$/.test(field));

@@ -14,12 +14,16 @@ export function ProposeDialog({
   penetrationId,
   fromCode,
   toCode,
+  unavailable,
 }: {
   siteId: string;
   penetrationId: string;
   fromCode: string;
   toCode: string;
+  /** Why this substitute can't be proposed now (not in stock, AC 90); the button is then disabled. */
+  unavailable?: string;
 }) {
+  const unavailableId = useId();
   const titleId = useId();
   const reasonId = useId();
   const [reason, setReason] = useState("");
@@ -58,10 +62,17 @@ export function ProposeDialog({
         type="button"
         className={`${styles.primary} ${styles.fullWidth}`}
         aria-label={`${BUTTONS.propose} ${toCode}`}
+        aria-describedby={unavailable ? unavailableId : undefined}
+        disabled={unavailable !== undefined}
         onClick={open}
       >
         {BUTTONS.propose}
       </Button>
+      {unavailable ? (
+        <p id={unavailableId} className={styles.muted}>
+          {unavailable}
+        </p>
+      ) : null}
       <Dialog
         dialogRef={dialog.dialogRef}
         title={`Propose ${toCode}`}

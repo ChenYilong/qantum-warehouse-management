@@ -121,6 +121,8 @@ One row per acceptance criterion: the behaviour in a few words, then every test 
 | 87 | Change the operator on the card, kept on the device | `e2e/schedule-edits.spec.ts`, `unit/site-edits.test.ts` |
 | 88 | Inner pages read the stored operator first | `e2e/schedule-edits.spec.ts`, `unit/ui-screens.test.ts` |
 | 89 | Controls use theme colours only | `e2e/theme-controls.spec.ts`, `e2e/sign-in.spec.ts` |
+| 90 | Inventory captured and Status; only stocked substitutes proposable | `e2e/solution-stock.spec.ts`, `e2e/penetration-page.spec.ts`, `unit/solution-stock.test.ts`, `unit/ui-messages.test.ts` |
+| 91 | Portable evidence before Propose, kept per site | `e2e/solution-stock.spec.ts`, `unit/evidence.test.ts` |
 
 CI runs a script that enumerates AC numbers and fails if any lacks a referencing test.
 
