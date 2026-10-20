@@ -435,7 +435,7 @@ Author's request: divide the projects page into three pages. Tab bar entry Inven
 | Entry | When a browser tab begins its visit at `/sites`, it is redirected to Map, the first tab, with the history entry replaced so Back cannot go there; later in that visit, tapping Projects, reloading, or a filtered link (`/sites?status=shortage`) shows the list. "First tab" simply means the leading tab bar entry; it is not configurable yet (AC 84) |
 | Projects (`/sites`) | h1 visible again, followed by filter, "Use my location" and cards; no panel |
 | Map (`/map`), Calendar (`/calendar`) | Each holds a single unchanged panel with the list's card below and the shared provider for trips, so a project is presented identically on Map, Calendar and Projects |
-| Inventory, Decisions | Still top-level pages, showing header and tab bar, though no tab represents them, so nothing is highlighted. Both are linked from the Guide's "Good to know" list (the tour step that named them now walks through Map and Calendar, 20 Oct 2026), and existing links to them still resolve |
+| Inventory, Decisions | Still top-level pages, showing header and tab bar, though no tab represents them, so nothing is highlighted. The Guide no longer names or links them (20 Oct 2026: its tour now walks through Map and Calendar instead), and existing links to them still resolve |
 
 ## 19. Guide as a brochure (20 Oct 2026)
 
