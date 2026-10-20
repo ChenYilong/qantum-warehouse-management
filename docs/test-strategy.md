@@ -120,6 +120,7 @@ One row per acceptance criterion: the behaviour in a few words, then every test 
 | 86 | Move a deadline on the card, kept on the device | `e2e/schedule-edits.spec.ts`, `e2e/field-ui.spec.ts`, `unit/site-edits.test.ts` |
 | 87 | Change the operator on the card, kept on the device | `e2e/schedule-edits.spec.ts`, `unit/site-edits.test.ts` |
 | 88 | Inner pages read the stored operator first | `e2e/schedule-edits.spec.ts`, `unit/ui-screens.test.ts` |
+| 89 | Controls use theme colours only | `e2e/theme-controls.spec.ts`, `e2e/sign-in.spec.ts` |
 
 CI runs a script that enumerates AC numbers and fails if any lacks a referencing test.
 

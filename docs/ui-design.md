@@ -495,3 +495,15 @@ From the author: apply the same browser-first rule to the second-level pages whe
 | Picks section | Send the crew texts the stored operator |
 | Deadline | Shown on no inner page, so nothing changed |
 
+## 24. Controls in theme colours (20 Oct 2026)
+
+From the author: check the colour of every control on every page, inner pages above all; every control must use the theme colours, and nothing but the colour may change. Requirement: AC 89. CSS only: `src/ui/primitives.module.css`. A crawl of 140 pages in both themes found the off-theme controls listed below; `e2e/theme-controls.spec.ts` now checks 16 representative pages in both themes and fails on any colour that is not a theme token.
+
+| Control | Before | Now |
+| --- | --- | --- |
+| Penetration and material rows (marks, state labels, short-material lines) | Danger red and warning brown text | The link's own colour; the stop and warning icons and the words still say which |
+| Chips inside links (material and penetration rows) | Dark red or amber backgrounds | Stops work: black with yellow text and edge. Warning: button yellow with black |
+| Online switch in the header | Green online, red offline | Yellow online, white offline, black text on both; black while checking |
+| Pick review answers | Yes in go green, No in stop red | Yes in button yellow with black ink; No black with yellow ink and edge |
+| Signal, calendar ovals, map pins, verdict bar, Guide colour key | Go green, stop red | Unchanged: they are the signal, the one place green and red keep their meaning |
+
