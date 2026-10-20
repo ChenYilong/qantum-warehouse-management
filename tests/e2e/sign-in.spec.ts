@@ -10,17 +10,17 @@ async function colours(locator: Locator): Promise<{ background: string; color: s
   });
 }
 
-test("AC 58: the header's Online control is green with dark text online and red with white text offline", async ({ page }) => {
+test("AC 58, AC 89: the header's Online control is yellow online and white offline, black text on both", async ({ page }) => {
   await gotoApp(page, "/about-this-demo");
   const bar = page.locator("[data-connection]");
   await expect(bar).toHaveAttribute("data-connection", "online");
-  expect(await colours(bar)).toEqual({ background: "rgb(61, 220, 108)", color: "rgb(4, 19, 10)" });
+  expect(await colours(bar)).toEqual({ background: "rgb(254, 209, 5)", color: "rgb(0, 0, 0)" });
   await expect(bar.getByText("Online", { exact: true })).toBeVisible();
   await assertAxe(page);
 
   await page.getByRole("switch", { name: "Online" }).click();
   await expect(bar).toHaveAttribute("data-connection", "offline");
-  expect(await colours(bar)).toEqual({ background: "rgb(179, 0, 27)", color: "rgb(255, 255, 255)" });
+  expect(await colours(bar)).toEqual({ background: "rgb(255, 255, 255)", color: "rgb(0, 0, 0)" });
   await expect(bar.getByText("Offline", { exact: true })).toBeVisible();
   await assertAxe(page);
 
