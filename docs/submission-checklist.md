@@ -1,8 +1,8 @@
 # Exercise submission checklist
 
-Living checklist against the "What to submit" and "What we will assess" sections of `docs/passive-fire-exercise.md`. Update it as work lands. Tick only with evidence (file, URL, or CI run), recorded in the Evidence column.
+Living checklist against the "What to submit" and "What we will assess" sections of the exercise brief. Update it as work lands. Tick only with evidence (file, URL, or CI run), recorded in the Evidence column.
 
-Last updated: 2026-10-07
+Last updated: 2026-10-20
 
 Legend: `[x]` done, `[~]` partial, `[ ]` not started.
 
@@ -12,21 +12,21 @@ Legend: `[x]` done, `[~]` partial, `[ ]` not started.
 | --- | --- | --- | --- |
 | 1 | GitHub repository link | [x] | https://github.com/ChenYilong/qantum-warehouse-management (public, default branch `main`). |
 | 2 | Public URL for the working experience | [x] | https://qantum-warehouse-management.vercel.app (Vercel, functions in `syd1`, actions in Postgres database `qantum_slice`). |
-| 3 | Try-it instructions | [x] | README "Try it": a two-minute walk through the live demo. |
-| 4 | README: run locally | [x] | README "Run locally": `npm ci`, `npm run dev`, memory store, no credentials. |
-| 5 | README: run tests | [x] | README "Tests": typecheck, lint, coverage, AC check, Playwright, database contract. |
-| 6 | README: deploy | [x] | README "Deploy": database setup and migration, Vercel settings, GitHub secrets. |
-| 7 | README: demo scenario | [x] | README "Try it", following spec section 9. |
-| 8 | README: sample data and known limitations | [x] | README "Sample data" and "Known limitations"; `data/sample/README.md` labels the data invented. |
-| 9 | Iteration plan (md) | [x] | `docs/iteration-plan.md`: slice rationale, 6 iterations, uncertainties. Awaiting your review. |
-| 10 | First-slice specification (md) | [x] | `docs/slice-specification.md`: 17 FRs, 47 acceptance criteria, NFRs, assumptions, exclusions. Awaiting your review. |
+| 3 | Try-it instructions | [x] | README "Try it": sign in, then five steps through Map, Calendar, Projects, a decision and offline. |
+| 4 | README: run locally | [x] | README "Run locally": copy the supplied CSV, `npm ci`, `ACTIONS_STORE=memory npm run dev`; no database or credentials. |
+| 5 | README: run tests | [x] | README "Verify": typecheck, lint, coverage, AC check, Playwright; the database contract suite is in `docs/test-strategy.md`. |
+| 6 | README: deploy | [x] | README "Deploy": how CI builds, migrates, deploys and smoke-tests `main`, with links to the variables. |
+| 7 | README: demo scenario | [x] | README "Try it", five steps. |
+| 8 | README: sample data and known limitations | [x] | README "Sample data" and "Known limitations", linking `docs/sample-data-and-stubs.md` and the iteration plan; `data/sample/README.md` labels the data invented. |
+| 9 | Iteration plan (md) | [x] | `docs/iteration-plan.md`: slice rationale, iteration 1 as delivered (with what was added beyond the first plan), unfinished work carried into iterations 2 to 7, uncertainties, known debts. |
+| 10 | First-slice specification (md) | [x] | `docs/slice-specification.md`: 34 FRs, 85 acceptance criteria, NFRs, assumptions, exclusions. |
 | 11 | Technical design (md) | [x] | `docs/technical-design.md`. Section 11 additions awaiting confirmation. |
-| 12 | Test strategy (md) | [x] | `docs/test-strategy.md`: layers, all 47 ACs mapped, risks, CI gates. Awaiting your review. |
+| 12 | Test strategy (md) | [x] | `docs/test-strategy.md`: layers, all 85 ACs mapped, risks, CI gates. |
 | 13 | Agent instructions and context files | [x] | `AGENTS.md` (tool-neutral; `CLAUDE.md` imports it), 11 [Skill Forge](https://github.com/more-than-code/skill-forge) skills in `.agents/skills` (`skill-forge.json`, lock file), and every brief, review brief, review report and worker note in `docs/agent-work/`. |
-| 14 | Working application code | [x] | Domain core, stubs, Postgres and memory stores, use cases, seven-route API, seven screens (landing, sites, materials, material, actions log, site, penetration). Live and proven against the real database. |
-| 15 | Automated tests | [x] | 618 unit and API tests, 10 database contract tests on Postgres 17, 82 Playwright tests with axe at 375px (and at 1024 and 1280px for wide screens); all 84 ACs referenced; all run in CI. |
+| 14 | Working application code | [x] | Domain core, stubs, Postgres and memory stores, use cases, the HTTP API, and the screens: Guide, Map, Calendar, Projects, Inventory, material, Decisions, site, penetration, pick check and review on site. Live and proven against the real database. |
+| 15 | Automated tests | [x] | 622 unit and API tests, 10 database contract tests on Postgres 17, 84 Playwright tests with axe at 375px (and at 1024 and 1280px for wide screens); all 85 ACs referenced; all run in CI. |
 | 16 | CI/CD config | [x] | `.github/workflows/ci.yml`: checks (typecheck, lint, coverage, build, bundle credential scan, audit, gitleaks), db (contract suite on Postgres 17), e2e (Playwright, axe, AC check), and on `main` a Vercel prebuilt deploy plus smoke test. |
-| 17 | Pipeline inspectable, with successful deploy evidence | [x] | Latest green run on `main` with deploy and smoke (PR #3): https://github.com/ChenYilong/qantum-warehouse-management/actions/runs/37528327015. First: https://github.com/ChenYilong/qantum-warehouse-management/actions/runs/37309054947. Live check 2026-10-06: `x-vercel-id` syd1, smoke ok, an escalation recorded through the live API survived a production redeploy. |
+| 17 | Pipeline inspectable, with successful deploy evidence | [x] | Latest green run on `main` with deploy and smoke (PR #28, 2026-10-20): https://github.com/ChenYilong/qantum-warehouse-management/actions/runs/39345187414. Live check 2026-10-06: `x-vercel-id` syd1, smoke ok, an escalation recorded through the live API survived a production redeploy. |
 | 18 | Agentic coding account | [x] | `docs/agentic-approach.md`: tools, planning, verification ladder, corrections, cost. |
 
 ## 2. Assessment criteria
@@ -34,8 +34,8 @@ Legend: `[x]` done, `[~]` partial, `[ ]` not started.
 | Criterion | Status | What reviewers need to see |
 | --- | --- | --- |
 | Business understanding | [x] | Path, gaps and assumptions in `business-path-data.md`, `glossary.md` and the iteration plan. |
-| Slicing | [x] | Slice chosen against alternatives, boundary stated, six iterations in `iteration-plan.md`. |
-| Specification and agent guidance | [x] | Spec with testable acceptance criteria. Agent instruction files. Evidence: 17 FRs and 47 ACs, every AC referenced by a test (`check:ac`); `AGENTS.md`, 11 skills, briefs and review reports in `docs/agent-work/`. |
+| Slicing | [x] | Slice chosen against alternatives, boundary stated, iteration 1 delivered and seven iterations in `iteration-plan.md`. |
+| Specification and agent guidance | [x] | Spec with testable acceptance criteria. Agent instruction files. Evidence: 34 FRs and 85 ACs, every AC referenced by a test (`check:ac`); `AGENTS.md`, 11 skills, briefs and review reports in `docs/agent-work/`. |
 | Technical judgement | [x] | Design with trade-offs and production-vs-exercise table. |
 | User experience | [x] | Working screens covering missing data and blocked states. Evidence: live demo walked 2026-10-07 (blocked, stock unknown, four data-problem kinds, stale stock, stock-down and malformed servers in e2e); axe in light and dark at 375px; two usability rounds (`docs/agent-work/18`, section 3 log). |
 | Engineering quality | [x] | Deployed slice, tests, pipeline. Evidence: items 2 and 15 to 17; section 5 readiness check. |
@@ -137,6 +137,7 @@ Human decisions that differed from the AI's suggestion or default (log each as i
 | 2026-10-20 | Tabs in the order Projects, Map, Calendar, and Use my location only above the projects list | Order the tabs Map, Calendar, Projects, Guide, and put Use my location with its note at the top of every tab's page, under the picker's line. AI kept each page's h1 first in main (the button follows it), gave the Guide a trip provider with no projects so it asks Mapbox for nothing, and pinned both with an e2e. Outcome (AC 75, AC 83) | Map and Calendar come first, and the drive is one tap from any tab |
 | 2026-10-20 | The Guide read as an engineer's document and still described Inventory and Decisions as tabs | Rewrite all of it as a plain-language brochure, with no five-word run repeating the old copy, describing today's four tabs. AI checked the overlap on the rendered text (not the source), kept the shared location note, which every tab carries, and kept the tour's Inventory and Decisions links that other specs walk through | A first-time visitor understands the app in a minute |
 | 2026-10-20 | A project's back control always went to Projects, even when opened from Map or Calendar | Back goes where you came from, by one general rule, not a fixed parent. AI made the rule the screen underneath when it is a top-level page, and otherwise the page's own target, so the existing material and log returns keep working (AC 85) | Back that returns somewhere else breaks trust in the tab bar |
+| 2026-10-20 | The public docs had fallen behind the product: README without deploy, sample data or limits; iteration plan exit at AC 47; stale tab names in FR17, FR31, FR33, FR34; "No login" beside a demo sign-in; this checklist and the agentic account last dated 2026-10-06/07 | Update every public doc from the author's completion review, in English. AI found the catalogue CSV is git-ignored (restored from a secret in CI), so the README's Run locally now says to copy it | A reviewer reads the docs before the code |
 | 2026-10-20 | Today's panel in stop red, go green and pinks, off the app's black and yellow, headed "Today" | Theme colours only, except the green for Crew can go and the red for Blocked; the first line names the open tab, then "today is" and the browser's date in English. AI kept the logic and the tone attribute, kept green and red on the bar's segments only, gave the faded red a bright edge and 50% so it shows on black, and checked contrast with axe in light and dark | The panel should look like the rest of the app |
 | 2026-10-20 | The trip line, the location note and every project card named the default start by its street address | Name it only as "Auckland city warehouse", everywhere Use my location's note and the cards show it, to keep the address private. AI replaced it in the copy, the tests, the code comment and the docs | A public demo should not print a real street address |
 | 2026-10-20 | A visit opened on `/sites` started on Projects, the third tab | Opening /sites should always land on the first tab; no setting yet. AI read it as the start of a visit only (so tapping Projects or reloading still shows the list), kept filtered links on the list, replaced the entry so Back does not bounce, read the first tab from the tab bar, and kept the server's /sites unchanged for the deploy's smoke. Outcome (AC 84) | Every visit starts on the map |
@@ -277,3 +278,4 @@ Readiness check 2026-10-07 on `b169450` (`origin/main`; `dev` had the same tree)
 | 2026-10-20 | Guide brochure: every sentence rewritten in plain words, cards for Map, Calendar, Projects and Guide, a colour legend, a three-step morning, a two-minute tour; no five-word overlap with the old copy. ui-design section 19, smoke and landing e2e updated |
 | 2026-10-20 | Back where you came from (AC 85): `backTarget` and a subscribable screen stack; a project opened from Map, Calendar or the Guide goes back there, opened directly to Projects. Spec, ui-design section 20, technical design and test strategy updated; 621 unit tests, 84 e2e, 85 ACs |
 | 2026-10-20 | README cut from about 2,330 words to about 200, in the style of a short product README: what it is, the live demo and CI, sign-in and a five-step try-it, run, verify, and five doc links. Deploy, sample data and limitations now live only in the docs |
+| 2026-10-20 | Public docs brought up to date: README regains Deploy, Sample data and Known limitations, with the CSV step; iteration plan has iteration 1 as delivered and unfinished work in iterations 2 to 7; spec FR17, FR31, FR33, FR34 and the login wording; this checklist's counts and evidence; agentic account for 2026-10-14 to 10-20 |
