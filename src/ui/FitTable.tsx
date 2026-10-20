@@ -1,10 +1,14 @@
 import type { FitRow } from "./fit";
+import { INVENTORY, type InventoryView } from "./inventory";
 import { StatusChip } from "./StatusChip";
 import { doesNotFit } from "./status";
 import styles from "./primitives.module.css";
 
-/** Penetration and nominated solution side by side; a field that does not fit is marked with an icon and text (AC 36). */
-export function FitTable({ code, rows }: { code: string; rows: readonly FitRow[] }) {
+/**
+ * Penetration and nominated solution side by side; a field that does not fit is marked with an icon and text (AC 36).
+ * With `inventory` the table ends with the solution's stock: when it was counted and whether it is READY (AC 90).
+ */
+export function FitTable({ code, rows, inventory }: { code: string; rows: readonly FitRow[]; inventory?: InventoryView }) {
   return (
     <table className={styles.fitTable}>
       <thead>
@@ -30,6 +34,24 @@ export function FitTable({ code, rows }: { code: string; rows: readonly FitRow[]
             </td>
           </tr>
         ))}
+        {inventory ? (
+          <>
+            <tr data-inventory-captured="">
+              <th scope="row">{INVENTORY.captured}</th>
+              <td>—</td>
+              <td>{inventory.capturedIso ? <time dateTime={inventory.capturedIso}>{inventory.captured}</time> : inventory.captured}</td>
+            </tr>
+            <tr data-inventory-status={inventory.status.label}>
+              <th scope="row">{INVENTORY.status}</th>
+              <td>—</td>
+              <td>
+                <StatusChip status={inventory.status} appearance="label" />
+                <span className={styles.inventoryReason}>{inventory.reason}</span>
+                {inventory.available ? <span className={styles.inventoryReason}>{inventory.available}</span> : null}
+              </td>
+            </tr>
+          </>
+        ) : null}
       </tbody>
     </table>
   );

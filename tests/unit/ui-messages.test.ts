@@ -22,6 +22,7 @@ const TABLE = [
   ["shortage_not_found", "That shortage no longer exists. Refresh to see the latest."],
   ["stale_nomination", "This penetration's nomination has changed. Refresh and try again."],
   ["not_a_candidate", "That solution is no longer a candidate. Refresh and try again."],
+  ["substitute_not_in_stock", "That solution is not in stock, so it can't be proposed. Nothing was recorded."],
   ["idempotency_key_reused", "Something went wrong sending that. Close this and try again."],
   ["upstream_unavailable", "A system we depend on isn't available. Nothing was recorded. Try again."],
   ["upstream_invalid", "A system we depend on isn't available. Nothing was recorded. Try again."],

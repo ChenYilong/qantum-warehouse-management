@@ -36,6 +36,7 @@ const readSpecs = [
   "**/today.spec.ts",
   "**/deadline.spec.ts",
   "**/theme-controls.spec.ts",
+  "**/solution-stock.spec.ts",
   "**/schedule-edits.spec.ts",
   "**/calendar.spec.ts",
   "**/entry.spec.ts",

@@ -61,3 +61,4 @@ export {
   type SiteShortageKinds,
 } from "./availability";
 export { isNonNegativeFinite, onHandFromQuantities, roundUpQuantity, snapQuantity } from "./quantities";
+export { solutionInventory, type InventoryReason, type InventoryStatus, type SolutionInventory, type SolutionStockCount } from "./inventory";

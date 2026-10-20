@@ -507,3 +507,16 @@ From the author: check the colour of every control on every page, inner pages ab
 | Pick review answers | Yes in go green, No in stop red | Yes in button yellow with black ink; No black with yellow ink and edge |
 | Signal, calendar ovals, map pins, verdict bar, Guide colour key | Go green, stop red | Unchanged: they are the signal, the one place green and red keep their meaning |
 
+## 25. Solution stock and portable evidence (20 Oct 2026)
+
+From the author: learn from the stock app (`qantum-stock-main`) how its shortage page completes the material table, and add "Inventory captured" and "Status" (READY, Quantity available; SHORTAGE, Insufficient quantity) to every material table here; put a solution-level stock file in `data/sample`, keyed by Internal Code, all in stock with random counts; note under the solution that selecting it changes the material plan and does not reserve stock; bring its "Portable evidence" over in front of Propose this, kept in the browser by site id; allow choosing a substitute only when it is in stock. Requirements: FR36, AC 90, AC 91. Copy: `src/ui/inventory.ts`, `src/ui/evidence.ts`; components: `FitTable`, `ShortageEvidence`, `ProposeDialog`.
+
+| Topic | Implemented |
+| --- | --- |
+| Material tables | The nominated solution's table and each substitute's end with "Inventory captured" (`20 Oct 2026, 9:00 am NZDT`) and "Status" (a READY tick or SHORTAGE stop label, the reason beneath, and the kit count, "12 install kits counted") |
+| Plan note | Under each substitute's table: "Selecting a Solution changes the material plan. It does not reserve stock." |
+| Propose this | Enabled only for a READY substitute; otherwise disabled with "Not in stock, so this substitute can't be proposed." The server checks again |
+| Portable evidence | Small capitalised "PORTABLE EVIDENCE", heading "Prepare shortage summary", the stock app's intro, checkboxes for this penetration's shortages, Optional note, Preview summary, a monospace preview and Copy summary. In the theme's colours and the app's 48px choice rows rather than the stock app's emerald |
+| Kept on the device | Ticks and note under `team-leader:evidence`, keyed by site id; a reload or another penetration of the same site fills them back in |
+| Known gap | Solution stock is a separate invented feed. A substitute can read READY while one of its materials is short at this site (the short-material line still says so), and crew readiness is still worked out from material stock alone |
+

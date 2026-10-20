@@ -2880,3 +2880,51 @@ section:has(> .stickyHeading) {
   margin: 1rem 0 0;
   color: var(--text-secondary);
 }
+
+/* Solution stock on the material tables (AC 90): the reason and the count under the status. */
+.inventoryReason {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.planNotice {
+  margin: 0;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Portable evidence (AC 91), before Propose this: a panel of its own with a small capitalised label above. */
+.evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.evidence > p {
+  margin: 0;
+}
+
+.evidenceEyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.evidenceTitle {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.evidencePreview {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+}
+

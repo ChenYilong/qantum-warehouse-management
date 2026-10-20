@@ -187,3 +187,7 @@ Every site in `sites.json` has a `location` (`{ lat, lng }`) that drives the map
 
 The cards let a leader move a deadline and hand a project to another operator (AC 86, 87). `data/sample/` stays read-only: the deployed function cannot write it, and upstream owns the data. A change goes to the browser's localStorage under `team-leader:site-edits` and is read before `sites.json`. The operator list is built from `sites.json` itself, every operator and picker once (Mere Tane, Sam Lee, Wiremu Ngata, Tama Rewi), so no new fixture was added. The end-to-end tests start each browser with empty storage, so they always see the sample values first.
 
+## 13. Solution stock (fabricated, 20 Oct 2026)
+
+`solution-stock.json` holds one record per catalogue Internal Code (all 148 in `solutions-excerpt.csv`): `availableQuantity` complete install kits, `unit` "install kit" and `capturedAt` 2026-10-19T20:00:00Z (shown as 20 Oct 2026, 9:00 am NZDT). The counts are random between 4 and 60 (seed 20261020), so every solution is READY for now. A test pins the 148 codes and that each count is positive. Removing a record, or a zero or bad count, makes that solution SHORTAGE and its Propose this unavailable.
+

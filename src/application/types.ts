@@ -1,5 +1,5 @@
 import type { Catalogue } from "@/domain";
-import type { ActionsRepository, NominationsPort, PicksPort, SitesPort, SolutionMaterialsPort, StockPort } from "@/ports";
+import type { ActionsRepository, NominationsPort, PicksPort, SitesPort, SolutionMaterialsPort, SolutionStockPort, StockPort } from "@/ports";
 
 export interface Dependencies {
   readonly sites: SitesPort;
@@ -8,6 +8,8 @@ export interface Dependencies {
   readonly solutionMaterials: SolutionMaterialsPort;
   /** The warehouse pick lists (AC 61). */
   readonly picks: PicksPort;
+  /** Install kits on hand per solution (AC 90). Absent means no stock is known: nothing can be proposed. */
+  readonly solutionStock?: SolutionStockPort;
   readonly catalogue: Catalogue;
   readonly actions: ActionsRepository;
   readonly now: () => Date;

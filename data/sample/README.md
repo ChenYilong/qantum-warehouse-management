@@ -10,6 +10,7 @@ apart from `9999`, left absent from the catalogue on purpose.
 | `nominations.json` | `GET /sites/{id}/nominations`, one entry per site id |
 | `solution-materials.json` | per-solution material and quantity per install, absent from the supplied catalogue |
 | `stock.json` | `GET /stock` from the inventory system |
+| `solution-stock.json` | solution-level stock: complete install kits on hand per catalogue Internal Code, with when it was counted (AC 90). All 148 solutions in stock, random counts |
 | `picks.json` | each site's warehouse pick list: quantity planned, quantity picked, spec and required parts |
 
 `docs/sample-data-and-stubs.md` explains the scenario and the reasoning behind each number.

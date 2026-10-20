@@ -1,17 +1,20 @@
 import {
   describeCandidateAvailability,
   findCandidates,
+  solutionInventory,
   solutionMismatches,
   type CandidateAvailability,
   type CandidateStatus,
   type FitField,
   type Solution,
+  type SolutionInventory,
   type SiteShortageKinds,
   type SubstitutionProposal,
 } from "@/domain";
 import {
   IdempotencyKeyReusedError,
   NotACandidateError,
+  NotInStockError,
   PenetrationNotFoundError,
   SiteNotFoundError,
   StaleNominationError,
@@ -36,6 +39,8 @@ export interface CandidateView {
   readonly mismatches: readonly FitField[];
   readonly availability: CandidateAvailability;
   readonly materials: Readonly<Record<string, { readonly name: string; readonly unit: string }>>;
+  /** Install kits on hand for this solution and when they were counted (AC 90). Only a READY one can be proposed. */
+  readonly inventory: SolutionInventory;
 }
 
 export interface PenetrationSummary {
@@ -78,6 +83,12 @@ async function requirePenetration(deps: Dependencies, siteId: string, penetratio
   return penetration;
 }
 
+/** Each code's solution-level stock (AC 90); a code without a count, or no stock feed at all, is SHORTAGE. */
+async function inventoryOf(deps: Dependencies, codes: readonly string[]): Promise<Map<string, SolutionInventory>> {
+  const counts = codes.length === 0 || !deps.solutionStock ? [] : await deps.solutionStock.getSolutionStock(codes);
+  return new Map(codes.map((code) => [code, solutionInventory(code, counts.find((count) => count.internalCode === code))]));
+}
+
 // A substitute that uses a material this site is already short of does not get the crew out of the shortage.
 async function siteShortageKinds(deps: Dependencies, siteId: string): Promise<SiteShortageKinds> {
   const { readiness } = await loadSiteData(deps, siteId);
@@ -94,6 +105,8 @@ export interface PenetrationDetail {
   readonly materialNames: readonly string[];
   /** Material ids in the same order as `materialNames`. Page only: which shortage decisions belong on this penetration. */
   readonly materialIds: readonly string[];
+  /** The nominated solution's own stock, as for a candidate (AC 90). */
+  readonly inventory: SolutionInventory;
 }
 
 /** For the penetration page: both sides of the fit, for a side-by-side comparison (AC 36). Not an API route. */
@@ -110,7 +123,8 @@ export async function describePenetration(deps: Dependencies, siteId: string, pe
     materialIds.push(item.materialId);
     materialNames.push(mapped.materials.find((material) => material.id === item.materialId)?.name ?? item.materialId);
   }
-  return { penetration, nominated, mismatches: nominated ? solutionMismatches(penetration, nominated) : [], materialNames, materialIds };
+  const inventory = (await inventoryOf(deps, [penetration.nominatedCode])).get(penetration.nominatedCode)!;
+  return { penetration, nominated, mismatches: nominated ? solutionMismatches(penetration, nominated) : [], materialNames, materialIds, inventory };
 }
 
 export async function listCandidates(deps: Dependencies, siteId: string, penetrationId: string): Promise<CandidateList> {
@@ -121,6 +135,7 @@ export async function listCandidates(deps: Dependencies, siteId: string, penetra
   const materialIds = uniqueIds(mapped.items.map((item) => item.materialId));
   const stock = codes.length === 0 ? { asOf: "", balances: [] } : await deps.stock.getStock(materialIds);
   const siteShortages = codes.length === 0 ? new Map() : await siteShortageKinds(deps, siteId);
+  const inventories = await inventoryOf(deps, codes);
 
   const candidates = found.candidates.map((solution) => {
     const availability = describeCandidateAvailability(solution.internalCode, mapped.items, stock.balances, siteShortages);
@@ -142,6 +157,7 @@ export async function listCandidates(deps: Dependencies, siteId: string, penetra
       mismatches: solutionMismatches(penetration, solution),
       availability,
       materials,
+      inventory: inventories.get(solution.internalCode)!,
     };
   });
 
@@ -180,6 +196,9 @@ export async function proposeSubstitution(
   const found = findCandidates(penetration, deps.catalogue);
   const allowed = found.status === "ok" && found.candidates.some((solution) => solution.internalCode === input.toInternalCode);
   if (!allowed) throw new NotACandidateError();
+  // Only a substitute in stock can be chosen (AC 90); the page's disabled button is a convenience, this is the rule.
+  const inventory = (await inventoryOf(deps, [input.toInternalCode])).get(input.toInternalCode)!;
+  if (inventory.status !== "READY") throw new NotInStockError();
   return deps.actions.appendSubstitutionProposal({
     siteId: input.siteId,
     penetrationId: input.penetrationId,
