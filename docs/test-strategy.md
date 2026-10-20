@@ -1,214 +1,227 @@
 # Test strategy
 
-How the slice is verified. Acceptance criteria (AC) are numbered in `slice-specification.md` section 4. Each AC maps to at least one automated test, and tests use the AC number in their name so coverage can be checked by search.
+Verification plan for the slice. ACs are numbered in `slice-specification.md` §4. Every AC has one or more automated tests, and each test name contains its AC number, so coverage can be found with a text search.
 
-## 1. Approach
+## 1. Principles
 
-- **Test where the risk is.** The risk is a wrong "Crew can go" and a wrong substitute suggestion. Both live in the pure domain core, so most tests sit there: fast, deterministic, no I/O.
-- **Fail closed is a tested property.** Every missing-data and upstream-failure path has a test asserting the crew is never reported clear.
-- **Test pyramid.** Many unit tests, fewer API and database tests, a handful of end-to-end tests on the demonstration scenario.
-- **Real parts where cheap.** The real catalogue CSV and a real Postgres in CI. Upstream systems are stubs, and that limit is stated in section 8.
-- **Tests are written from the spec, not from the code.** An agent that writes code does not write its own acceptance tests unreviewed. Tests are reviewed against the AC list before the implementation they cover.
+- **Concentrate where failure hurts.** The two dangerous outputs are a false "Crew can go" and a bad substitute suggestion. Both are produced by pure domain code, which therefore holds most of the tests: quick, repeatable, I/O-free.
+- **Fail-closed behaviour is asserted.** Each missing-data and upstream-error path has a test proving the crew never reads clear.
+- **Pyramid shape.** Many unit tests; a smaller number at API and DB level; a small set of browser tests around the demo script.
+- **Use the real thing when it is cheap.** Real catalogue CSV; real Postgres in CI. Upstreams are stubbed, a limitation stated in §8.
+- **Specs drive tests, not the implementation.** No agent ships unreviewed acceptance tests for code it wrote itself; every test is reviewed against the criteria ahead of the code it exercises.
 
-## 2. Layers and tools
+## 2. Layers
 
-| Layer | Tool | What it covers | Runs |
+| Layer | Tooling | Scope | When |
 | --- | --- | --- | --- |
-| Unit (domain) | Vitest | Requirements, shortages, status, lifecycle, matching, normalisation | Every push |
-| Catalogue and data checks | Vitest | CSV load counts, raw text preserved, sample data references | Every push |
-| Contract | Vitest and Zod | Each upstream stub validates against its schema | Every push |
-| API | Vitest, calling route handlers directly | Status codes, validation, idempotency, headers | Every push |
-| Database | Vitest against a real Postgres 17 (`npm run test:db`) | Constraints, idempotent uniqueness, ordering, and the app role's refused update, delete, truncate and DDL | Every push |
-| End to end | Playwright | The demonstration scenario and failure states in a browser | Every push, and after deploy against the public URL |
-| Accessibility | axe-core inside Playwright, plus a manual keyboard pass | Contrast, labels, focus order, status without colour | Every push (automated), release (manual) |
-| Static checks | TypeScript strict, ESLint | Types, unsafe patterns, import boundaries | Every push |
-| Secrets and dependencies | Secret scan, dependency audit | No credentials in repo, known vulnerabilities | Every push |
+| Domain unit | Vitest | Demand, shortages, crew status, decision ageing, matching, normalisation | Each push |
+| Catalogue/data | Vitest | Row counts after CSV load, raw strings preserved, fixture references | Each push |
+| Contract | Vitest + Zod | Every upstream stub against its schema | Each push |
+| API | Vitest invoking route handlers in-process | HTTP statuses, input validation, idempotent replay, response headers | Each push |
+| Database | Vitest on real Postgres 17 (`npm run test:db`) | Constraints, idempotency uniqueness, ordering, app role denied update/delete/truncate/DDL | Each push |
+| E2E | Playwright | Demo script plus failure states, run in Chromium | Each push, plus post-deploy against production |
+| Accessibility | axe-core in Playwright; manual keyboard pass | Contrast, labelling, focus order, state not by colour only | Each push (automated); at release (manual) |
+| Static | strict TypeScript, ESLint | Typing, risky constructs, module boundaries | Each push |
+| Supply chain | secret scan, dependency audit | Credentials in the repo, known CVEs | Each push |
 
-Boundary rule enforced by lint: the domain core may not import Next.js, React, the database driver (`pg`) or file system modules, and client code may not import `pg` or server modules.
+ESLint enforces the boundary: no Next.js, React, `pg` or file-system import inside the domain core, and no `pg` or server module inside client code.
 
-## 3. Acceptance criteria to tests
+## 3. AC → test mapping
 
-| AC | Layer | Test focus |
+One row per acceptance criterion: the behaviour in a few words, then every test file that references the AC. The exact assertions are the `it(...)` and `test(...)` titles inside those files, each prefixed with its AC number; this table points to them rather than repeating them. Paths are relative to `tests/`.
+
+| AC | Focus | Tests |
 | --- | --- | --- |
-| 1, 2, 3, 4 | Unit | Sum, covered site, two locations summed, fraction rounds up |
-| 5 | Unit, API | Unknown shortage has null quantities. API accepts wait and escalate for it |
-| 6, 7 | Unit, API | Blocker reasons. 422 for wait on a blocker, escalate accepted |
-| 8 | Unit | No penetrations gives nothing planned |
-| 9 | API, E2E | Stock stub fails: 502, UI says unavailable, never clear |
-| 10 | Unit, E2E | Two sites share stock and both clear. Label visible on screen |
-| 11, 12, 13 | API | 201 and state waiting, 422 on bad target, 404 on missing shortage |
-| 14, 15 | Unit | Escalate then wait keeps escalated. Grown shortfall marks action earlier |
-| 16 | API, Database | Repeat returns original with one row. Missing key is 400. Per-user unique constraint |
-| 17 | API | Over-long note is 422 |
-| 18 | Unit, E2E | `0438` gives `0451` and `0464`, in the domain and on the penetration screen |
-| 19, 22 | Unit | `0789` and `0434` give the stated candidates. Null insulation never offered |
-| 20, 21 | Unit, API | Empty and incomplete-substrate states, and an unknown code |
-| 23 | API | 422 for non-candidate target, 409 for stale source |
-| 24 | API, Database | Proposed status only. Nomination and shortage unchanged |
-| 25 | Unit | Exactly 20 of 148 have a candidate |
-| 26 | Unit | 148 rows, raw text intact, 6 incomplete flagged |
-| 27 | Contract | Every sample penetration code exists, except the deliberate missing one |
-| 28 | Build check | Client bundle contains no database credentials or service key |
-| 29 | API | `Cache-Control: no-store` on readiness and actions |
-| 30, 31, 32 | E2E, accessibility | Row contents, keyboard use, target size, 375px layout without horizontal scroll |
-| 33 | Unit, API, E2E | A material the site is short of (or has unknown stock for) makes a candidate short (or unknown). Quayside House's `0451` shows it |
-| 34 | Unit, E2E | A blocked site has no summary banner. Chips filter the rows and count penetrations; a proposed substitute counts as Acted. A clear site still says Crew can go |
-| 35 | Unit, API | Each fit rule, normalisation, a cut-off substrate on either side never fits (even identical text), blank text never matches, fail-closed requirements, order of blocker checks, no added need; wait 422 and escalate 201 on the new blocker |
-| 36 | Unit, E2E | Side-by-side rows for penetration and nominated solution; a field that does not fit marked with an icon and text |
-| 37 | Unit, E2E | Theme: `parseTheme`, `applyTheme` (blocked storage still applies), the pre-paint script, chosen-dark tokens identical to system-dark; E2E: Dark pins and survives a reload, arrow keys move the choice, Light overrides a dark device, System hands back, axe in dark. Theme choice on the Guide's "On this device", not in the header (source check; E2E: no Theme group on `/sites`). Tab bar on the landing page, Map, Calendar, Projects and Guide (source check: `MenuBar` renders `TabBar`); on the landing page Guide is current and Sites is not; the bar lists all four entries, marks the current one, is pinned full width to the foot of the viewport before and after scrolling, the body is padded by its height, it passes axe, targets and overflow, and a tab works from the keyboard; inner screens have no tab bar, no padding, and lead with back |
-| 38 | Unit, E2E | `listMaterialStock`: planned materials by name, on hand or unknown, across-sites total, short sites, one stock read per page; an unavailable or missing site is unchecked, gives no total and never "not short"; no stock read when nothing is planned; stock down, malformed or a failed page read is unavailable. `materialState`: short, unknown, unchecked and "sites together need more" before "not short". Rows at 375px with targets, icons and no overflow; stock-down and stock-malformed servers show can't-check on both pages |
-| 39 | Unit, E2E | `siteMaterialNeeds` (rounded once per site, blockers add no need); `describeMaterialStock` per-site sections, stock-unknown shortage, unchecked site last, not found vs unavailable; Wait and Escalate only where short |
-| 40 | Unit, E2E | `shortageBrief` wording; penetration facts link to `/materials/<id>?from=<pid>#site-<id>`; a substitute's line links only when the site is already short of that material |
-| 41 | E2E | `/sites/<id>/materials/<mid>` redirects to the material page at that site's section |
-| 42 | Unit, E2E | `describeMaterialStock` returns to a penetration of a planning site (including a substitute's) and never for another site, an unknown id, an object key (`constructor`) or an unchecked site; `materialBack` wording. E2E: back to the penetration, and to Materials for foreign, malformed and repeated `from` |
-| 43 | Unit, E2E | `listAllActions`: every site in order, a missing or failing site unavailable, all down unavailable, other errors rethrown, no sites; `actionLink` to the material page at the site's section with `fromLog`; `fromLogPath`, `logOrigin` (single, known site only) and `logBack`; filter chips keep `fromLog`. E2E: menu to `/actions` with the item marked, a section per site with the site icon and a sticky heading linking to the site, back to the log from a site (after a filter chip), a penetration and a material page, a foreign origin falls back to the parent, the old URL redirects to the section, axe, targets and no overflow at 375px; stock down shows the page unavailable, never "nothing recorded" |
-| 44 | Unit, E2E | `rowMarks`: problem kinds with a count when repeated, then escalations, waits and proposals always counted, from `logCounts(penetrationLog(...))` so they match the tab; no mark at 0; unreadable log shows problems only. `penetrationMaterialIds` on site data. E2E: after an escalation the row link carries the hidden "Escalated" label with count 1; after a proposal, a "Proposed substitute" mark; no button inside |
-| 45 | Unit, E2E | `penetrationLog`: shortage decisions for the nominated solution's materials (resolved kept), its own data-problem decisions and its proposals, newest first, others excluded; tab hrefs keep `fromLog`. E2E: both tabs with Solution current, `?tab=log` empty before writes, junk tab falls back, entry opens the material page with `?from=` and back pops to the tab, axe, targets and no overflow at 375px; stock down shows the site-unavailable screen, never 0 or nothing recorded |
-| 46 | Unit, E2E | `materialLog`: this material's shortage decisions at every site, newest first, other materials and blockers excluded, unreadable sites named; `materialTabHref` keeps `from` and `fromLog`; site-count wording. E2E: Stock current, `?tab=log` empty with 0 before writes, junk tab falls back, `from` kept with back to the penetration on both tabs, axe, targets and no overflow at 375px; after an escalation the log names the site and the Stock section has no state label (AC 39); stock down never shows 0 or nothing recorded |
-| 47 | Unit, E2E | `NAV_ITEMS` order (Map, Calendar, Projects; Guide is appended); `next.config` redirects `/` to `ABOUT_PATH`, not permanently; the head script is the theme and the demo sign-in only (no `sidebar`), and the sticky header's offset is never zeroed; source checks: no side menu in the layout or the stylesheet, `MenuBar` renders `TabBar`. E2E at 1280px (`wide-screen.spec.ts`): the projects list has one Main navigation, the tab bar at the foot of the viewport with its entries in a column at most 721px wide, the Online switch in the header, no `<aside>`, no collapse control and no `data-sidebar`; the tab bar marks Map, Calendar and Guide on their pages; an inner page keeps its back control and the switch, with no tab bar; the `/actions` site heading sticks directly below the header; axe, 48px targets and no overflow at 1280 and 1024px. `/` lands on `/about-this-demo` (home-status) |
-| 48 | Unit, API, E2E | `connectionState` (online needs all three; checking before the first answer; a later failure is offline), `clockLabel`, `pickerLine`, `updatedLine`, `connectionDescription`, `offlineBannerText`, `lastSyncedLine`, `parseStoredTime`, `parseHealth`. API: `/api/health` ok with the stock time and `no-store`; stock down or malformed is ok with no time. Source check: every header (`AppBar`, `MenuBar` and the error screen's `StatusBar`) holds the switch and the picker's line, and the layout has no connection row. E2E: one switch named Online, in the header, with the picker's last action below the header; after scrolling more than 500px the switch is still in the top 56px; it is in the header on the projects list, a penetration page, Inventory and the Guide; it is on; off shows Offline, "Updated", the foot banner, axe and 48px targets; a decision dialog sends nothing (no POST) and says why; Offline details then Sync now returns online and announces "Synced" |
-| 49 | Unit, API, E2E | `siteAction` (notify, decide, retry, none), `telHref`, `smsHref`, `readyText`, `contactRoles`. API: sites carry operator and picker, Ofcom drama numbers; `SiteSchema` rejects blank names and non-international numbers. E2E: Cedar Court's Text and Call links, Sort out shortages on Quayside House and Northgate, nothing on Foundry Lane, one link per site name, axe, targets, no overflow, and the action lands on the panel |
-| 50 | Unit, E2E | `actionNeeded`, `shortageLine`, `affectedLine`, `actionSummary`. E2E: site-b's figures with units, affected links, Wait and Escalate names, covered list with the caveat, picker and operator calls; site-c's unknown stock, data-problem link and one "Picker and operator"; no panel and "Crew can go" on site-a |
-| 51 | E2E | Body text is 18px; 48px targets and no overflow on the sites list, a blocked site, a penetration and a material page (and on every screen through AC 31's check) |
-| 52 | Unit, E2E | `signalView` (only the literal `clear` is go; blocked, nothing planned; every other status, including unavailable, is amber), no two states share a colour or a shape and only go has its knob on the right. E2E on the sites list: each card's `data-signal`, `data-knob` and knob shape, colours green, red and grey by channel in light and in dark, the labels, axe in both themes. Stock down or malformed: four amber signals, no `go` or `stop` |
-| 53 | Unit | The `--signal-*` tokens are read from `globals.css` in all three theme blocks: fill, ink and edge for each state, ink on fill at least 7:1, edge on the page and on the card at least 3:1, green and red and amber by hue, four different fills, and the two dark blocks identical |
-| 54 | Unit, E2E | `siteAction` (tap is a call for a clear or blocked site with an operator, the same href as Call operator; none, with "No operator assigned", without one; retry for an unchecked site; none for nothing planned), the hint never contains a button name. E2E: each card's signal link is `tel:` and equals Call operator's, its name never repeats the site name; nothing planned has no link or button; stock down has no link at all |
-| 55 | Unit, E2E | `readyText`, `blockedText` (NOT complete, up to three names and a count, unknown stock, data problems, no reason named), `holdText`: each names the site and job ref, and only the clear text says the crew can go. E2E: the exact blocked text for Quayside House from the card and from the top of the site, Northgate's unknown stock and data problems, Cedar Court's ready text, the hold text with the stock down |
-| 56 | API | `GET /api/sites` lists each blocked site's shortages in readiness order with unit, kind, required and shortfall (null when unknown), none for other sites, and none when stock is down; length equals `shortageCount` |
-| 57 | E2E, unit | The signal is at least 88px tall and 280px wide at 375px, with 48px targets, no overflow and axe on the sites list and on the site screens; on the site screen the signal comes before the operator row, which comes before the panel; a clear site's signal replaces its banner; nothing planned has a grey signal and no operator row. Unit: the site frame source has no banner and keeps that order |
-| 58 | E2E | The header's Online control's computed colours: green with dark text online, red with white text offline; axe in both (`sign-in.spec.ts`) |
-| 59 | Unit, E2E | `auth.ts`: any username and password sign in, either missing stays out, no password is stored, blocked storage still signs in for the visit, the pre-paint script; E2E: the cover fills the screen on a first visit with the page behind inert, says what is missing, any password gets in, the role is kept, "Hi, <username>" in the header, a reload stays signed in with no cover; axe and targets on the cover. Every other spec starts signed in through Playwright `storageState` |
-| 60 | Unit, E2E | `auth.ts`: create account replaces a same-named one and signs in, bad accounts storage is ignored, sign out keeps the username and role; E2E: Sign out at the Guide's top right brings the cover back with the username kept and the password focused, create account checks the passwords match, forgot password asks for a username or email and says nothing was sent |
-| 61 | Unit, API | `checkPicks` (`tests/unit/picks.test.ts`): wrong spec, marked picked with the fixing kit missing, partly picked with an accessory missing are each NOT_READY although the warehouse says picked; the warehouse status is never read; bad or missing numbers and a missing spec block; no list or an empty one is unknown, never ready. Stub modes for the pick system fail closed; the contract test checks `picks.json` |
-| 62 | Unit, E2E | `picks.ts` labels, amount lines and `crewGate`; E2E: Quayside House shows Not ready · 3 pick issues, the picker with Call and Email, four rows with their labels, Send the crew locked and no "Crew can go" text; Cedar Court's Send the crew texts the operator; Foundry Lane says Can't check with no link; the home page has no Picks section; axe, targets, overflow |
-| 63 | Unit, E2E | `crewGate` is locked offline and while checking whatever the picks say; E2E: offline, every label reads Was …, Send the crew is locked with "Never decided from saved data" even where every line matched, Call still works |
-| 64 | E2E | The Pick check page: three cards (partly picked with a 6 of 10 bar and the nozzle 0 of 1, parts missing with the kit 0 of 6, wrong spec with both ratings), the picker's Call, Report to warehouse on the first issue, Wait for re-pick back to the site, a row on the site screen landing on its card, the offline note; axe, targets, overflow |
-| 65 | API, DB, E2E | API: 201 then 200 for the same key with one row, 404 for an unknown line or no list, 422 for no recipient, bad amounts, long text, unknown kinds or fields, 409 for a key reused on another line, empty text stored as none; repository contract and row mapping; DB: the table's checks and grants. E2E: the form prefilled from the line, refilled on another material, the recipient and amount checks, the request's key and body, the sent status |
-| 66 | Unit, API, E2E | `pick-outbox.ts`: keep by key, replace a resave, drop junk, survive blocked storage, sent and final refusals leave, the rest stay to retry; E2E: offline, the report waits on the phone with nothing sent, the site screen counts it, back online it is sent once with the saved key, and a resend with that key is 200 created false |
-| 67 | Unit, E2E | `pickReviewPath`, `pickReportPath(…, true)`, the review labels and wording (`tests/unit/ui-picks.test.ts`); E2E: on Quayside House each of the four rows (Part-picked, Missing parts, Wrong spec, Matches plan) has its own Review, described by its material and at least 48px, still there offline; each Pick check card has one; the review page of a line that matches the plan shows its card, Yes and No at least 88px tall, No opening the report from the review, and an unknown line has nothing to review; axe, targets, overflow |
-| 68 | Unit, API, DB, E2E | Domain: a review gives `checkedAt` and never turns a mismatch into a match; API (`tests/api/pick-reviews.test.ts`): 201 then 200 for the same key with one row, 400 without a key, 404 for a line not on the list, no list or an unknown site, 409 for a key reused on another line, 422 for any other body; repository contract and row mapping; DB: `pick_review` is append-only (42501 on update or delete) and idempotent by user and key. E2E: Yes sends `{ lineId }` with a key and the row reads Checked on site |
-| 69 | Unit, API, DB, E2E | API: the site's kinds, `affectedQty` and `same_day` stored; no request is a re-pick and no amount is none; an unknown request, a fractional, negative or too large amount, or an unknown kind is 422; DB: an old-style row reads as a re-pick, the kind, request and amount checks (23514). `reportKinds` order; E2E: the report from a review opens with no kind chosen, the site's kinds first, refuses no kind and 2.5 affected, then sends damaged, 2, same-day |
-| 70 | Unit, API, E2E | Domain (`tests/unit/picks.test.ts`): the latest report is open until a strictly later review; a same-instant review or one with an unreadable time closes nothing, and an unreadable report time is never closed; a reported line that also fails the check keeps its label and adds `reported`; reports on another line count for nothing. API: a damaged report makes a matching site not ready, a later review makes it ready; a failed report read rejects (never ready). E2E: the row reads Reported on site with what, how many and what was asked, Picks Not ready, Send the crew locked, the card names it, Yes closes it and Send the crew unlocks |
-| 71 | Unit, E2E | `pick-outbox.ts`: a review keeps its type, counts apart from reports, goes to its own address, and an entry of an unknown type is dropped; the waiting and sent wording; E2E: offline Yes waits on the phone with nothing sent, the site screen counts "1 review waiting to send", back online it is sent once with the saved key and a resend is 200 created false |
-| 72 | Unit, E2E | `site-filters.ts` (`tests/unit/site-filters.test.ts`): the four choices in order, the status read in any case with a missing, unknown, empty or repeated value as All statuses, clear under Ready, blocked under Shortage, nothing planned, can't check and any unknown status under Unknown (never Ready); E2E: on the projects list Ready shows Cedar Court with a green signal, Shortage the two blocked projects with red ones, Unknown Foundry Lane, All statuses all four, each in the URL with "N of 4 projects"; with stock down Ready and Shortage match nothing and Unknown shows all four; axe, targets, overflow |
-| 73 | Unit, E2E | Search trimmed and cut to 100 characters, by name, job ref or address in any case, a project without an address, search and readiness together, the count and no-match wording; E2E: the search's placeholder and limit, by name, job ref and address, nothing matching says so, Reset returns every project with an empty form, an unknown status in the URL is All statuses; axe, targets, overflow |
-| 74 | Unit, API, E2E | `travel.ts` (`tests/unit/travel.test.ts`): valid locations (finite, in range, never 0,0), the Google Maps directions URL, the pin colours and the streets style; API: every sample site has a valid `location`, a wrong shape rejects the response, an out-of-range point passes the schema and gets no map. E2E without a token: no map, each card's Directions with its exact URL, a new tab, described by its project, and the nothing-planned card with Directions but no call; with a fake token (maps server): four maps load with a canvas and a pin, a tap on a map opens the directions, and at 375 and 1280px each map sits between its project's name and its signal, with the signal's left edge and width; Mapbox's wordmark is the only target under 48px; axe, targets, overflow |
-| 75 | Unit, E2E | The haversine line, distances (metres, one decimal, whole km) and times (at least a minute, hours), every trip line from the phone and from the default address, the default address itself (a valid point, its name and address), the start (the phone only with a fix), the line above the list for every location state, the shown answer kept until the new start's answer arrives, matrix batches of nine and the exact request, and a matrix answer read per project with anything untrustworthy as no route; E2E: before any tap every card is measured from Auckland city warehouse (straight line, no token), and a refused location keeps it and says why; an allowed one gives the phone's straight line with no drive time when there is no token (no request to Mapbox); on the maps server, without the location one matrix request from the default gives each project its drive "from Auckland city warehouse", and a shared location then replaces it with one request from the phone; with the location already allowed, exactly one request from the phone (one from the default may go out first), offline gives the straight line with no new request, and back online the drive again |
-| 76 | Unit, build | `publicMapboxToken` keeps only `pk.` tokens; `mapboxTokenForBuild` throws on `sk.`; `next.config.ts` passes the token through that check under a name that is not `NEXT_PUBLIC_`; the page reads it on the server; AC 28's public-name check still passes. Build checks (manual): an `sk.` token fails `next build`; with a `pk.` token the token is in no file of `.next/static` and in the server output only. CI refuses a GitHub secret that is not `pk.` before the build |
-| 77 | Unit, E2E | `today.ts` (`tests/unit/today.test.ts`): the sample reads "2 of 3 crews can't go yet", "3 shortages · 4 data problems" and one go and two blocked segments; a crew is a project with work planned and one that can't be checked can't go (anything unknown too); every headline form, every totals form, "Stock can't be checked" with any unchecked crew; green, neutral and no bar. E2E: the verdict, the totals and the bar on `/sites`, the black panel with white text, the first line "Map · today is <the day>", full bleed at 375px, above the filter, the h1 still first in main; with a filter on, the verdict still counts every project; on the stock-down server "4 of 4 crews can't go yet", "Stock can't be checked" and four yellow segments; axe, targets, overflow |
-| 78 | Unit, E2E | Groups (clear to Crew can go, nothing planned to Other, everything else to Blocked), the four tabs' labels and order with All first, All showing every project, the opening tab (Crew can go, else Blocked, else Other, else All), which segments a tab lights (All lights every one), and the arrow keys, Home and End over the four tabs with wrapping. E2E: "All 4", "Blocked 2", "Crew can go 1", "Other 1" right under the bar, opening on Crew can go; each tab lights its segments and fades the rest (computed opacity), All lights them all; one tab in the tab order and the keys move focus and choose; on the stock-down server it opens on Blocked |
-| 79 | Unit, E2E | Each pin's name, short name, status, colour and point (no point, no pin), the tab's first project (All's is the first in the list), and pin places on the plain panel (middle, full span, north up, inside the room). E2E without a token: the tab's pins only (four under All), the card under the map built and styled exactly as the list's card for the same project (every element's tag and class, the box's own style), the same trip line, as wide as the map and right under it, no id repeated on the page; a tapped pin takes the card and grows; Northgate north-west of Quayside; the tab bar over the card; an empty tab says so (stock-down); with a fake token: the Mapbox canvas fills the map, the pins sit inside it for each tab, the wordmark is clear of the card; axe and targets |
-| 80 | Unit, API, E2E | `deadlineOf` (`tests/unit/deadline.test.ts`): each sample date's English words, a leap day and both ends of a year, weekdays worked out independently; nothing for a missing, malformed or impossible date (`2026-02-30`, `0099-01-01`, a timestamp, `23/10/2026`). API: every sample site's `date`, the order kept; a number, an object or null rejects the response; an impossible date passes the schema and shows nothing. E2E: every list card ends with "Deadline · …" for its project, the `time` element carries the date as written, the card under today's map shows the same line; axe, targets, overflow |
-| 81 | Unit, E2E | `calendar.ts` (`tests/unit/calendar.test.ts`): the copy keeps today's verdict, totals, bar and tabs; each project's deadline and signal (no real date, no place); the oval's name; month grids worked out independently (Monday first, the months either side, five, six and four weeks, across a year); month names and moves across years; the opening month. E2E with the phone's clock fixed to 20 Oct 2026: the calendar above the map panel, which keeps its own tabs and card; the copied verdict, totals, bar and tabs; October 2026, Monday first, today ringed; Cedar Court's oval on the 23rd with the card signal's tone, knob side, knob shape and fill; the list's own card under it, as wide as the calendar; no repeated id; each tab's ovals, opening month and first project, Next and Previous month, a tapped oval taking the card; axe, targets, overflow |
-| 82 | Unit, E2E | `localDate`, `endOfYear`, `inRange` (both ends included, empty ends open, no date never), `rangeProblem`, `visibleProjects` and `firstVisible` for every tab and range. E2E: From and To start at 2026-10-20 and 2026-12-31; To at the end of October drops November's ovals; From on the 24th drops Cedar Court and moves the card; Crew can go then says "No deadlines between these dates." while the tabs still count every project; From after To says so and holds none; empty fields hold every deadline |
-| 83 | Unit, E2E | `NAV_ITEMS` (Map, Calendar, Projects with their hrefs, labels and icons); the screen sources: `/map` and `/calendar` are top-level pages with `MenuBar` and their h1 first in main. E2E: the tab bar reads Map, Calendar, Projects, Guide; every tab's page starts with Use my location and its note under the picker's line; Map and Calendar open from it, by keyboard too, and are marked current (also at 1280px); Map holds today's panel and Calendar the calendar, neither the list nor the other panel; from a filtered list, Map's verdict counts every project; Decisions opens from the Guide with no tab marked; the scenario reaches it the same way |
-| 85 | Unit, E2E | `backTarget`: each top-level page underneath is named and returned to; nothing underneath, the target itself underneath (query or anchor kept), or an inner page keeps the page's own target; the store tells listeners when the screen underneath changes. E2E: a project opened from Map, Calendar or Projects goes back there, from the Guide's tour back to the Guide, opened directly back to Projects |
-| 84 | Unit, E2E | `entryRedirect`: the first page of a visit at `/sites` goes to the tab bar's first entry (`/map`); a visit under way, a filtered link and every other page stay. E2E without the mid-visit mark: `/sites` lands on Map, Projects and a reload then show the list, Back does not return to the entry, a filtered link opens the list; every other spec starts mid-visit (`gotoApp` marks it). Seen to fail without `EntryTab` |
+| 1 | Demand summed per material | `unit/readiness.test.ts` |
+| 2 | Site whose stock suffices | `unit/readiness.test.ts` |
+| 3 | Balances added across warehouse and van | `unit/readiness.test.ts` |
+| 4 | Fractional demand rounds up | `unit/readiness.test.ts` |
+| 5 | Unknown-stock shortage: null figures; wait and escalate allowed | `api/routes.test.ts`, `unit/readiness.test.ts` |
+| 6 | Blocker reasons | `api/routes.test.ts`, `unit/readiness.test.ts` |
+| 7 | Wait on a blocker rejected (422); escalate allowed | `unit/readiness.test.ts` |
+| 8 | No penetrations means nothing planned | `unit/readiness.test.ts` |
+| 9 | Stock stub failing: 502 and an unavailable screen, never clear | `api/routes.test.ts`, `api/stubs.test.ts`, `api/upstream.test.ts`, `e2e/stock-down.spec.ts`, `e2e/stock-malformed.spec.ts`, `unit/ui-load.test.ts`, `unit/ui-messages.test.ts`, `unit/ui-status.test.ts` |
+| 10 | Pooled stock makes two sites clear at once; label on screen | `api/routes.test.ts`, `e2e/scenario.spec.ts`, `unit/readiness.test.ts` |
+| 11 | Wait stored, state becomes waiting (201) | `api/routes.test.ts` |
+| 12 | Invalid target refused (422) | `api/routes.test.ts` |
+| 13 | Absent shortage refused (404) | `api/routes.test.ts` |
+| 14 | Escalation outranks a later wait | `unit/lifecycle.test.ts`, `unit/readiness.test.ts` |
+| 15 | Growing shortfall demotes the stored action | `unit/lifecycle.test.ts`, `unit/readiness.test.ts`, `unit/ui-status.test.ts` |
+| 16 | Replays store a single row; no key → 400; DB uniqueness per user | `api/actions-repository.test.ts`, `api/idempotency.test.ts`, `api/routes.test.ts`, `db/contract.test.ts`, `unit/pg-store.test.ts` |
+| 17 | Overlong note refused (422) | `api/body-limit.test.ts`, `api/routes.test.ts`, `db/contract.test.ts` |
+| 18 | Candidates for 0438 (domain and UI) | `e2e/scenario.spec.ts`, `unit/candidates.test.ts` |
+| 19 | Candidates for 0789 | `unit/candidates.test.ts` |
+| 20 | Empty result and unknown nominated code | `api/routes.test.ts`, `unit/candidates.test.ts` |
+| 21 | Incomplete-substrate status | `api/routes.test.ts`, `e2e/penetration-page.spec.ts`, `unit/candidates.test.ts` |
+| 22 | Candidates for 0434; null insulation never offered | `unit/candidates.test.ts` |
+| 23 | Non-candidate target 422; outdated source 409 | `api/routes.test.ts` |
+| 24 | Proposals stored as proposed only; nothing else changes | `api/routes.test.ts`, `db/contract.test.ts` |
+| 25 | Exactly 20 of 148 solutions have a candidate | `unit/candidates.test.ts` |
+| 26 | CSV loads 148 rows unchanged; six incomplete substrates flagged | `data/catalogue-file.test.ts`, `unit/catalogue.test.ts` |
+| 27 | Fixture codes all exist apart from the planted 9999 | `api/contract.test.ts` |
+| 28 | Client bundle free of DB credentials and service keys | `api/security.test.ts` |
+| 29 | no-store on readiness and actions | `api/security.test.ts` |
+| 30 | Penetration row content | `e2e/ac30-status-text.spec.ts`, `unit/ui-status.test.ts` |
+| 31 | Keyboard-only escalation; target sizes | `e2e/ac31-keyboard.spec.ts` |
+| 32 | 375px layout with no horizontal scroll | `e2e/ac32-viewport.spec.ts` |
+| 33 | Candidate stock reflects the site's own shortages and unknowns | `api/routes.test.ts`, `unit/availability.test.ts` |
+| 34 | Blocked site without banner; chips filter and count; clear site says Crew can go | `e2e/site-tabs.spec.ts`, `unit/penetration-filters.test.ts`, `unit/ui-messages.test.ts`, `unit/ui-penetrations.test.ts`, `unit/ui-screens.test.ts` |
+| 35 | Fit rules, normalisation, fail-closed requirements, blocker order | `api/routes.test.ts`, `e2e/penetration-page.spec.ts`, `e2e/site-tabs.spec.ts`, `e2e/substitutes-empty.spec.ts`, `unit/fit.test.ts`, `unit/readiness.test.ts`, `unit/ui-penetrations.test.ts`, `unit/ui-status.test.ts` |
+| 36 | Side-by-side penetration vs nominated solution; misfits flagged | `e2e/penetration-page.spec.ts`, `unit/penetration-detail.test.ts`, `unit/ui-fit.test.ts`, `unit/ui-status.test.ts` |
+| 37 | Theme switching and persistence; tab bar on the Guide | `e2e/navigation-tabs.spec.ts`, `unit/ui-head-script.test.ts`, `unit/ui-nav-section.test.ts`, `unit/ui-screens.test.ts`, `unit/ui-theme.test.ts` |
+| 38 | Materials list: pooled stock, cross-site totals, unchecked sites | `e2e/navigation-tabs.spec.ts`, `e2e/stock-down.spec.ts`, `e2e/stock-malformed.spec.ts`, `unit/material-needs.test.ts`, `unit/material-stock.test.ts`, `unit/ui-materials.test.ts` |
+| 39 | Material page: per-site sections and actions where short | `e2e/ac30-status-text.spec.ts`, `e2e/penetration-page.spec.ts`, `e2e/stock-down.spec.ts`, `e2e/stock-malformed.spec.ts`, `unit/material-needs.test.ts`, `unit/material-stock.test.ts` |
+| 40 | Shortage lines link into material pages | `e2e/penetration-page.spec.ts`, `unit/ui-format.test.ts`, `unit/ui-penetrations.test.ts` |
+| 41 | Old site-material URL redirects to the material section | `e2e/penetration-page.spec.ts` |
+| 42 | Back from a material page to the originating penetration | `e2e/penetration-page.spec.ts`, `unit/material-stock.test.ts`, `unit/nav-history.test.ts`, `unit/ui-materials.test.ts` |
+| 43 | Decisions log across sites; returns to the log | `e2e/ac31-keyboard.spec.ts`, `e2e/actions-log.spec.ts`, `unit/actions-log.test.ts`, `unit/penetration-filters.test.ts`, `unit/ui-actions-log.test.ts`, `unit/ui-format.test.ts` |
+| 44 | Row marks counting problems and decisions | `e2e/ac31-keyboard.spec.ts`, `unit/ui-penetrations.test.ts`, `unit/ui-status.test.ts` |
+| 45 | Penetration Decisions tab | `e2e/penetration-page.spec.ts`, `unit/penetration-log.test.ts`, `unit/penetration-tabs.test.ts` |
+| 46 | Material Decisions tab | `e2e/penetration-page.spec.ts`, `unit/material-log.test.ts`, `unit/material-tabs.test.ts` |
+| 47 | Wide screens keep the phone layout | `e2e/wide-screen.spec.ts`, `unit/ui-head-script.test.ts`, `unit/ui-nav-section.test.ts`, `unit/ui-screens.test.ts` |
+| 48 | Online switch, connection states, health endpoint | `api/health.test.ts`, `e2e/field-ui.spec.ts`, `e2e/navigation-tabs.spec.ts`, `unit/connection.test.ts`, `unit/ui-screens.test.ts` |
+| 49 | Operator and picker contact actions | `api/health.test.ts`, `e2e/field-ui.spec.ts`, `unit/contacts.test.ts` |
+| 50 | Needs-your-decision panel | `e2e/field-ui.spec.ts`, `unit/action-needed.test.ts`, `unit/contacts.test.ts` |
+| 51 | 18px text, 48px targets, no overflow | `e2e/field-ui.spec.ts` |
+| 52 | Signal states by colour and shape | `e2e/field-ui.spec.ts`, `e2e/stock-down.spec.ts`, `e2e/stock-malformed.spec.ts`, `unit/signal.test.ts` |
+| 53 | Signal colour tokens and contrast ratios | `e2e/field-ui.spec.ts`, `unit/signal-tokens.test.ts` |
+| 54 | Signal tap calls the operator | `e2e/field-ui.spec.ts`, `e2e/stock-down.spec.ts`, `e2e/stock-malformed.spec.ts`, `unit/contacts.test.ts` |
+| 55 | Prepared operator messages | `e2e/field-ui.spec.ts`, `e2e/stock-down.spec.ts`, `unit/contacts.test.ts`, `unit/signal.test.ts` |
+| 56 | Sites API lists shortages of blocked sites | `api/routes.test.ts` |
+| 57 | Signal size and screen order | `e2e/field-ui.spec.ts`, `e2e/stock-down.spec.ts`, `unit/signal.test.ts`, `unit/ui-screens.test.ts` |
+| 58 | Online control colours | `e2e/sign-in.spec.ts` |
+| 59 | Demo sign-in cover | `e2e/sign-in.spec.ts`, `unit/ui-auth.test.ts` |
+| 60 | Create account, sign out, forgot password | `e2e/sign-in.spec.ts`, `unit/ui-auth.test.ts` |
+| 61 | Pick check ignores the warehouse's own status | `api/contract.test.ts`, `api/pick-reports.test.ts`, `api/stubs.test.ts`, `e2e/pick-check.spec.ts`, `unit/picks.test.ts`, `unit/ui-picks.test.ts` |
+| 62 | Pick summary and the crew gate | `api/pick-reports.test.ts`, `e2e/pick-check.spec.ts`, `unit/ui-picks.test.ts` |
+| 63 | Crew gate locked offline | `e2e/pick-check.spec.ts`, `unit/ui-picks.test.ts` |
+| 64 | Pick check page | `e2e/pick-check.spec.ts`, `unit/ui-picks.test.ts` |
+| 65 | Pick-error report API and form | `api/actions-repository.test.ts`, `api/pick-reports.test.ts`, `db/contract.test.ts`, `e2e/pick-report.spec.ts`, `unit/ui-picks.test.ts` |
+| 66 | Pick reports queued offline, sent once | `api/actions-repository.test.ts`, `api/pick-reports.test.ts`, `db/contract.test.ts`, `e2e/pick-report.spec.ts`, `unit/ui-picks.test.ts` |
+| 67 | Review control on every pick line | `api/pick-reviews.test.ts`, `e2e/pick-check.spec.ts`, `unit/ui-picks.test.ts` |
+| 68 | Review that a line is right | `api/actions-repository.test.ts`, `api/pick-reviews.test.ts`, `db/contract.test.ts`, `e2e/pick-review.spec.ts`, `unit/picks.test.ts` |
+| 69 | Site-side report kinds, amounts and requests | `api/actions-repository.test.ts`, `api/pick-reviews.test.ts`, `db/contract.test.ts`, `e2e/pick-review.spec.ts`, `unit/ui-picks.test.ts` |
+| 70 | Reports stay open until a later review | `api/pick-reviews.test.ts`, `e2e/pick-review.spec.ts`, `unit/picks.test.ts`, `unit/ui-picks.test.ts` |
+| 71 | Reviews queued offline | `api/actions-repository.test.ts`, `api/pick-reviews.test.ts`, `db/contract.test.ts`, `e2e/pick-check.spec.ts`, `e2e/pick-review.spec.ts`, `unit/ui-picks.test.ts` |
+| 72 | Readiness filter | `e2e/sites-filter.spec.ts`, `e2e/stock-down.spec.ts`, `unit/site-filters.test.ts` |
+| 73 | Search by name, job ref, address | `e2e/sites-filter.spec.ts`, `unit/site-filters.test.ts` |
+| 74 | Project maps and directions | `api/sites-location.test.ts`, `e2e/field-ui.spec.ts`, `e2e/site-maps-token.spec.ts`, `e2e/site-maps.spec.ts`, `unit/travel.test.ts` |
+| 75 | Drive and distance from fallback origin or device | `e2e/navigation-tabs.spec.ts`, `e2e/site-maps-token.spec.ts`, `e2e/site-maps.spec.ts`, `unit/travel.test.ts` |
+| 76 | Mapbox token must be public | `e2e/site-maps-token.spec.ts`, `unit/mapbox-token.test.ts`, `unit/travel.test.ts` |
+| 77 | Daily verdict panel | `e2e/not-found.spec.ts`, `e2e/stock-down.spec.ts`, `e2e/stock-malformed.spec.ts`, `e2e/today.spec.ts`, `unit/today.test.ts`, `unit/ui-screens.test.ts` |
+| 78 | Verdict tabs and lit segments | `e2e/stock-down.spec.ts`, `e2e/today.spec.ts`, `unit/today.test.ts` |
+| 79 | Map pins; the selected card below | `e2e/field-ui.spec.ts`, `e2e/site-maps-token.spec.ts`, `e2e/site-maps.spec.ts`, `e2e/stock-down.spec.ts`, `e2e/stock-malformed.spec.ts`, `e2e/today.spec.ts`, `unit/today.test.ts` |
+| 80 | Deadline on each card | `api/sites-date.test.ts`, `e2e/deadline.spec.ts`, `unit/deadline.test.ts` |
+| 81 | Deadline calendar | `e2e/calendar.spec.ts`, `e2e/site-maps-token.spec.ts`, `e2e/today.spec.ts`, `unit/calendar.test.ts` |
+| 82 | Calendar date range | `e2e/calendar.spec.ts`, `unit/calendar.test.ts` |
+| 83 | Map and Calendar tabs | `e2e/actions-log.spec.ts`, `e2e/calendar.spec.ts`, `e2e/home-status.spec.ts`, `e2e/navigation-tabs.spec.ts`, `e2e/scenario.spec.ts`, `e2e/today.spec.ts`, `e2e/wide-screen.spec.ts`, `unit/ui-nav-section.test.ts` |
+| 84 | First tab on entry | `e2e/entry.spec.ts`, `unit/entry.test.ts` |
+| 85 | Back returns to the originating page | `e2e/back-navigation.spec.ts`, `unit/nav-back.test.ts` |
 
-A script lists every AC number and fails CI if one has no test referencing it.
+CI runs a script that enumerates AC numbers and fails if any lacks a referencing test.
 
-## 4. Key unit test groups
+## 4. Principal unit test groups
 
-**Fail-closed numbers** (added after independent review)
-- Negative, `NaN` and `Infinity` mapped quantities give `invalid_quantity` and never `clear`. A bad value cannot cancel another penetration's need.
-- Negative, `NaN`, `Infinity` and overflowing stock make the material `unknown`.
-- Required overflow throws. Decimal dust: ten balances of 0.1 cover 1, and 4.2 against 5 is short by 0.8.
-- Non-finite requirements or offered ratings never produce a candidate.
+**Numbers that must fail closed** (introduced after independent review)
+- Mapped quantities that are negative, `NaN` or `Infinity` → `invalid_quantity`, never `clear`; no bad value can offset another penetration's demand.
+- Stock that is negative, `NaN`, `Infinity` or overflowing → material `unknown`.
+- Demand overflow throws. Floating-point residue: 10 × 0.1 in stock covers a demand of 1; demand 5 with 4.2 available leaves 0.8 missing.
+- Requirements or offered ratings that are not finite never yield a candidate.
 
-**Shortage maths**
-- Sum across penetrations and materials. Exact match is not a shortage. One unit short is.
-- Fractions round up. Zero and very large quantities.
-- Multi-location stock summed. A missing location is not zero.
+**Shortage arithmetic**
+- Sums across penetrations and materials. Equal demand and stock is no shortage; one unit less is.
+- Rounding up of fractions; zero; very large values.
+- Stock added up over locations; an absent location is not zero.
 
-**Status**
-- Clear only when no shortage, no blocker, and at least one penetration.
-- Wait and escalate never change status.
+**Crew status**
+- Clear means: zero shortages, zero blockers, one or more penetrations.
+- Neither wait nor escalate alters status.
 
-**Lifecycle**
-- Action current while shortfall is no larger than recorded. Earlier when it grows.
-- Escalate then wait. Wait then escalate. Several actions in order.
+**Decision ageing**
+- Current while the shortfall stays at or below the recorded figure; earlier once it rises.
+- Escalate → wait; wait → escalate; several actions in sequence.
 
-**Normalisation** (one case from a real row each)
-- Double space in service type (`0375`).
-- Space inside brackets (`0452`, `0479`).
-- Space before unit (`0734`).
-- Case differences.
-- Trailing comma is not stripped. The six incomplete rows are flagged (`0943`).
-- Different size formats do not match each other. `0534` and `0535` are not merged.
+**Normalisation** (one real catalogue row per case)
+- Two spaces inside a service type (`0375`).
+- Space directly inside brackets (`0452`, `0479`).
+- Space ahead of a unit (`0734`).
+- Letter case.
+- Trailing comma kept; the six incomplete rows flagged (`0943`).
+- Distinct size formats stay unequal; `0534` and `0535` stay separate.
 
-**Matching** (property-style checks over the real catalogue)
-- No candidate ever has a lower integrity or insulation than required.
-- A null insulation never satisfies a stated requirement.
-- A candidate never shares the nominated code.
-- Orientation, substrate, service type and size always equal after normalisation.
-- Count of solutions with candidates is exactly 20.
+**Matching** (property-style, over the whole real catalogue)
+- Every candidate meets or beats the required integrity and insulation.
+- Null insulation never meets a stated requirement.
+- No candidate equals the nominated code.
+- Post-normalisation, the four text fields (orientation, substrate, service type, size) always agree.
+- Exactly 20 solutions have candidates.
 
-## 4a. API layer verification (added after independent review)
+## 4a. Verifying the API layer (introduced after independent review)
 
-The vitest coverage floor measures only `src/domain`, so the API layer is judged by mutation checks. After the first review, 24 deliberately broken rules survived the suite. The fix round added tests for each, and the orchestrator re-ran the rules as mutants: 13 of 15 were killed, and the 2 survivors were equivalent (the numeric `Content-Length` early reject is an optimisation behind the streaming limit, and the note length is enforced by both the schema and the use case). Contract tests run against the in-memory repository, and against a real Postgres 17 when `TEST_DB_ADMIN_URL` is set. `REQUIRE_DB_CONTRACT=1` and `REQUIRE_BUNDLE_SCAN=1` make a skipped run fail, for CI. A mutation that grants the app role `update, delete` fails the database suite.
+Vitest's coverage floor applies only to `src/domain`, which is why mutation testing judges the API layer. Following the initial review, the suite still passed with 24 rules deliberately broken. The fix round added a test per rule; re-running them as mutants in the orchestrator's shell caught 13 of 15; the two survivors are equivalent mutants (the early numeric `Content-Length` rejection only optimises ahead of the streaming cap, and note length is checked by both schema and use case). The contract suite targets the in-memory repository, plus real Postgres 17 whenever `TEST_DB_ADMIN_URL` is set. In CI, `REQUIRE_DB_CONTRACT=1` and `REQUIRE_BUNDLE_SCAN=1` turn a skip into a failure. Granting the app role `update, delete` as a mutation makes the database suite fail.
 
-## 5. Failure and risk coverage
+## 5. Risks and their tests
 
-| Risk | Consequence | Tests |
+| Risk | Impact | Covered by |
 | --- | --- | --- |
-| Missing data read as zero | False clear or false shortage | AC 5, 6, 7, 8, 9 and stock-record-missing unit cases |
-| Stale nomination or stale candidates | Wrong substitute saved | AC 23 |
-| Over-eager matching | Unsafe substitute suggested | AC 18 to 22, 25 and the property checks |
-| Coarse catalogue fields used by mistake | Socket matched as pipe | Unit cases where options match but raw values differ |
-| Old action applied to a new shortage | Leader thinks someone is dealing with it | AC 14, 15 |
-| Double submit on poor signal | Duplicate escalation | AC 16 |
-| Cached "clear" after stock falls | Crew sent without materials | AC 29 |
-| Database credentials exposed | Data exposure | AC 28 and secret scan |
-| Direct database access without login | Anyone reads or writes | Database test: with the anon role, select and insert both fail |
-| Catalogue update changes behaviour silently | Wrong suggestions | AC 25 and 26 fail loudly |
-| Upstream shape changes | Wrong numbers | Contract tests |
-| Inaccessible controls | Leader cannot act | Axe checks and manual keyboard pass |
+| Absent data treated as zero | Wrong clear or invented shortage | AC 5–9 and unit cases for a missing stock record |
+| Outdated nomination or candidates | Bad substitute stored | AC 23 |
+| Matching too loosely | Unsafe suggestion | AC 18–22, 25, property checks |
+| Coarse catalogue columns used by accident | A socket treated as a pipe | Unit cases where options agree but raw values do not |
+| Old decision covering a new shortage | Leader assumes it is handled | AC 14, 15 |
+| Repeat taps on weak signal | Duplicated escalation | AC 16 |
+| Stale cached "clear" after stock drops | Crew leaves without materials | AC 29 |
+| Leaked DB credentials | Data exposure | AC 28, secret scan |
+| DB reachable without login | Anyone can read or write | DB test: anon role cannot select or insert |
+| Silent behaviour change from a catalogue update | Wrong suggestions | AC 25 and 26 break visibly |
+| Upstream schema drift | Wrong figures | Contract tests |
+| Controls unusable without a mouse or sight | Leader cannot act | axe, manual keyboard pass |
 
-Failure paths for every endpoint: invalid body, unknown field, wrong type, missing key, unknown site, upstream error. Each returns the single error shape `{code, message}` and none leaks a stack trace, path or SQL. A test checks the shape and the absence of those strings.
+Each endpoint is tested with: a malformed body, an extra property, a mistyped value, no key, a site that does not exist, a failing upstream. Each answers with the one `{code, message}` shape and leaks no stack trace, file path or SQL; a dedicated test asserts that shape and that such strings never appear.
 
 ## 6. Test data
 
-- **Catalogue:** the real CSV, unchanged.
-- **Sample upstream data:** `data/sample/`, labelled invented. The demo set from `slice-specification.md` section 7.
-- **Fixtures for unit tests:** small hand-built objects, so tests do not depend on the sample files.
-- **Failure stubs:** each upstream stub can be switched to fail, return empty, or return malformed data for tests.
-- **Database:** each test run starts from migrations on a clean schema, and tests clean up their rows.
-- No real personal data and no production credentials anywhere in tests.
+- **Catalogue:** the supplied CSV, unmodified.
+- **Upstream fixtures:** `data/sample/`, marked invented; the demo set described in `slice-specification.md` §7.
+- **Unit fixtures:** small objects built inline, independent of the sample files.
+- **Failing stubs:** every upstream stub can be told to fail, return nothing, or return malformed data.
+- **Database:** each run migrates a clean schema; tests remove their own rows.
+- No genuine personal data or production credential appears in any test.
 
 ## 7. CI/CD gates
 
-On every push and pull request, in order:
+Each push and pull request runs, in sequence:
 
-1. Install with a locked lockfile.
-2. Typecheck and lint, including the import-boundary rule.
-3. Unit, contract, catalogue and API tests, with coverage.
-4. Start a Postgres 17 service, run `db/setup.sql` and the migrations, run the database contract suite with `REQUIRE_DB_CONTRACT=1`.
-5. Build, then the client bundle check for credentials.
-6. Secret scan and dependency audit.
-7. Playwright end-to-end and axe on a dev server (five projects: reads, writes, two stock-failure servers started with `STUB_STOCK_MODE=down` and `malformed`, and a maps server started with a fake public Mapbox token whose spec answers every Mapbox request itself, each with its own build directory; the other servers get an empty token, so no test reaches Mapbox).
+1. Install strictly from the lockfile.
+2. Typecheck and lint, import-boundary rule included.
+3. Coverage run over the unit, catalogue, contract and API suites.
+4. Postgres 17 service: apply `db/setup.sql` and the migrations, then the DB contract suite under `REQUIRE_DB_CONTRACT=1`.
+5. Production build, followed by the client-bundle credential scan.
+6. Secret scan; dependency audit.
+7. Playwright E2E with axe against dev servers. Five projects: read-only, writing, two stock-failure servers (`STUB_STOCK_MODE=down` and `malformed`); and a maps server given a dummy `pk.` token, whose spec answers all Mapbox traffic on its own. Each server has its own build directory; every server but the maps one gets a blank token, so Mapbox is never contacted.
 8. AC coverage script.
-9. On `main` only, after all of the above: deploy to Vercel (`vercel pull`, `build --prod`, then `npm run db:migrate` on the production database, failing closed without `SUPABASE_DB_PASSWORD`, then `deploy --prebuilt --prod`), then `scripts/smoke.mjs` against the production URL (`/api/sites` is 200, `no-store`, four sites; `/` redirects to `/about-this-demo` and renders "Is the crew good to go?", `/sites` renders "Projects"; Cedar Court's pick check reads ready or not ready, never "Can't check picks", which is how a missing migration shows).
+9. `main` only, once everything above is green: Vercel deploy (`vercel pull`, `build --prod`, `npm run db:migrate` against production, which aborts without `SUPABASE_DB_PASSWORD`, then `deploy --prebuilt --prod`), followed by `scripts/smoke.mjs` on the production URL: `/api/sites` 200 with `no-store` and four sites; `/` redirecting to `/about-this-demo` and rendering "Know which crews can roll out today"; `/sites` rendering "Projects"; Cedar Court's pick check showing either ready or not-ready status, never "Can't check picks", which is the symptom of a missing migration.
 
-Merge to the default branch is blocked on any failure. Deployment to Vercel runs only from a green default branch. After deploy, a smoke run of the end-to-end scenario against the public URL is the evidence of a working deployment.
+Any failure blocks merging to the default branch. Only a green default branch can reach Vercel, and the smoke run against the public URL after deployment proves the release works.
 
-**Thresholds.** Domain core: at least 95% line and branch coverage. Overall: no fall below the current level. Coverage is a floor, and the AC mapping and property checks are what show the tests mean something.
+**Thresholds.** Domain core ≥ 95% lines and branches; overall coverage may not drop below its current value. Coverage is only a floor; the AC mapping and the property checks are what demonstrate the tests are meaningful.
 
-**Flakiness policy.** No retries on unit, API or database tests. Playwright may retry once, and a retried pass is reported so it can be fixed.
+**Flaky tests.** Unit, API and DB tests never retry. Playwright gets one retry, and any pass-on-retry is reported for fixing.
 
-**Local runs.** The same commands run locally. For containers use Podman where Docker is absent. The README documents the commands.
+**Running locally.** Identical commands; Podman substitutes for Docker where needed. The README lists the commands.
 
-## 8. What this strategy does not prove
+## 8. Outside what these tests prove
 
-- Real upstream behaviour: latency, auth, data quality. Stubs prove the contract shape and the logic only.
-- Real user comprehension. Accessibility checks and a keyboard pass do not replace trying it with leaders.
-- Compliance of a suggested substitute. Tests show that rules are applied as written, not that the rules are sufficient. That judgement stays with a qualified person.
-- Load beyond the stated target, and long-running behaviour.
-- Offline use, which is out of scope.
+- How production upstreams behave (response times, authentication, quality of data). Stubs establish logic and contract shape, nothing more.
+- Whether real leaders understand the screens; automated a11y and a keyboard pass are no substitute for sessions with users.
+- Compliance of any suggested substitute. Tests show the rules were implemented faithfully, not that they suffice; that call belongs to a qualified person.
+- Load beyond the target in §8 of the design, and behaviour over long periods.
+- Offline operation (not in scope).
 
-## 9. Reviewing agent-written tests
+## 9. Reviewing tests written by agents
 
-- Tests are derived from the AC list before implementation, so they cannot be shaped around the code.
-- Every new test is checked to fail first against missing or wrong behaviour, then pass.
-- A test that only restates the implementation, or asserts a mock, is rejected.
-- Corrections to agent output are logged in `submission-checklist.md` as evidence of review.
-- Mutation-style spot checks on the matching and shortage code: deliberately break a rule and confirm a test fails.
+- Authored from acceptance criteria up front, which prevents fitting them to the implementation.
+- Each new test is first shown failing against absent or wrong behaviour, then passing.
+- Tests that merely restate the implementation, or only assert on a mock, are rejected.
+- Corrections to agent output go into `submission-checklist.md` as review evidence.
+- Mutation spot checks on matching and shortage code: break a rule on purpose, confirm a test catches it.

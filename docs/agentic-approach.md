@@ -1,75 +1,73 @@
-# Agentic coding approach
+# Agent workflow
 
-How coding agents were used on this slice, how they were directed and checked, and where their work was corrected. The evidence for every step (briefs, review reports, worker notes, costs) is in `docs/agent-work/`; corrections are logged in `docs/submission-checklist.md`.
+Who wrote what, how each agent was steered, how its output was checked, and where it got corrected. Raw artefacts (briefs, reviews, worker logs, spend) sit in `docs/agent-work/`; corrections are also logged in `docs/submission-checklist.md`.
 
-## Tools
+## Tooling
 
-| Role | Tool | Used for |
+| Role | Tool | Responsibility |
 | --- | --- | --- |
-| Orchestrator | Claude Code (Claude Sonnet 5.5, later Opus 5.5) | Requirements, specs, briefs, triage, every gate run, docs, git, deployment setup |
-| Worker | Grok Build CLI (`grok-4.7-build`; the fast variant for three runs, on request) | Implementation, and independent review sessions |
-| Design reviewer | A Claude Opus subagent | One review of the technical design before any code |
-| Builder (from 2026-10-18) | Claude Code on Opus 5.5, building directly; GitHub CLI and MCP; chrome-devtools MCP and Playwright for screenshots; SonarCloud in CI | The phone-review rounds (Online switch, site signal, pick review, maps, today's panel, calendar, tabs, Guide, theme), each test-first against new acceptance criteria and through the same gates |
-| Helpers (from 2026-10-06) | Claude Code subagents: `validator` and `reviewer` on Sonnet, `Explore`, `bulk-worker` on Haiku | Gate runs, one review lens each, code search and mechanical edits, so the orchestrator's context went on decisions; the submission readiness check ran this way |
-| Guidance | `AGENTS.md` (tool-neutral repo rules), 11 [Skill Forge](https://github.com/more-than-code/skill-forge) skills in `.agents/skills/` (coding discipline, security, testing, frontend, delegation, Vercel, Supabase Postgres, data migration) | Loaded by both agents |
+| Orchestrator | Claude Code (models: Sonnet 5.5, then Opus 5.5) | Requirements, specs, briefs, triage, all gate runs, documentation, git, deploy configuration |
+| Worker | Grok Build CLI, `grok-4.7-build` (fast variant on three runs, when I asked) | Implementation; separate review sessions |
+| Design reviewer | Claude Opus subagent | One pass over the technical design, before coding started |
+| Builder, from 18 Oct | Opus 5.5 inside Claude Code, writing code directly; `gh` plus the GitHub MCP server; screenshots through Playwright and chrome-devtools MCP; SonarCloud gate in CI | Phone-feedback iterations covering the connectivity toggle, per-site signal, picking review, maps, daily panel, deadline calendar, tab bar, Guide and colour theme. Each began with new ACs and failing tests and cleared the usual gates |
+| Helpers, from 6 Oct | Subagents `validator` and `reviewer` (Sonnet), `Explore`, `bulk-worker` (Haiku) | Running gates, single-angle reviews, searching, mechanical edits. Kept orchestrator context free for decisions; the pre-submission readiness check used them |
+| Guidance | `AGENTS.md`, tool-agnostic; 11 skills from [Skill Forge](https://github.com/more-than-code/skill-forge) in `.agents/skills/`: frontend, delegation, Supabase Postgres, Vercel, migrations of data, security, testing, general coding discipline | Loaded by every agent |
 
-I made the product and scope decisions: which slice, shared versus reserved stock, how substitutes are worded, UI defaults, which database and Vercel project, and every approval to commit, push or merge.
+I owned product and scope calls: choice of slice, pooled vs reserved stock, wording around substitutes, UI defaults, the choice of database and of Vercel project, plus approval of each commit, push and merge.
 
-## How the work was planned and directed
+## Planning
 
-1. **Docs before code.** The business path, glossary, iteration plan, specification (16 requirements, 17 once the side menu and materials pages were added; 32 numbered acceptance criteria, 34 after the post-delivery walkthrough, 36 after the solution-fit change, 42 after the materials pages, 44 after the actions log moved to the menu, 45 after the penetration tabs, 46 after the material tabs, 47 after the responsive side menu, then 85 after the phone-review rounds of 2026-10-18 to 10-20, with 34 requirements), technical design and test strategy were written and reviewed first. Code was then measured against them; when they disagreed, the spec was fixed first.
-2. **Risk tiers.** Each change was classified by blast radius. Contract and storage changes (the HTTP API, the move to Postgres) were Tier 3 and needed my written approval of a spec with a contract diff and rollback plan.
-3. **Orchestrator and worker.** Claude wrote a self-contained brief for each piece of work, as a file in the repo: role, facts, decisions not to relitigate, files the worker may touch, test-first method, verification commands and honesty rules ("do not claim a command passed unless you ran it"). Grok carried it out. Briefs were cheap to write and saved rounds of rework; the expensive model spent its tokens on decisions and checking, not on typing code.
-4. **Small rounds.** Domain core, API, UI, navigation, usability, then storage and delivery. Each round ended accepted and committed before the next began.
+1. **Spec before implementation.** Glossary, business path, iteration plan, specification, design and test strategy existed and were reviewed before code. Requirement count: 16, then 17 (side menu, materials). AC count: 32 → 34 (walkthrough after first delivery) → 36 (solution fit) → 42 (materials) → 44 (log moved into menu) → 45 (penetration tabs) → 46 (material tabs) → 47 (responsive menu) → 85, with 34 FRs, after the 18–20 Oct phone rounds. Spec wins conflicts: fix it, then the code.
+2. **Tiering by blast radius.** Storage and contract changes (HTTP API, Postgres migration) were Tier 3: I had to sign off in writing on a spec that contained the contract diff and rollback steps.
+3. **Brief-driven delegation.** Claude wrote one self-contained brief per task, committed to the repo: role, known facts, decisions that are closed, the writable file list, test-first steps, verification commands, honesty rules ("do not claim a command passed unless you ran it"). Grok implemented. Cheap briefs, less rework; the pricier model spent tokens on judgement and verification.
+4. **Small increments.** Domain → API → UI → navigation → usability → storage and delivery. No round started until the previous one was accepted and committed.
 
-## How outputs were verified
+## Verification ladder
 
-Each worker run went through the same ladder, cheapest checks first:
+Applied to each worker run, cheapest step first:
 
-1. **The run itself:** stop reason, turns, cost, which model actually ran, and any failed tool calls.
-2. **Write scope:** a checksum or `git status` diff against the files the brief allowed. Anything else was a finding.
-3. **The worker's notes:** departures from the brief and what it could not verify.
-4. **Gates in the orchestrator's own shell,** never the worker's word: typecheck, lint, tests with coverage, the acceptance-criteria check, build, Playwright with axe, the database contract suite, audit and secret scan.
-5. **Mutation checks:** deliberately breaking rules to prove the tests notice (for example granting the database role `update, delete` must fail the contract suite).
-6. **Independent review:** three fresh read-only sessions per major round (spec conformance, test quality, code quality with security and accessibility). The session that wrote the code never reviewed it.
-7. **Looking at the product:** screens at phone width in light and dark, and the live site after deploy, including a write that had to survive a redeploy.
+1. Run metadata: why it stopped, turns, spend, actual model, failed tool calls.
+2. Scope: `git status`/checksum diff versus the allowed file list. Extra files = finding.
+3. Worker's own notes: where it deviated, and anything it left unchecked.
+4. Gates re-run by the orchestrator itself, never trusted from the worker: typecheck, lint, coverage, AC gate, build, Playwright + axe, DB contract tests, audit, secret scan.
+5. Mutation probes: deliberately break a rule and confirm a test fails (granting `update, delete` to the app role must break the contract suite).
+6. Independent review: per large round, three new sessions without write access, one each for spec compliance, tests, and code (security and a11y included). No session reviewed code it wrote.
+7. Hands-on product check: phone-width UI, light and dark; production after each deploy, including one write that must survive a redeploy.
 
-## Where agent work was corrected or rejected
+## Corrections and rejections
 
-- **Fail-open numbers.** The domain build let a negative or non-numeric quantity cancel another penetration's need, which could show a crew as clear when it is not. Review caught it; the fix added an `invalid_quantity` blocker and treats bad stock as unknown.
-- **Idempotency in the wrong place.** The API checked business rules before the idempotency key, so a retry after the shortage cleared returned 404, and a reused key could silently drop a decision. Redesigned as lookup first, with 409 for a key reused on a different target.
-- **Tests that could not fail.** The UI build reported 100% coverage, but its browser tests had never run (its sandbox could not start Chromium). Running them found a real bug: pages and API routes held separate in-memory stores, so a recorded escalation never appeared.
-- **Wrong numbers in our own spec.** The orchestrator's first spec said 24 solutions had substitutes; recomputing under the design's own rules gave 20. Corrected before the brief went out.
-- **A layout departure reversed.** A worker made the page body an inner scroller, claiming a sticky footer could not stay in view. Measured in a browser, it could; the inner scroller would have broken scroll position on "back", so it was reverted.
-- **Usability that tests could not see.** After every gate and review passed, walking the screens against the brief's question ("can a team leader understand the information and act?") found identical penetration rows, substitution buried two levels down, unexplained "Rating 60/30", and two-day-old stock with no warning. Fixed in a dedicated round.
-- **A spec gap found after delivery.** Walking the live demo again showed substitute `0451` as "Materials in stock" although it uses sealant, the very material that site is short of. The spec only said "shows whether its materials are in stock", and the code checked one install against raw stock. The spec was clarified first (AC 33), then the code.
-- **Our own process slips.** The orchestrator edited docs inside a running worker's worktree, and the worker reverted them as unexplained changes. It also pushed to a pull request that had merged minutes before. Both are now rules in `tasks/lessons.md`: never write into a worker's tree, and check a PR's state before pushing to it.
-- **A test that was wrong, not the code.** The straight-line distance test expected 1784 m, a figure worked out in the head. Computed independently it is 1759 m; the test was corrected, and expected values now come from a separate calculation.
-- **Checking the wrong thing.** Asked to make sure no five-word run of the Guide repeated its old copy, the first check compared source tokens. It was redone on the rendered text of both versions.
-- **A test that depended on the machine.** The calendar test passed locally and failed in CI, which runs in UTC. The test now pins `Pacific/Auckland` instead of trusting the runner's zone.
-- **Rules that met a third party.** The 48px target check failed on Mapbox's logo, which Mapbox requires on every map; the check now leaves out Mapbox's own controls. SonarCloud then failed the quality gate twice: `npx vercel` could run install scripts (S6505), now a global install with `--ignore-scripts`; and a click handler on the map had no keyboard path (S1082), now a real link laid over it.
-- **An unasked change rejected.** The local npm rewrote 120 `libc` lines in the lockfile while adding one dependency. Reverted, keeping only the new package, and checked with `npm ci`.
-- **Suggestions declined, with reasons.** A module-relative CSV path (breaks once bundled), adding `server-only` (a new dependency, logged for production), a shared dialog form shell and refresh on tab focus (real, but outside the slice).
+- **Fail-open arithmetic.** Domain code let a negative or NaN quantity cancel demand elsewhere, which could mark a crew clear incorrectly. Caught in review. Fix: `invalid_quantity` blocker; malformed stock treated as unknown.
+- **Idempotency order.** Business-rule validation ran before key lookup: retrying once the shortage had cleared returned 404, and reusing a key could silently lose a decision. Now: key lookup first; 409 if the same key arrives for another target.
+- **Unexecuted tests.** The UI worker reported full coverage while its Playwright suite had never launched (no Chromium in its sandbox). Once run, the suite exposed separate in-memory stores for pages vs API routes, so escalations disappeared.
+- **Our spec was wrong.** It said 24 solutions have substitutes. Recomputed with the design rules: 20. Fixed pre-dispatch.
+- **Reverted layout change.** A worker introduced an inner scrolling container for the page body, saying the sticky footer required one. Measured in a browser: not needed, and it broke scroll restore on back. Reverted.
+- **Usability issues invisible to tests.** All gates and reviews green, yet a walkthrough against the brief's question ("can a team leader understand the information and act?") found penetration rows that looked identical, substitution two screens down, an unexplained "Rating 60/30", and stale stock (2 days) without a warning. One round dedicated to fixing these.
+- **Spec gap after delivery.** Live check: substitute `0451` read "Materials in stock" despite needing sealant, the very material short on that site. The requirement only asked whether materials are in stock; the code compared a single install against raw stock. AC 33 was clarified, then the implementation.
+- **Orchestrator mistakes.** Edited docs in a live worker's worktree (they were rolled back by the worker as unexplained edits); pushed to a PR that had merged minutes earlier. Both now rules in `tasks/lessons.md`.
+- **Bad expected value.** Haversine test asserted 1784 m from a mental estimate; independent computation says 1759 m. Test fixed; expected values are now derived outside the code under test.
+- **Measuring the wrong artefact.** The "no five-word run left from the old Guide" check initially diffed source tokens. Redone against rendered text.
+- **CI-only failure.** Calendar spec green locally, red in CI (UTC runner). Spec now pins `Pacific/Auckland`.
+- **Vendor constraints.** 48px target check flagged the Mapbox logo, which Mapbox requires; the check now ignores Mapbox-owned controls. SonarCloud blocked twice: S6505 (`npx vercel` may execute install scripts) → global install with `--ignore-scripts`; S1082 (mouse-only handler on the map) → an anchor element layered over it.
+- **Unrequested lockfile churn.** Adding a single dependency made npm rewrite 120 `libc` entries. Reverted to only the new package; confirmed via `npm ci`.
+- **Declined, with reasons.** Resolving the CSV relative to the module (fails after bundling). `server-only` (extra dependency; noted for production). A common form wrapper for dialogs and refetching when the tab regains focus (reasonable, out of scope).
 
-## Where I overruled or redirected the AI
+## My overrides
 
-The agents proposed; I decided. Each case is logged with the reason in `docs/submission-checklist.md` (section 3). The pattern: the AI's defaults were reasonable but generic, and the changes came from looking at the product as a team leader would on a phone.
+Agents suggested, I chose. Reasons are recorded per case in `docs/submission-checklist.md` §3. Typical shape: a reasonable generic default from the AI, changed once I used the app on a phone as a leader would.
 
-- **Navigation.** The design had a top demo bar, a full-width Back button and an unlabelled site code. From my own phone review I moved the demo label to the bottom, put the title in the header with a chevron back row below it, and had the code labelled.
-- **Review approach.** Instead of the proposed fan-out of review subagents, I gave my own observations, which were faster and more specific.
-- **Worker model.** A worker run went out on the fast model by default. I stopped it and set the default model as the rule, fast only when I ask.
-- **What the screens carry.** I questioned the site reference on every card (now only on the site screen, as "Job ref") and replaced the permanent demo bar with a landing page that explains the demo, keeping a small Demo tag in each header after the AI pointed out that deep links would otherwise skip the explanation (I later removed the tag as clutter).
-- **Shared stock on a material page.** I questioned why Wait and Escalate sit on the material page when work is done per penetration, and why its list named no site when stock is shared. The AI's point held for the buttons (a shortage is per site and material, so one escalation covers every penetration), so they stayed with their scope stated; the site is now named in the need line and the heading. When the AI proposed linking each place back to its penetration, I rejected it as circular: the places stay text, grouped, with one link up to the site list.
+- **Navigation.** Original design: demo bar on top, full-width Back, site code without a label. After phone testing: demo label at the bottom, title in the header, chevron back row underneath, code labelled.
+- **Reviews.** Rather than the proposed swarm of reviewer subagents, I wrote up my own findings; quicker and more specific.
+- **Model choice.** One worker run defaulted to the fast model; I halted it. Rule since then: standard model unless I ask for fast.
+- **What screens show.** Site reference dropped from cards (site screen only, as "Job ref"). Permanent demo bar replaced by an explanatory landing page. The AI pointed out deep links skip that page, so a small Demo tag stayed in headers for a time; removed later as clutter.
+- **Material page vs pooled stock.** I questioned Wait/Escalate on the material page (work is per penetration) and the missing site name (stock is pooled). The AI was right about the buttons: shortages are keyed by site + material, one escalation covers every affected penetration, so the buttons remained with an explicit scope; the site name was added to the heading and to the demand line. I vetoed linking each place to its penetration (circular navigation); places remain grouped plain text, linking once to the site list.
+- **Decision log.** Taken out of the header (ambiguous context) into the side menu, with a latest-decision popover per acted row. Next: icons per entity, the site heading pinned while scrolling, and back controls leading to the log instead of the page's parent. Then: chips reduced to icons, popover removed, a penetration's decisions moved to its own Actions log tab, the same tabs added to the material page, state labels removed for one consistent design, row counts include proposals, and "Acted" includes proposals too.
+- **Responsive menu.** Off-canvas drawer at all widths → drawer on phones, expanded collapsible side menu on wider screens. About page moved off `/` to `/about-this-demo` (root redirects) and linked to this repo. The skills point at [Skill Forge](https://github.com/more-than-code/skill-forge), a skill registry I maintain.
+- **18–20 Oct phone rounds.** Requested by me: a connectivity toggle that never scrolls away; one large per-site signal that dials the operator; an on-site check of every picked item; per-project map with directions and drive time from a fallback origin (shown only as "Auckland city warehouse", keeping the street private) until the device shares location; daily verdict with tabs, plus a deadline calendar; tabs ordered Map, Calendar, Projects, Guide; a back control that goes to wherever the user came from; the Guide as a plain-English brochure; panels in company black/yellow. Where scope was unclear the agent asked first. Example: Map and Calendar were stripped down to a single panel each, and I picked keeping the header, the picker line and the bottom navigation.
 
-- **Actions log.** I took the actions log out of the header, because it did not say which work it belonged to, moved it into the side menu and asked for the latest decision in a popover on each acted row. After the first build I asked for the entity icons, a sticky site title, and back controls that return to the log rather than to each page's parent. Then I cut the row chips to icons, dropped the popover, and moved a penetration's decisions onto its own page as an Actions log tab. Since decisions are made on materials and solutions, I asked for the same tabs on the material page, dropped the state labels for one design across pages, and asked rows to count decisions, proposals included, with Acted covering proposals too.
-- **Responsive menu.** The drawer was off-canvas at every width. I asked for the drawer on phones and a side menu shown by default on wider windows, collapsible. Then I moved the About page off the root to `/about-this-demo`, with `/` redirecting to it, and added a link from it to this repository. The skills now link to [Skill Forge](https://github.com/more-than-code/skill-forge), my own skill registry.
+## Spend
 
-- **Phone-review rounds (2026-10-18 to 10-20).** I asked for: the Online switch always in view; one big signal per site that calls its operator; a review of every picked material on site; a map, directions and drive time per project, starting from a default place until the phone shares its location, named only as "Auckland city warehouse" to keep the address private; today's verdict with tabs and a deadline calendar; the tab bar as Map, Calendar, Projects, Guide; back returning where the visit came from rather than to a fixed parent; the Guide rewritten as a plain-language brochure; and the panels in the company's black and yellow. Where a request was open, the AI asked rather than guessed: when Map and Calendar were cut to their panel, I chose to keep the header, the picker's line and the tab bar.
+≈ $39 of worker usage across 13 implementation runs and 9 reviews; breakdown per run in `docs/agent-work/README.md`.
 
-## Cost
+## Lessons
 
-Worker runs totalled about $39 across thirteen implementation runs and nine review sessions. Per-run figures are in `docs/agent-work/README.md`.
-
-## What I would do differently
-
-Run the browser tests in my own shell from the first UI round, rather than trusting a worker's "written, not run". Walk the screens against the brief's user question before the code reviews, not after, since that found the most valuable fixes.
+Run browser suites in my own shell starting with UI round one; never accept "written, not run". Do the user-question walkthrough of the screens ahead of code review, not after it; that walkthrough yielded the best fixes.

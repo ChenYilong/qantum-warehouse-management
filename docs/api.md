@@ -1,32 +1,32 @@
-# API reference
+# HTTP API
 
-The app's own HTTP API, as built. Requirements are in `slice-specification.md`, design in `technical-design.md`. Everything is under `/api`. Responses are JSON with `Cache-Control: no-store`, including errors.
+Reference for the routes this app serves, as implemented. Behaviour is specified in `slice-specification.md` and designed in `technical-design.md`. All routes live under `/api` and return JSON; every response, errors included, carries `Cache-Control: no-store`.
 
-## Conventions
+## Rules common to all routes
 
-- **Identity.** One demo identity, `DEMO_USER_ID` (default `demo-leader`), set on the server. The author of every record comes from there, never from the request. A `createdBy` field in a body is rejected.
-- **Idempotency.** Every POST needs `Idempotency-Key` (1 to 128 characters of `A-Z a-z 0-9 . _ -`), else 400 `idempotency_key_required`. Keys are unique per user.
-  - A repeat for the **same target** returns the original record with 200 and `created: false`, even if the note or reason differs, and even if the shortage has since disappeared or the nomination changed.
-  - A repeat for a **different target** is 409 `idempotency_key_reused` and stores nothing. A shortage target is site, shortage id and kind (wait then escalate is a different target). A proposal target is site and penetration.
-  - A request that fails validation or a business rule stores nothing, so a later valid request with the same key succeeds.
-  - Rejecting a repeat whose note or reason differs is a production item.
-- **Limits.** Body at most 10,000 bytes, enforced while streaming whether or not `Content-Length` is present (413). `note` is trimmed and at most 500 characters (empty after trimming is stored as null). `reason` is trimmed and 1 to 500 characters.
-- **Order of checks for a POST.** Path ids, `Idempotency-Key`, body size, JSON, schema, then the use case. A bad site id is 404 even when the key is missing.
-- **Ids.** Site and penetration ids match `[A-Za-z0-9._-]{1,64}`. A shortage id is `siteId:materialId` and arrives URL-encoded (`site-b%3AMAT-SEALANT`) or plain. A blocker id is `siteId:blocker.penetrationId`. A bad or foreign id, or a bad percent-escape, is 404, never 500.
-- **Upstream failures** are 502 with `upstream_unavailable` or `upstream_invalid` and the failing system name. They never produce a "clear" status.
+- **Caller identity.** A fixed server-side demo user, `DEMO_USER_ID` (defaults to `demo-leader`), authors every record. The client cannot set it: a `createdBy` property in a request body causes rejection.
+- **Idempotency.** POST requests must send `Idempotency-Key`: 1–128 characters from `A-Z a-z 0-9 . _ -`. Missing → 400 `idempotency_key_required`. Uniqueness is scoped per user.
+  - Replay against the **same target**: 200, `created: false`, original record returned. This holds when the note or reason changed, when the shortage no longer exists, and when the nomination has moved on.
+  - Replay against **another target**: 409 `idempotency_key_reused`, nothing written. Target for shortage actions = site + shortage id + kind, so a wait followed by an escalate counts as two targets. Target for proposals = site + penetration.
+  - Requests failing validation or a domain rule write nothing; the key remains usable for a later valid request.
+  - Rejecting replays that carry a changed note or reason is left for production.
+- **Size and length limits.** Bodies are capped at 10,000 bytes, checked during streaming regardless of `Content-Length` (413). `note`: trimmed, ≤ 500 characters, stored as null when blank. `reason`: trimmed, 1–500 characters.
+- **POST validation sequence.** Path ids → `Idempotency-Key` → body size → JSON parse → schema → use case. An unknown site yields 404 even without a key.
+- **Identifier formats.** Site and penetration ids: `[A-Za-z0-9._-]{1,64}`. Shortage id: `siteId:materialId`, accepted URL-encoded (`site-b%3AMAT-SEALANT`) or raw. Blocker id: `siteId:blocker.penetrationId`. Malformed ids, ids from another site and broken percent-encoding all give 404, never 500.
+- **Upstream errors** map to 502 with `upstream_unavailable` or `upstream_invalid` plus the name of the failing source. A crew is never reported clear because of one.
 
-## Endpoints
+## Routes
 
-| Method and path | Purpose | Success |
+| Method and path | Returns | Status |
 | --- | --- | --- |
-| `GET /api/sites` | Sites with crew status | 200 |
-| `GET /api/sites/{id}/readiness` | Shortages, blockers and crew status for a site | 200 |
-| `POST /api/sites/{id}/shortages/{shortageId}/wait` | Record a wait | 201, or 200 on a repeat |
-| `POST /api/sites/{id}/shortages/{shortageId}/escalate` | Record an escalation | 201, or 200 |
-| `GET /api/sites/{id}/penetrations/{pid}/substitution-candidates` | Catalogue-similar substitutes | 200 |
-| `POST /api/sites/{id}/penetrations/{pid}/substitutions` | Record a proposed substitute | 201, or 200 |
-| `GET /api/sites/{id}/actions` | Recorded actions and proposals | 200 |
-| `GET /api/health` | The header Online switch's check, with the stock feed's time | 200 |
+| `GET /api/sites` | Every site and its crew status | 200 |
+| `GET /api/sites/{id}/readiness` | One site's shortages, blockers, crew status | 200 |
+| `POST /api/sites/{id}/shortages/{shortageId}/wait` | Stores a wait | 201; 200 when replayed |
+| `POST /api/sites/{id}/shortages/{shortageId}/escalate` | Stores an escalation | 201; 200 when replayed |
+| `GET /api/sites/{id}/penetrations/{pid}/substitution-candidates` | Substitute candidates by catalogue similarity | 200 |
+| `POST /api/sites/{id}/penetrations/{pid}/substitutions` | Stores a substitute proposal | 201; 200 when replayed |
+| `GET /api/sites/{id}/actions` | Stored actions and proposals | 200 |
+| `GET /api/health` | Connectivity probe behind the header's Online switch, including the stock feed timestamp | 200 |
 
 ### `GET /api/sites`
 
@@ -41,17 +41,17 @@ The app's own HTTP API, as built. Requirements are in `slice-specification.md`, 
     requiredQty: number, shortfallQty: number | null }> }> }
 ```
 
-`location` comes with the site from upstream too (AC 74): latitude and longitude in degrees, invented points in Auckland in the sample. Like every upstream field its structure is strict (a wrong type rejects the response) and its values lenient: the projects list ignores a point out of range or at 0,0, and then shows no map, no Directions and no distance. The API never computes travel: the page asks Mapbox for the drive itself, from the demo's default address until the phone shares its location, and from the phone only after a tap or the phone's own permission (AC 75).
+`location` is upstream data as well (AC 74): latitude/longitude in degrees; the sample uses fabricated Auckland coordinates. The usual upstream policy applies: shape is validated strictly (a wrong type fails the whole response), values leniently. A point outside valid ranges, or at 0,0, is ignored by the projects list, which then omits that project's map, Directions link and distance. Routing never happens in the API. The browser requests drive times from Mapbox directly, starting at the demo's fallback origin and switching to the device position once the user taps or the browser already grants permission (AC 75).
 
-`date` comes with the site from upstream too (AC 80): the project's deadline, a calendar date written `YYYY-MM-DD`, invented in the sample. Its structure is strict (anything but a string rejects the response) and its value lenient: the projects list shows no deadline for a date that isn't a real one (`2026-02-30`, `23/10/2026`).
+`date`, also upstream (AC 80), is the project deadline as a `YYYY-MM-DD` calendar date, fabricated in the sample. Strict on shape (non-strings fail the response), lenient on value: impossible dates such as `2026-02-30` or other formats such as `23/10/2026` simply render no deadline.
 
-`operator` and `picker` come with the site from upstream (AC 49). `phone` is international, a `+` then digits and spaces. Either may be missing; the operator and the picker may be the same person.
+`operator` and `picker` are upstream too (AC 49). `phone` uses international format: `+`, then digits and spaces. Each can be absent, and both can name one person.
 
-`shortageCount` and `dataProblemCount` are always present and are 0 unless `crewStatus` is `blocked`, so the list can say why a site is blocked.
+`shortageCount` and `dataProblemCount` are always returned and stay 0 unless `crewStatus` is `blocked`; the list uses them to explain a block.
 
-`shortages` (AC 56) names the short materials of a blocked site, in the order of the readiness response, so the sites list and the prepared text to the operator say what is missing without a second call. It is always present, empty unless `crewStatus` is `blocked`, and its length is `shortageCount`. `name` falls back to the material id when the upstream has no name. `shortfallQty` is null, never a number, when the stock is unknown (`kind` is `unknown`). The field is additive: existing clients keep working.
+`shortages` (AC 56) lists a blocked site's short materials in readiness-response order, so the list and the operator's prepared text can name what is missing without another request. Always present; empty unless `crewStatus` is `blocked`; length equals `shortageCount`. If upstream has no material name, `name` falls back to the id. When stock is unknown (`kind` = `unknown`), `shortfallQty` is null rather than a number. Adding the field broke no existing client.
 
-`unavailable` means that site's readiness could not be computed. It is logged and never shown as clear. A failure of the sites source itself is a 502.
+`unavailable` marks a site whose readiness computation failed. The failure is logged; the site is never presented as clear. If the sites source itself fails, the route returns 502.
 
 ### `GET /api/health`
 
@@ -59,7 +59,7 @@ The app's own HTTP API, as built. Requirements are in `slice-specification.md`, 
 { status: "ok", stockAsOf: string | null }
 ```
 
-Answers whenever the app can be reached, never cached. `stockAsOf` is the stock feed's time, shown as the picker's last action, or null when the stock feed is down or invalid: a feed failure is not a failed check (AC 48).
+Responds whenever the app is reachable and is never cached. `stockAsOf` carries the stock feed timestamp (shown in the header as the picker's latest activity), or null if that feed is down or malformed; a broken feed does not fail the probe (AC 48).
 
 ### `GET /api/sites/{id}/readiness`
 
@@ -74,15 +74,15 @@ Answers whenever the app can be reached, never cached. `stockAsOf` is the stock 
   penetrations: Record<id, { floor, location, nominatedCode, serviceType, serviceSize }> }
 ```
 
-`serviceType` and `serviceSize` are the nomination's raw text (catalogue spacing kept); the screen collapses repeated spaces for display only.
+`serviceType` and `serviceSize` are the nomination strings untouched, catalogue whitespace included; collapsing double spaces happens only at render time.
 
-Blocker reasons: `unknown_solution_code`, `solution_mismatch`, `no_material_mapping`, `invalid_quantity`. A `solution_mismatch` blocker also carries `mismatches`, the failing fields in a fixed order: `orientation`, `substrate`, `serviceType`, `serviceSize`, `integrity`, `insulation`. A shortage of kind `unknown` has null `onHandQty` and null `shortfallQty`. Each entry in a shortage's or blocker's `actions` is a recorded wait or escalation plus `current: boolean` (false once the shortfall has grown past the one recorded with it).
+Blocker `reason` values: `unknown_solution_code`, `solution_mismatch`, `no_material_mapping`, `invalid_quantity`. For `solution_mismatch` the blocker adds `mismatches`, listing failing fields in this fixed sequence: `orientation`, `substrate`, `serviceType`, `serviceSize`, `integrity`, `insulation`. Shortages of kind `unknown` return null for both `onHandQty` and `shortfallQty`. Entries in `actions` (on shortages and blockers) are stored waits or escalations with `current: boolean`, which turns false once the shortfall exceeds the value stored with that action.
 
-### Wait and escalate
+### Wait / escalate
 
-- Wait body `{ note? }`. Escalate body `{ escalateTo: "purchasing" | "warehouse", note? }`. Unknown fields are 422.
-- The target must currently exist, else 404 `shortage_not_found`. Wait on a blocker is 422 `wait_not_allowed_for_blocker`. Escalate is allowed on shortages (including unknown-stock ones) and blockers.
-- Response `{ record, created }` where `record` is `{ id, siteId, shortageId, kind, escalateTo, note, shortfallQtyAtTime, createdBy, createdAt }`. Neither action changes crew status.
+- Bodies: wait `{ note? }`; escalate `{ escalateTo: "purchasing" | "warehouse", note? }`. Extra properties → 422.
+- The shortage must exist at request time, otherwise 404 `shortage_not_found`. A wait aimed at a blocker → 422 `wait_not_allowed_for_blocker`. Escalation works on blockers and on every shortage, unknown-stock ones included.
+- Returns `{ record, created }`; `record` = `{ id, siteId, shortageId, kind, escalateTo, note, shortfallQtyAtTime, createdBy, createdAt }`. Crew status is unaffected by either.
 
 ### `GET .../substitution-candidates`
 
@@ -101,19 +101,19 @@ Blocker reasons: `unknown_solution_code`, `solution_mismatch`, `no_material_mapp
     requiredIntegrityMinutes: number | null, requiredInsulationMinutes: number | null } }
 ```
 
-A line's `status` is `short` when one install needs more than is on hand, or when this site is already short of that material. It is `unknown` when there is no stock record, or when the site's stock for that material is unknown.
+A line reports `short` if a single install needs more than the on-hand amount, or if the site is short of that material already. It reports `unknown` if no stock row exists, or if the site's stock of that material is unknown.
 
-`penetration` is the summary the penetration page shows above its substitutes. (The page's side-by-side comparison comes from a page-only use case, `describePenetration`, with no API route.) The materials pages likewise use page-only use cases (`listMaterialStock`, `describeMaterialStock`), as does the all-sites Actions log (`listAllActions`); decisions made there still go through the shortage `wait` and `escalate` routes above. Their `material_not_found` (404) is page-only too: no API route returns it. `id` and `nominatedCode` repeat the top-level fields. `penetration` carries no substrate, orientation or stock (each candidate does carry its own orientation and substrate).
+`penetration` is the summary rendered above the substitute list on the penetration page. Its two-column comparison view comes from a use case with no route, `describePenetration`. Likewise the materials pages (`listMaterialStock`, `describeMaterialStock`) and the cross-site Actions log (`listAllActions`) call use cases directly; any wait or escalate issued from those pages still goes through the shortage routes above. Their 404 `material_not_found` never leaves the page layer: no route can return it. `id` and `nominatedCode` duplicate top-level fields. `penetration` omits substrate, orientation and stock; orientation and substrate are given per candidate instead.
 
-Candidate lines are one per material (quantities summed per material). The notice is present whatever the status. The API never says "compatible" or "approved".
+Each candidate has one line per material, quantities aggregated by material. `notice` is returned for every status. Responses never contain the words "compatible" or "approved".
 
 ### `POST .../substitutions`
 
-Body `{ fromInternalCode, toInternalCode, reason }`. `from` must be the penetration's current nomination, else 409 `stale_nomination`. `to` must be a current candidate, else 422 `not_a_candidate`. Response `{ record, created }` with `status` always `proposed`. Nothing else changes.
+Body: `{ fromInternalCode, toInternalCode, reason }`. If `from` is not the current nomination → 409 `stale_nomination`. If `to` is not among current candidates → 422 `not_a_candidate`. Returns `{ record, created }`; `status` is `proposed`, always. No other state changes.
 
 ### `POST /api/sites/{id}/pick-reports`
 
-A pick-error report to the warehouse (AC 65), or what the site found on a review (AC 69). `Idempotency-Key` required, like every write. Body:
+Files a pick error with warehouse staff (AC 65), or records a finding from an on-site review (AC 69). Requires `Idempotency-Key`, as all writes do. Body:
 
 ```ts
 { kind: "wrong_spec" | "missing_parts" | "part_picked"           // what the pick check finds
@@ -131,19 +131,19 @@ A pick-error report to the warehouse (AC 65), or what the site found on a review
   photoAttached?: boolean }       // the photo itself stays on the phone in the demo
 ```
 
-Response `{ record, created }`: 201 the first time; the same key again returns the original with 200, whatever the body says, so a phone resending its outbox after a lost answer is recorded once (AC 66). The same key for another site, line or kind is 409 `idempotency_key_reused`. The pick check itself (AC 61 to 64) has no API route: the site screens read it through the page-only use case `getPickCheck`.
+Returns `{ record, created }`. First call: 201. Replaying the key: 200 with the stored record, ignoring any body changes, so a phone that resends its queue after losing the response still produces a single record (AC 66). Same key reused with a different site, line or kind: 409 `idempotency_key_reused`. The pick check (AC 61–64) has no route; site screens obtain it from the use case `getPickCheck`.
 
-Any report on a line is open until a later review of that line (AC 70): the line is then a pick issue, `reported`, even when the pick list matches the plan, so the site's picks are not ready and Send the crew stays locked.
+A report keeps its line open until that line is reviewed again (AC 70). Until then the line counts as a `reported` pick issue even if pick and plan agree, which keeps the site's picking in a not-ready state and Send the crew disabled.
 
 ### `POST /api/sites/{id}/pick-reviews`
 
-A review on site that says a line is right (AC 68). `Idempotency-Key` required. Body `{ lineId: string }` and nothing else (anything else is 422). The line must be on this site's pick list, else 404 `pick_line_not_found`; an unknown site is 404 `site_not_found`.
+Records an on-site confirmation that a line is correct (AC 68). Requires `Idempotency-Key`. Body is exactly `{ lineId: string }`; anything more → 422. A line missing from the site's pick list → 404 `pick_line_not_found`; unknown site → 404 `site_not_found`.
 
 ```ts
 { record: { id, siteId, lineId, createdBy, createdAt }, created: boolean }
 ```
 
-201 the first time; the same key again returns the original with 200; the same key for another site or line is 409 `idempotency_key_reused`. A review closes the line's reports made before it (strictly earlier, by `createdAt`) and the line then reads "Checked on site". It never turns a line that doesn't match the plan into a match, and it never changes the pick list, which this app does not write.
+First call 201; replay 200 with the stored record; key reused with a different site or line 409 `idempotency_key_reused`. A review closes every earlier report on that line (strictly before it by `createdAt`), after which the line shows "Checked on site". It cannot make a mismatched line match, and it leaves the pick list untouched; this app never writes pick lists.
 
 ### `GET .../actions`
 
@@ -154,17 +154,17 @@ A review on site that says a line is right (AC 68). `Idempotency-Key` required. 
   penetrations: Record<id, { floor, location, nominatedCode, serviceType, serviceSize }> } // every penetration on the site
 ```
 
-`materials` and `penetrations` let the log name what an action was about. They are present even when `actions` and `proposals` are empty, and they are wider than the readiness maps, which hold only current shortages and blockers.
+`materials` and `penetrations` give the log the names it needs. They are returned even with empty `actions` and `proposals`, and they are broader than the readiness response's maps, which only hold active shortages and blockers.
 
 ## Errors
 
-Every error is `{ code, message }` and nothing else: no stack, path, SQL, note or reason.
+Error bodies are exactly `{ code, message }`. No stack traces, paths, SQL, notes or reasons ever appear.
 
 | Code | Status |
 | --- | --- |
 | `site_not_found`, `penetration_not_found`, `shortage_not_found` | 404 |
 | `idempotency_key_required`, `invalid_json` | 400 |
-| `validation_failed` (names failing fields only) | 422 |
+| `validation_failed` (lists only the invalid fields) | 422 |
 | `wait_not_allowed_for_blocker`, `not_a_candidate` | 422 |
 | `stale_nomination`, `idempotency_key_reused` | 409 |
 | `payload_too_large` | 413 |
@@ -173,19 +173,20 @@ Every error is `{ code, message }` and nothing else: no stack, path, SQL, note o
 
 ## Configuration
 
-| Variable | Meaning |
+| Variable | Effect |
 | --- | --- |
-| `ACTIONS_STORE` | `memory` or `postgres`. Outside production the default is `memory`. In production it defaults to `postgres`, and anything but a complete `postgres` configuration returns 500, never memory |
-| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Postgres connection, server-side only. Deployed: the Supabase transaction pooler (port 6543), user `qantum_slice`, database `qantum_slice`. `DB_PORT` defaults to 5432 |
-| `DB_SSL`, `DB_SSL_CA` | `require` (default: encrypted, server not authenticated, a recorded compromise because the pooler chain is not in Node's trust store), `verify-full` with a PEM CA, or `disable` (refused in production) |
-| `DB_POOL_MAX` | Connections per function process, 1 to 10, default 1 (the pooler holds the real sessions) |
-| `DEMO_USER_ID` | Demo identity, default `demo-leader` |
-| `STUB_STOCK_MODE` | Testing only: `normal` (default), `down`, `empty` or `malformed` for the stock stub. Read outside production only, ignored in production. Used by the end-to-end stock-failure projects |
+| `ACTIONS_STORE` | `memory` or `postgres`. Non-production default: `memory`. Production default: `postgres`; an incomplete Postgres setup there yields 500 instead of silently using memory |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Server-only Postgres connection. In the deployment: Supabase transaction pooler on 6543, user `qantum_slice`, database `qantum_slice`. `DB_PORT` falls back to 5432 |
+| `DB_SSL`, `DB_SSL_CA` | `require` (default; traffic encrypted but the server unauthenticated, an accepted and documented trade-off since Node does not trust the pooler's chain), `verify-full` plus a PEM CA, or `disable` (rejected in production) |
+| `DB_POOL_MAX` | Per-process connection cap, 1–10, default 1; real sessions are held by the pooler |
+| `DEMO_USER_ID` | The fixed demo identity; default `demo-leader` |
+| `STUB_STOCK_MODE` | Tests only. Stock stub behaviour: `normal` (default), `down`, `empty`, `malformed`. Honoured only outside production; drives the e2e stock-failure projects |
+| `MAPBOX_PUBLIC_TOKEN` | Public Mapbox token (`pk.` only), injected at build time for maps and drive times; an `sk.` token aborts the build (AC 76). Empty means no maps |
 
-Config failures return a generic 500 and log one fixed reason token (`config_invalid`, `store_forbidden`, `db_unconfigured`, `db_tls_insecure`), never a value. A successful start logs `db_config` with host, port, user, database, TLS mode and whether a password is present, never the password.
+On a configuration error the response is a generic 500, and the log gets a single fixed token (`config_invalid`, `store_forbidden`, `db_unconfigured`, `db_tls_insecure`), never a value. A healthy start logs `db_config`: database, host, port, user and TLS mode, plus whether a password was supplied; the password itself is never logged.
 
-## Known limits
+## Limits
 
-- The Postgres store is proven by a contract suite against a real Postgres 17 (locally and in CI): appends, idempotent replay, ordering, constraints, and that the app role cannot update, delete, truncate or create tables. Set `REQUIRE_DB_CONTRACT=1` to make a skipped run fail.
-- No server-side login. The demo sign-in lives in the browser, so anyone with the URL can add demo actions.
-- `src/server/*` is not yet marked `server-only` (needs a dependency). Nothing client-side imports it today, and a test enforces that.
+- Postgres storage is covered by a contract suite run against Postgres 17 on developer machines and in CI. It covers append-only writes, replay by key, sort order, constraints, and confirms the app role has no update, delete, truncate or table-creation rights. `REQUIRE_DB_CONTRACT=1` turns a skipped run into a failure.
+- No authentication on the server. Sign-in exists only in the browser, so anybody holding the URL can write demo actions.
+- `src/server/*` lacks the `server-only` marker (that needs another dependency). No client module imports it, and a test enforces this.

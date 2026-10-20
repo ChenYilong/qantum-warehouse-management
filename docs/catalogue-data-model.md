@@ -1,33 +1,33 @@
 # Catalogue data model
 
-Model of `data/solutions-excerpt.csv` only. This file is a solutions catalogue (148 Ryanfire rows). It does not include product kits, quantities, stock, sites, or schedules.
+Scope: `data/solutions-excerpt.csv` and nothing else. The file is a Ryanfire solutions catalogue of 148 rows. It holds no product kits, no quantities, no stock, no sites and no schedules.
 
 ## Grain
 
-One row is one tested fire-stopping **solution**: a specific penetrating service, through a specific substrate, at a stated size and fire rating, as published by one supplier.
+Each row describes a single fire-stopping **solution** that has been tested: one penetrating service through one substrate, for one size and rating, published by one supplier.
 
-`internal_code` and `supplier_ref_code` are both unique in this excerpt (148/148). Use `internal_code` as the QAntum key. Keep `supplier_ref_code` as the supplier's own identity.
+Both `internal_code` and `supplier_ref_code` are unique across the excerpt (148 of 148). `internal_code` serves as the QAntum primary key; `supplier_ref_code` is kept as the supplier's identifier.
 
 ## Columns
 
-| CSV column | Field | Meaning |
+| CSV column | Field | Content |
 | --- | --- | --- |
-| Internal Code | `internal_code` | QAntum solution id (string, unique) |
-| Supplier Ref. Code | `supplier_ref_code` | Supplier document/reference (unique here) |
-| Supplier | `supplier` | Always `Ryanfire` in this excerpt |
-| Orientation | `orientation` | `Wall`, `Floor`, or `Ceiling` |
-| Substrate | `substrate_detail` | Free-text build-up (layers, thickness). Messy: extra spaces, truncated values like `FR plasterboard,` |
-| Substrate Option | `substrate_option` | Coarse substrate family (15 values), e.g. `Plasterboard Wall`, `Concrete Floor` |
-| Service Classification | `service_classification` | Broad class: combustible pipe, non-combustible pipe, insulated pipe, electrical, structural, other |
-| Service Type | `service_type` | Specific penetrating item, including insulation wrap when present (`Copper Pipe - 38mm Nitrile Rubber`) |
-| Service Type Option | `service_type_option` | Coarser label for the same item (19 values). Not always equal to service type (`PVC Socket` maps to `PVC Pipe`; `Blank` maps to `Other`) |
-| Service Size | `service_size` | Diameter or opening size as printed (`Ø50mm`, `1100x10mm`). Not parsed to a number |
-| Integrity | `integrity_minutes` | Minutes the seal holds flame and hot gas. Always a number in this file (30–240) |
-| Insulation | `insulation_minutes` | Minutes the seal limits heat transfer. `-` means not claimed (8 rows); store as null |
+| Internal Code | `internal_code` | QAntum id for the solution; string, unique |
+| Supplier Ref. Code | `supplier_ref_code` | Supplier's document reference; unique in this file |
+| Supplier | `supplier` | `Ryanfire` on every row |
+| Orientation | `orientation` | One of `Wall`, `Floor`, `Ceiling` |
+| Substrate | `substrate_detail` | Free-text construction (layers, thicknesses). Dirty: stray spaces, cut-off values such as `FR plasterboard,` |
+| Substrate Option | `substrate_option` | Broad substrate group, 15 distinct values, e.g. `Plasterboard Wall`, `Concrete Floor` |
+| Service Classification | `service_classification` | Top-level class, one of six (pipes: combustible, non-combustible, insulated; then electrical, structural, other) |
+| Service Type | `service_type` | The exact item passing through, insulation wrap included where present (`Copper Pipe - 38mm Nitrile Rubber`) |
+| Service Type Option | `service_type_option` | Grouped label for that item, 19 distinct values. It can differ from the service type (`PVC Socket` becomes `PVC Pipe`; `Blank` becomes `Other`) |
+| Service Size | `service_size` | Diameter or opening dimensions exactly as printed (`Ø50mm`, `1100x10mm`); kept as text |
+| Integrity | `integrity_minutes` | Minutes the seal resists flame and hot gas; numeric on every row (30 to 240) |
+| Insulation | `insulation_minutes` | Minutes the seal restricts heat transfer. `-` (8 rows) means no claim and maps to null |
 
-## Shape
+## Normalised shape
 
-The CSV is denormalised. A normalised form that still matches the file:
+The file repeats text heavily. A normalised equivalent with the same content:
 
 ```text
 supplier
@@ -65,41 +65,41 @@ solution
   insulation_minutes     nullable
 ```
 
-For the first slice, one `Solution` record per CSV row is enough. The lookups above are how the repeated text should be treated, not tables you must build on day one.
+Iteration 1 keeps a flat `Solution` per CSV row. The lookup tables show how to treat the repeated strings; they are not a day-one schema requirement.
 
-## Rules observed in this excerpt
+## Observed relationships
 
-- Substrate option is a rollup of substrate detail. Several different build-ups share one option (for example many plasterboard thicknesses all say `Plasterboard Wall`).
-- Service type option is a rollup of service type, and it can hide a difference that matters (socket vs pipe, blank opening vs "other").
-- Integrity and insulation are independent. Insulation can be missing while integrity is set.
-- Nothing in a row names the products, collars, or sealants required to install it. The brief says the catalogue includes required products; this excerpt does not. Do not invent a product column and pretend it came from the file.
+- `substrate_option` groups many `substrate_detail` values: numerous plasterboard thicknesses, for instance, all roll up to `Plasterboard Wall`.
+- `service_type_option` groups `service_type` values and can erase a distinction that matters, such as socket versus pipe or a blank opening versus "other".
+- Integrity and insulation vary independently; a row may carry integrity with no insulation.
+- No column lists the collars, sealants or other products an installation consumes. The brief says the full catalogue carries required products; the excerpt does not, and inventing a product column and attributing it to the file is not allowed.
 
-## Data quality notes
+## Data quality
 
-Checked against all 148 rows. These matter because exact matching is how substitutes are suggested (see `technical-design.md` section 6).
+Verified on every one of the 148 rows. It matters because substitutes are proposed by exact field comparison (`technical-design.md`, section 6).
 
-| Issue | Rows | Example |
+| Problem | Rows | Example |
 | --- | --- | --- |
-| Double space inside `Service Type` | 15 | `Copper Pipe  - 50mm Fibreglass` (`0375`) |
-| Substrate cut off after the family name | 6 (`0853`, `0943`, `0944`, `0946`, `0952`, `0955`) | `FR plasterboard,` with no build-up |
-| Space inside brackets | 2 | `( 1 layer 13mm)` (`0452`, `0479`) |
-| Space between number and unit | 1 | `(51 mm)` (`0734`) |
-| Same construction worded two ways | 2 | `385mm hollow core concrete floor` vs `385mm hollow core floor` (`0534`, `0535`) |
-| Inconsistent `Service Size` shapes | 24 non-standard of 148 | `Ø50mm` (124), `80mm` (12), `1100x10mm` (9), `900mm x 50mm` (2), bare `60` (1) |
+| Two consecutive spaces in `Service Type` | 15 | `Copper Pipe  - 50mm Fibreglass` (`0375`) |
+| Substrate truncated right after the family | 6 (`0853`, `0943`, `0944`, `0946`, `0952`, `0955`) | `FR plasterboard,` without the build-up |
+| Space after an opening bracket | 2 | `( 1 layer 13mm)` (`0452`, `0479`) |
+| Space between value and unit | 1 | `(51 mm)` (`0734`) |
+| One construction, two spellings | 2 | `385mm hollow core concrete floor` vs `385mm hollow core floor` (`0534`, `0535`) |
+| Mixed `Service Size` formats | 24 of 148 off the common form | `Ø50mm` (124), `80mm` (12), `1100x10mm` (9), `900mm x 50mm` (2), bare `60` (1) |
 
-The substrate cut-offs are the serious one: they cannot identify a build-up, so they must not be treated as equal to each other. The others are cosmetic and handled by the normalisation rule. Case differences also exist, so comparison is case-insensitive.
+Truncation is the critical defect: such a value identifies no construction, so two truncated substrates are never considered equal. Everything else is cosmetic and absorbed by normalisation. Letter case also varies, so comparisons ignore case.
 
-Distinct raw substrates: 42. After whitespace and case normalisation: 41.
+Raw distinct substrates: 42; after collapsing whitespace and case: 41.
 
-## Findings to report to the catalogue owner
+## Feedback for the catalogue owner
 
-The catalogue is owned upstream, so this slice does not correct it. These are findings to hand back, and they are listed again as known limitations in the README.
+The slice does not repair upstream data; it reports it. The README's limitations repeat these points.
 
-1. **Incomplete substrate on 6 solutions** (`0853`, `0943`, `0944`, `0946`, `0952`, `0955`). The build-up after the family name is missing, so the solution cannot be matched to a construction. This slice offers no substitutes for them, and a penetration nominating one never fits: it is a data problem that blocks the crew (AC 35).
-2. **Same construction worded two ways** (`0534`, `0535`). One includes "concrete" and one does not. Please confirm whether they are the same build-up.
-3. **Inconsistent formatting** in service type (15 rows with a double space), substrate (3 rows with stray spaces) and service size (five shapes). The slice normalises spacing only for comparison.
-4. **No products or quantities.** The brief says the catalogue includes required products, but this excerpt does not. Shortage maths in this slice uses invented mappings.
+1. **Six solutions with a truncated substrate** (`0853`, `0943`, `0944`, `0946`, `0952`, `0955`). Without the build-up they match no construction. They never get substitutes, and nominating one turns the penetration into a crew-blocking data problem (AC 35).
+2. **`0534` and `0535` spell one construction differently**, with and without "concrete". Confirmation needed on whether the build-ups are identical.
+3. **Formatting drift**: double spaces in 15 service types, stray spaces in 3 substrates, five different size formats. The slice normalises whitespace for comparison only.
+4. **Products and quantities missing.** The brief promises required products in the catalogue; the excerpt has none, so the slice's shortage calculation runs on fabricated mappings.
 
-## Out of this model
+## Outside this model
 
-Stock, quantities, delivery dates, nominated site solutions, and crew schedules are sample data for the team-leader slice, not part of the catalogue.
+Stock, quantities, delivery dates, site nominations and crew rosters belong to the slice's sample data; none of it is catalogue content.
