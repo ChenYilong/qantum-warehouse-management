@@ -1,41 +1,41 @@
-# Agent guidance for this repo (tool-neutral)
+# Agent rules for this repository (any tool)
 
-Team-leader slice for the QAntum take-home. The docs are the source of truth. Read before coding:
+Scope: the team-leader slice of the QAntum take-home. Specs are authoritative; read these before touching code:
 
-- `docs/slice-specification.md` (requirements and numbered acceptance criteria)
-- `docs/technical-design.md` (architecture, domain rules, schema)
-- `docs/test-strategy.md` (layers, AC mapping, CI gates)
-- `docs/glossary.md` (business terms), `docs/catalogue-data-model.md` (CSV and its quirks)
+- `docs/slice-specification.md`: functional requirements and the numbered acceptance criteria
+- `docs/technical-design.md`: architecture, domain rules, schema
+- `docs/test-strategy.md`: test layers, AC-to-test mapping, CI gates
+- `docs/glossary.md` for domain vocabulary; `docs/catalogue-data-model.md` for the CSV and its oddities
 
-If code and spec disagree, stop and fix the spec first, then the code.
+When the code contradicts the spec, halt. Correct the spec, then change the code to match.
 
 ## Skills
 
-Project skills come from [Skill Forge](https://github.com/more-than-code/skill-forge). They are declared in `skill-forge.json` and vendored by `skf sync` into `.agents/skills` (`.claude/skills` is a shim). Never hand-edit them. Change the profile and re-sync. Check drift with `skf sync --check`.
+Skills are pulled from [Skill Forge](https://github.com/more-than-code/skill-forge): `skill-forge.json` lists them, `skf sync` vendors them into `.agents/skills`, and `.claude/skills` only points there. Do not edit vendored skills by hand; edit the profile, sync again, and use `skf sync --check` to detect drift.
 
-## Architecture rules
+## Architecture constraints
 
-- `src/domain/` is pure: no Next.js, React, database driver, file system or adapter imports (lint enforces it).
-- Upstream systems (sites, nominations, stock, solution materials) sit behind ports in `src/ports/`; adapters in `src/adapters/`. The supplied catalogue CSV is loaded by an adapter into a typed map (no port).
-- Route handlers in `src/app/` stay thin: validate with Zod, call a use case, map errors to `{ code, message }`.
-- This app stores only wait, escalate and proposed-substitute actions, pick-error reports and reviews on site. It never writes sites, nominations, stock, pick lists or the catalogue.
+- `src/domain/` stays framework-free: no imports from Next.js, React, a DB driver, the file system or any adapter. ESLint blocks violations.
+- Each upstream source (site list, nominations, solution materials, stock) is reached through a port in `src/ports/`, implemented in `src/adapters/`. The catalogue CSV has no port: one adapter parses it into a typed map.
+- Handlers under `src/app/` do three things only: Zod validation, one use-case call, and mapping failures to `{ code, message }`.
+- Persistence is limited to wait, escalate and substitute-proposal records, pick-error reports and on-site reviews. The app treats the catalogue, pick lists, stock, nominations and sites as read-only.
 
-## Safety rules (do not weaken)
+## Safety invariants (never relax)
 
-- Missing or unavailable data is never zero and never "clear". Fail closed. Negative, `NaN` or infinite numbers are bad data too: they block the crew or mark stock unknown, they never cancel a need or cover a shortage.
-- Never describe a substitute as compatible or approved. It is "catalogue match, not verified". Status is always `proposed`.
-- Match substitutes on raw normalised fields, never on `substrate_option` or `service_type_option`.
-- Do not strip trailing commas from substrates. Incomplete substrates get no candidates.
-- Do not edit `data/solutions-excerpt.csv`. A test pins its hash.
-- Sample data lives only in `data/sample/` and is labelled invented.
-- No secrets in code, tests, logs or output. Server credentials never reach the browser. No `NEXT_PUBLIC_` for secrets. The one value that reaches the browser by design is the public Mapbox token (`MAPBOX_PUBLIC_TOKEN`, `pk.` only); a secret token fails the build (AC 76).
+- Absent or unreachable data is not zero and not "clear"; fail closed. Negative, `NaN` and infinite values count as bad data: the crew is blocked or the stock becomes unknown, and must never offset a requirement or fill a shortfall.
+- A substitute is never called compatible or approved. The wording is "catalogue match, not verified", and the status stays `proposed`.
+- Compare raw normalised fields when matching substitutes; `substrate_option` and `service_type_option` are off limits.
+- Keep trailing commas in substrate values. A truncated substrate produces zero candidates.
+- `data/solutions-excerpt.csv` is immutable; its hash is pinned by a test.
+- Sample data goes in `data/sample/` only, marked as invented.
+- Secrets stay out of code, tests, logs and output, and server credentials out of the browser bundle. Never put a secret behind `NEXT_PUBLIC_`. Only one value ships to the browser on purpose: the Mapbox public token (`MAPBOX_PUBLIC_TOKEN`, `pk.` prefix); an `sk.` token breaks the build (AC 76).
 
-## Working rules
+## Workflow
 
-- Tests come from the acceptance criteria. Name them with the AC number (for example `AC 15`). Write the test, see it fail, then implement.
-- Change only what the task needs. Match the surrounding style.
-- Do not commit or push unless asked. Never commit to `main` without asking.
-- Update the owning docs in the same change as behaviour changes, and log notable agent corrections in `docs/submission-checklist.md`.
+- Derive tests from acceptance criteria and put the AC number in the test name, e.g. `AC 15`. Red first, then green.
+- Keep diffs to what the task requires, in the style of the code around them.
+- No commits or pushes without a request; `main` needs explicit approval.
+- When behaviour changes, update the owning doc in that same change; record significant agent corrections in `docs/submission-checklist.md`.
 
 ## Commands
 

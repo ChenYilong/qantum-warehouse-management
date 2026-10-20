@@ -1,171 +1,183 @@
 # Glossary
 
-Plain-language meanings for the exercise, from the business point of view. Each entry says where the term comes from:
+Domain vocabulary for the slice, defined from the business side. Every entry is tagged with its source:
 
-- **Brief**: stated in `passive-fire-exercise.md`.
-- **CSV**: visible in `data/solutions-excerpt.csv`.
-- **Assumed**: our reading, not given in the source. Check with the business.
-- **Sample**: invented for this slice.
-- **Industry**: general passive fire knowledge, not defined in the brief. Treat as background and verify.
+- **Brief**: comes from the exercise brief.
+- **CSV**: observable in `data/solutions-excerpt.csv`.
+- **Assumed**: our interpretation; the source is silent. Needs business confirmation.
+- **Sample**: fabricated for this slice.
+- **Industry**: general passive-fire background, not defined by the brief. Verify before relying on it.
 
-## 1. The business
+## 1. Domain
 
-**Passive fire protection.** Building elements that slow fire and smoke without any action or power: fire-rated walls, floors, doors and seals. Compare *active* protection such as sprinklers and alarms. *(Industry)*
+**Passive fire protection.** Rated building elements (walls, floors, doors, seals) that hold back fire and smoke with no power and no moving parts, as opposed to *active* systems such as sprinklers or alarms. *(Industry)*
 
-**Compartmentation.** Dividing a building into fire-resistant cells (walls and floors) so a fire stays contained for a stated time. Everything in this exercise exists to keep that containment intact. *(Industry)*
+**Compartmentation.** Splitting a building into fire-resisting cells, each bounded by rated elements, so that fire is held back for a rated period. Everything this app does serves that containment. *(Industry)*
 
-**Penetration.** A hole through a fire-rated wall, floor or ceiling that a service (pipe, cable, duct) passes through. Every penetration weakens the compartment unless sealed. This is the unit of work for the team leader: one opening, one seal. *(Brief; "penetration" is used throughout)*
+**Penetration.** An opening through a rated wall, ceiling or floor that carries a service: pipe, cable or duct. Unsealed, it compromises the compartment. It is the team leader's work unit: one hole, one seal. *(Brief; the brief uses the word throughout)*
 
-**Fire stopping.** The seal fitted around or in a penetration to restore the fire rating of the wall or floor. *(Brief)*
+**Fire stopping.** The seal installed in or around a penetration to bring the element back to its fire rating. *(Brief)*
 
-**Solution.** One tested, published way to fire-stop one specific situation: this service type, through this substrate, at this size, for this fire rating, from one supplier. A solution is a recipe, not a product. *(CSV: one row = one solution)*
+**Solution.** A published, tested method for sealing one exact case: given service type, given substrate, given size, given rating, from a single supplier. Think recipe, not product. *(CSV: one row per solution)*
 
-**Nominated solution.** The solution the specifier chose for a given penetration. The installer is expected to fit exactly that. *(Brief: "solutions nominated for each site")*
+**Nominated solution.** The solution a specifier assigned to a particular penetration; installers are meant to fit precisely that one. *(Brief: "solutions nominated for each site")*
 
-**Specification.** The design document that says which solution goes where. In QAntum it lives in the web app. *(Brief)*
+**Specification.** The design-side record of which solution applies where. QAntum stores it inside its web application. *(Brief)*
 
-**Variation.** An installation that departs from the specification. QAntum flags these automatically. A substitute solution is a deliberate variation, so it needs approval before it is used. *(Brief)*
+**Variation.** An installation that deviates from the specification, flagged automatically by QAntum. Using a substitute is an intentional variation and needs sign-off first. *(Brief)*
 
-**Golden thread.** The continuous, trustworthy record of building safety information from design through install to inspection. It is why compliance evidence (pins, photos, approvals) matters and why a "probably fine" substitute is not acceptable. *(Brief; the term is from UK building safety regulation)*
+**Golden thread.** The unbroken, reliable trail of building-safety information across design, installation and inspection. It is the reason pins, photos and approvals matter, and the reason a substitute that is "probably fine" is unacceptable. *(Brief; the term originates in UK building-safety regulation)*
 
-**Compliance evidence.** The proof that the right thing was installed: a pin on the floor plan and a photo per penetration. *(Brief)*
+**Compliance evidence.** Proof of correct installation: for each penetration, a floor-plan pin and a photo. *(Brief)*
 
-## 2. People and systems
+## 2. Roles and systems
 
-**Operative.** The installer on site. Uses the offline mobile app to install, pin and photograph. *(Brief)*
+**Operative.** On-site installer. Installs, pins and photographs using the offline mobile app. *(Brief)*
 
-**Team leader.** Runs a crew of operatives on a site. Decides when and where the crew goes. This is our user. *(Brief)*
+**Team leader.** Leads a crew of operatives at a site and decides where and when it works. The slice is built for this role. *(Brief)*
 
-**Back-office manager.** Specifies, reviews pins and progress, and (assumed) approves substitutes. *(Brief for the role; approval duty is Assumed)*
+**Back-office manager.** Writes specifications, checks pins and progress, and presumably signs off substitutes. *(Role from the Brief; the sign-off duty is Assumed)*
 
-**Quantity surveyor.** Tracks quantities and cost. Sees progress live. Not a user of this slice. *(Brief)*
+**Quantity surveyor.** Follows quantities and cost, with live sight of progress. Not a user here. *(Brief)*
 
-**Purchasing / warehouse.** Where an escalation goes: purchasing orders more, the warehouse moves existing stock. *(Assumed; the brief says "others in the business")*
+**Purchasing / warehouse.** Who an escalation lands with. Purchasing buys more; the warehouse relocates what exists. *(Assumed; the brief only says "others in the business")*
 
-**Web app.** Existing QAntum app for administration, specification and reporting. Owns sites, penetrations and nominations. *(Brief)*
+**Web app.** QAntum's current application for admin, specification and reporting; it owns sites, nominations and penetrations. *(Brief)*
 
-**Mobile app.** Existing offline-first Flutter app for operatives. Out of this slice. *(Brief)*
+**Mobile app.** Flutter app used offline-first by operatives; outside the slice. *(Brief)*
 
-**Upstream system.** Any system this slice only reads from: sites, nominations, stock. *(Our term; see `slice-decisions.md`)*
+**Upstream system.** Anything the slice consumes read-only (stock, nominations, sites). *(Our term; `slice-decisions.md`)*
 
-## 3. The catalogue fields
+## 3. Catalogue columns
 
-**Internal code.** QAntum's own id for a solution, such as `0334`. The key used everywhere in this slice. *(CSV)*
+**Internal code.** QAntum's identifier for a solution, e.g. `0334`; the key across this slice. *(CSV)*
 
-**Supplier reference code.** The supplier's own document reference for the tested solution, such as `V1.11-22SFR00038-146-E`. Identifies the test or assessment behind the row. *(CSV)*
+**Supplier reference code.** Supplier-issued identifier, e.g. `V1.11-22SFR00038-146-E`, pointing at the test or assessment that backs the row. *(CSV)*
 
-**Supplier.** Who published the solution. Always Ryanfire here. *(CSV)*
+**Supplier.** Publisher of the solution; Ryanfire on every row. *(CSV)*
 
-**Orientation.** Wall, floor or ceiling. A solution tested for a wall is not automatically valid in a floor. *(CSV)*
+**Orientation.** Values `Wall`, `Floor`, `Ceiling`. A wall-tested solution carries no automatic validity in a floor. *(CSV)*
 
-**Substrate.** What the hole goes through: the construction of the wall or floor (for example plasterboard of a given layer count and thickness, concrete, timber infill). Fire performance depends on it. *(CSV)*
+**Substrate.** The construction being penetrated: layered plasterboard of some thickness, concrete, a timber infill, and so on. Its make-up drives fire performance. *(CSV)*
 
-**Substrate option.** A coarse grouping of substrates (such as "Plasterboard Wall"). Several different constructions share one option, so it is for browsing, not for deciding suitability. *(CSV; caution from `catalogue-data-model.md`)*
+**Substrate option.** A loose family label like "Plasterboard Wall". Many constructions map to one option, so it helps browsing and must not drive suitability. *(CSV; warning in `catalogue-data-model.md`)*
 
-**Service.** The thing passing through the hole: a pipe, cable, duct, bundle or an empty opening. *(CSV: "penetrating service")*
+**Service.** Whatever runs through the opening (cable, pipe, duct, bundle), or nothing in the case of a blank opening. *(CSV: "penetrating service")*
 
-**Service classification.** Broad class of the service: combustible pipe (melts or burns, such as plastic), non-combustible pipe (such as steel or copper), insulated pipe, electrical, structural, other. Plastic pipes burn away and leave a hole, so they need different seals. *(CSV for values; the reason is Industry)*
+**Service classification.** The service's broad category. Values: pipes that are combustible (plastic, which melts or burns), non-combustible (steel, copper) or insulated; electrical; structural; other. Plastic burns away and leaves a void, which calls for a different seal. *(Values from the CSV; the reasoning is Industry)*
 
-**Service type.** The specific item, including any insulation wrap, such as `Copper Pipe - 38mm Nitrile Rubber`. *(CSV)*
+**Service type.** The precise item, insulation wrap included, e.g. `Copper Pipe - 38mm Nitrile Rubber`. *(CSV)*
 
-**Service type option.** A coarser label for the service type. It can hide a real difference (a socket is not a pipe). *(CSV)*
+**Service type option.** A grouped label over service types that can mask a real distinction (sockets are not pipes). *(CSV)*
 
-**Service size.** Pipe diameter or opening size as printed (`Ø50mm`, `1100x10mm`). Text, not a number. *(CSV)*
+**Service size.** Diameter or opening dimensions verbatim (`Ø50mm`, `1100x10mm`), stored as text. *(CSV)*
 
-**Fire integrity.** How many minutes the seal stops flames and hot gas passing through. 60 means 60 minutes. See section 3a. *(CSV: "Integrity", 30 to 240)*
+**Fire integrity.** Minutes for which the seal prevents flame and hot gas crossing; 60 = an hour. Detail in section 3a. *(CSV column "Integrity", range 30–240)*
 
-**Fire insulation.** How many minutes the seal keeps the far side cool enough not to ignite things. A dash means the supplier does not claim it, which is not the same as zero. Integrity and insulation are separate claims. See section 3a. *(CSV)*
+**Fire insulation.** Minutes for which the unexposed side remains below ignition temperature for nearby materials. A dash is an absent claim, which differs from zero. The two ratings are independent claims. Detail in section 3a. *(CSV)*
 
-**Fire rating.** Shorthand for the integrity and insulation figures together (for example 60/30). The nominated rating is the minimum a penetration must meet. *(Assumed shorthand)*
+**Fire rating.** The integrity and insulation pair written together, e.g. 60/30. A nominated rating is the floor a penetration has to reach. *(Assumed notation)*
 
-## 3a. Fire performance in depth (integrity, insulation and related terms)
+## 3a. Fire performance detail
 
-Picture a fire on one side of a wall with a pipe through it. The seal around that pipe must do two different jobs, and the catalogue records each as a number of minutes.
+Imagine fire burning against one face of a wall that a pipe crosses. The seal has two separate duties, and the catalogue gives each a figure in minutes.
 
-**Integrity (E).** Job one: keep flames and hot gas from getting through to the other side. If the seal fails, fire spreads through the hole. In the CSV this is the `Integrity` column. It always has a value (30 to 240). Spread in this excerpt: 30 min (5 rows), 60 (72), 90 (10), 120 (55), 180 (4), 240 (2). *(CSV; E/I letters are Industry)*
+**Integrity (E).** First duty: no flame or hot gas reaches the far side. If it fails, fire travels through the opening. CSV column `Integrity`, populated on every row, between 30 and 240.
 
-**Insulation (I).** Job two: keep the *unexposed* face from getting hot enough to ignite something nearby, or to burn someone. A seal can stop flames yet still conduct heat through a metal pipe, so this is a separate, harder claim. In the CSV it is the `Insulation` column. Spread: not claimed (8 rows), 15 min (2), 30 (11), 45 (3), 60 (64), 90 (18), 120 (36), 180 (4), 240 (2). *(CSV)*
+| Integrity (min) | 30 | 60 | 90 | 120 | 180 | 240 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Rows | 5 | 72 | 10 | 55 | 4 | 2 |
 
-**Not claimed (`-`).** The supplier does not state an insulation time. It does not mean zero and it does not mean "fine". Treat it as unknown. For example, solution `0334` (copper pipe Ø100mm, 60 integrity, no insulation claim) cannot stand in for `0344` (steel pipe, 60/60) even though the integrity matches. *(CSV for the 8 rows; the reading is ours)*
+ *(CSV; the letters E and I are Industry usage)*
 
-**Reading a rating.** Written as integrity/insulation in minutes:
+**Insulation (I).** Second duty: keep the *unexposed* face below the temperature that would ignite nearby material or injure a person. A seal may block flame yet let a metal pipe carry heat across, so this is an independent and stricter claim. CSV column `Insulation`.
 
-| Code | Service | Rating | What it tells the leader |
+| Insulation (min) | none | 15 | 30 | 45 | 60 | 90 | 120 | 180 | 240 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Rows | 8 | 2 | 11 | 3 | 64 | 18 | 36 | 4 | 2 |
+
+ *(CSV)*
+
+**No claim (`-`).** The supplier publishes no insulation figure. That is neither zero nor acceptable; handle it as unknown. Example: `0334` (copper Ø100mm, integrity 60, no insulation figure) cannot replace `0344` (steel, 60/60) although the integrity values agree. *(8 CSV rows; interpretation is ours)*
+
+**Rating notation.** Integrity/insulation in minutes:
+
+| Code | Service | Rating | Meaning for the leader |
 | --- | --- | --- | --- |
-| `0334` | Copper pipe Ø100mm | 60 / not claimed | Holds flame 60 min. Says nothing about heat on the far side. |
-| `0344` | Steel pipe Ø28mm | 60 / 60 | Holds flame and limits heat for 60 min. |
-| `0345` | Copper pipe Ø100mm | 120 / 90 | Holds flame 120 min and limits heat for 90. |
-| `0435` | KELOX pipe Ø32mm | 60 / 60 | Full 60 on both. |
-| `0434` | KELOX pipe Ø32mm | 60 / 30 | Same pipe and size as `0435` but only 30 min insulation. Not interchangeable. |
+| `0334` | Copper pipe Ø100mm | 60 / no claim | Blocks flame for an hour; silent on far-side heat. |
+| `0344` | Steel pipe Ø28mm | 60 / 60 | Blocks flame and limits heat, both for an hour. |
+| `0345` | Copper pipe Ø100mm | 120 / 90 | Two hours against flame, 90 minutes against heat. |
+| `0435` | KELOX pipe Ø32mm | 60 / 60 | An hour on each measure. |
+| `0434` | KELOX pipe Ø32mm | 60 / 30 | Identical pipe and size to `0435`, but insulation lasts half as long; the two cannot be swapped. |
 
-**Insulation never exceeds integrity.** In all 148 rows insulation is at or below integrity, which fits how the two are defined: if flame gets through, the far side is no longer protected. *(Observed in CSV; reasoning is Industry)*
+**Insulation ≤ integrity.** Holds on all 148 rows, which matches the definitions: once flame passes, the far side has no protection left. *(Observed in the CSV; rationale is Industry)*
 
-**Fire resistance period.** The overall time the penetration must last, often stated as one number on drawings (30, 60, 90, 120 minutes). It sets the integrity minimum. Whether the project also requires insulation is a second requirement. *(Industry; how QAntum stores the requirement is Assumed)*
+**Fire resistance period.** Total time the penetration must hold, which drawings usually give as a single figure (30, 60, 90 or 120 minutes). It fixes the integrity minimum; any insulation requirement is a second, separate condition. *(Industry; QAntum's storage of it is Assumed)*
 
-**Required vs offered.** A penetration has a *required* rating from the specification. A solution *offers* a rating from its test. A solution is only a candidate if offered is at least required on **both** measures, and "not claimed" fails a stated insulation requirement. *(Our matching rule, `technical-design.md` section 6)*
+**Required vs offered.** The specification gives a penetration its *required* rating; a solution's test gives it an *offered* rating. A solution qualifies only if offered meets or exceeds required on **each** measure, and a missing insulation claim never satisfies a stated insulation requirement. *(Our matching rule, `technical-design.md` §6)*
 
-**Fire test.** A laboratory test in which the exact build-up (wall, service, seal, size) is exposed to a standard fire curve, and the minutes to failure are recorded. This is where a solution's numbers come from. *(Industry)*
+**Fire test.** A laboratory run in which the exact assembly (substrate, service, seal, size) is heated along a standard time–temperature curve until failure, and the minutes are recorded. Source of every number a solution carries. *(Industry)*
 
-**Assessment (engineering judgement).** A written opinion from a qualified body that a variation on a tested build-up is also acceptable. Some supplier references may rest on assessments rather than direct tests. The CSV does not say which. *(Industry; not in CSV)*
+**Assessment (engineering judgement).** A qualified body's written opinion that a variant of a tested assembly also performs. A supplier reference might rest on an assessment instead of a direct test; the CSV gives no way to tell. *(Industry; not in the CSV)*
 
-**Why exact build-up matters.** The test result applies only to the tested combination. Change the substrate thickness, pipe material, insulation wrap or size and the number may no longer hold. This is the heart of the brief's warning that matching fields is not proof of compliance. *(Brief for the warning; explanation is Industry)*
+**Why the exact assembly matters.** A test result covers the tested combination only. Alter substrate thickness, pipe material, lagging or size and the figure may no longer apply. That is the core of the brief's caution that agreeing fields do not prove compliance. *(Caution from the Brief; explanation is Industry)*
 
-**Insulated pipe vs fire insulation.** A name clash worth noting. "Insulated Pipe" (service classification) means a pipe wrapped in *thermal lagging* such as fibreglass, nitrile rubber or Thermobreak. "Insulation" (the rating) means *fire* heat-limiting performance. A lagged pipe can have an insulation rating of anything. 13 rows are Insulated Pipe. *(CSV)*
+**"Insulated pipe" vs fire insulation.** Two meanings of one word. "Insulated Pipe" as a classification refers to *thermal lagging* (fibreglass, nitrile rubber, Thermobreak). "Insulation" as a rating refers to limiting *fire* heat transfer. A lagged pipe may carry any insulation rating. Insulated Pipe appears on 13 rows. *(CSV)*
 
-**Combustible vs non-combustible pipe.** Plastic pipes (PEX, PVC, PP-R and the like) burn or melt, leaving an open hole, so their seals must close the gap as the pipe disappears. Metal pipes stay put but conduct heat, which is why their insulation claim is often weak or missing. 76 rows are combustible, 19 non-combustible. *(CSV counts; behaviour is Industry)*
+**Plastic vs metal pipe.** Plastics such as PEX, PVC or PP-R melt or burn and open a void; the seal therefore has to shut the void while the pipe burns away. Metals stay put yet carry heat across, so their insulation figures tend to be low or missing. Counts: combustible 76, non-combustible 19. *(Counts from the CSV; behaviour is Industry)*
 
-**Intumescent.** A material that swells when hot to fill gaps and block the hole. Typical in collars, wraps and sealants. *(Industry)*
+**Intumescent.** Swells when heated, filling gaps and shutting the opening; found in most collars, wraps and sealants. *(Industry)*
 
-**Typical products.** The kinds of items a solution might call for: collars, wraps, sealants or mastics, batts or boards, pillows. The excerpt does not list products, so our materials are sample data. *(Industry; absence from CSV is documented)*
+**Typical products.** Kinds of item a solution may consume: collars, wraps, sealant or mastic, batts or boards, pillows. None are named in the excerpt, so every material in the slice is invented. *(Industry; the gap in the CSV is documented)*
 
-## 4. The slice
+## 4. Slice terms
 
-**Planned work.** The set of penetrations on a site that the crew is due to install, each with a nominated solution. *(Brief, Assumed shape)*
+**Planned work.** A site's penetrations scheduled for the crew, each carrying a nominated solution. *(Brief; the shape is Assumed)*
 
-**Required product / material.** A physical item used to install a solution (sealant, collar, wrap, board). The brief says the catalogue includes required products, but the excerpt has none. *(Brief; absent from CSV)*
+**Required product / material.** Physical items an installation consumes, e.g. collars, wraps, boards, sealant. The brief claims the catalogue lists these; the excerpt does not. *(Brief; absent from the CSV)*
 
-**Quantity per install.** How much of a material one penetration uses. Not in the CSV. *(Sample)*
+**Quantity per install.** Usage of one material by a single penetration; missing from the CSV. *(Sample)*
 
-**Solution material.** Our join: for a solution, the materials and the quantity per install. *(Sample; our term)*
+**Solution material.** Our mapping from a solution to its materials and per-install quantities. *(Sample; our term)*
 
-**Stock balance.** How much of a material is on hand, and where (warehouse or van). Read from the inventory system. *(Assumed system; Sample data)*
+**Stock balance.** Quantity of a material on hand and where it is held (warehouse or van), as read from inventory. *(System Assumed; data Sample)*
 
-**Shortage.** Needed quantity for the planned work is greater than the quantity on hand. Calculated each time, never entered by anyone. Our design identifies it as site plus material. *(Our term; see `technical-design.md`)*
+**Shortage.** Demand from the planned work exceeds what is on hand. Derived on every read, never typed in. Keyed by site + material in our design. *(Our term; see `technical-design.md`)*
 
-**Shortfall.** How much is missing: needed minus on hand. *(Our term)*
+**Shortfall.** The gap, calculated as demand less on-hand. *(Our term)*
 
-**Blocked / clear.** Crew status for a site. Blocked means at least one shortage (or missing data) stands between the crew and finishing the planned work. Clear means everything needed is in stock. *(Our term, from "ready vs blocked" in `slice-decisions.md`)*
+**Blocked / clear.** Crew status per site. Blocked: one or more shortages, or missing data, prevent completing the planned work. Clear: all required material is available. *(Our term, from the ready/blocked split in `slice-decisions.md`)*
 
-**Unknown.** Data is missing (no stock record, no material mapping). We treat it as blocked with a stated reason, never as zero. *(Our rule)*
+**Unknown.** Required data is absent (no stock row, no material mapping). Handled as blocked with an explicit reason; never read as zero. *(Our rule)*
 
-**Wait.** Decision: hold off until stock arrives. Recorded, but it does not unblock the crew. *(Our term)*
+**Wait.** Decision to hold until stock turns up. Stored; the crew stays blocked. *(Our term)*
 
-**Escalate.** Decision: pass the shortage to purchasing or the warehouse with a note. Recorded, and the crew stays blocked until stock changes. *(Our term)*
+**Escalate.** Decision that passes the shortage, with a note, to the warehouse or purchasing. Stored; the crew is blocked until the stock figure changes. *(Our term)*
 
-**Substitute (proposed).** Decision: suggest a different catalogue solution for a penetration because the nominated one cannot be installed. It is only a proposal until approved. *(Our term)*
+**Substitute (proposed).** Decision that proposes a different solution from the catalogue for a penetration whose nominated one cannot be fitted. Remains a proposal until signed off. *(Our term)*
 
-**Catalogue match.** A candidate substitute whose catalogue fields line up with the penetration. It is evidence to start a review, not proof of compliance. Missing fields in the data (products, installation limits, test scope) mean a match cannot establish suitability on its own. *(Brief: "A matching catalogue field alone should not be treated as proof")*
+**Catalogue match.** A substitute candidate whose catalogue fields agree with the penetration. It justifies opening a review; it does not prove compliance. The data lacks products, installation limits and test scope, so a match alone cannot establish suitability. *(Brief: "A matching catalogue field alone should not be treated as proof")*
 
-**Approval.** A qualified person's sign-off that a substitute is acceptable. After approval, the web app changes the nomination. This slice never approves. *(Assumed process; slice boundary from `slice-decisions.md`)*
+**Approval.** A qualified person confirms the substitute is acceptable; only then does the web application update the nomination. Nothing in this slice approves. *(Process Assumed; boundary per `slice-decisions.md`)*
 
-**Idempotency.** Sending the same request twice records it once. Matters on poor mobile signal where taps get repeated. *(Technical term)*
+**Idempotency.** A request sent twice is stored once. Important on patchy mobile networks, where taps repeat. *(Technical term)*
 
-## 5. Quick contrasts
+## 5. Commonly confused pairs
 
-| Easily confused | Difference |
+| Pair | Distinction |
 | --- | --- |
-| Solution vs product | A solution is the tested recipe for a situation. Products are the items used to build it. The CSV has solutions only. |
-| Integrity vs insulation | Integrity stops flame and gas getting through. Insulation limits heat on the far side. A seal can have one without the other. |
-| Substrate vs substrate option | Substrate is the exact construction. Option is a loose family name. |
-| Wait vs escalate | Wait holds. Escalate asks someone else to act. Neither frees the crew. |
-| Substitute vs approved substitute | A substitute is proposed by the leader. Approval comes from elsewhere and is what changes the nomination. |
-| Blocked vs unknown | Blocked has a known cause. Unknown means we lack data, and we still do not say "clear". |
-| Variation vs substitute | A variation is any departure from spec. An approved substitute is a controlled, recorded one. |
+| Solution vs product | Solution: the method proven by test for one case. Products: the items that build it. The CSV contains solutions only. |
+| Integrity vs insulation | Integrity: flame and gas stay on their side. Insulation: the far face stays cool. Either can exist alone. |
+| Substrate vs substrate option | Substrate: the precise construction. Option: a broad family label. |
+| Wait vs escalate | Wait pauses; escalate hands action to someone else. The crew remains blocked in both cases. |
+| Substitute vs approved substitute | The leader proposes; someone else approves, and only approval alters the nomination. |
+| Blocked vs unknown | Blocked: cause known. Unknown: data missing; still never reported as clear. |
+| Variation vs substitute | Variation: any deviation from spec. Approved substitute: a controlled, recorded deviation. |
 
-## 6. Terms to confirm with the business
+## 6. Open questions for the business
 
-- Does "fire rating" mean the pair integrity/insulation, or something stricter in QAntum?
-- Who approves a substitute, and does that queue exist today?
-- Who receives escalations, and in what form?
-- Is stock per warehouse, per van, per site allocation, or all three?
-- Is the crew blocked for the whole site while one material is short, or only for the affected penetrations?
+- Is "fire rating" the integrity/insulation pair, or does QAntum mean something stricter?
+- Who signs off substitutes, and is there a queue for it today?
+- Who handles escalations, and through which channel?
+- Is stock held per warehouse, per van, as a site allocation, or all of those?
+- With one material short, is the whole site blocked or only the penetrations it affects?

@@ -1,129 +1,129 @@
 # Iteration plan
 
-A short sequence of iterations, each useful on its own. Iteration 1 is the slice specified in `slice-specification.md`, now delivered (section 3); what it did not finish is carried into iterations 2 to 7. Later iterations are directions with reasons, not commitments. Terms are in `glossary.md`.
+Seven increments, each shippable by itself. Increment 1 is the slice defined in `slice-specification.md` and is live (section 3); work it left open moves to increments 2 through 7. Beyond increment 1 these are reasoned directions, not promises. Vocabulary: `glossary.md`.
 
-## 1. The need
+## 1. Problem
 
-Before a crew leaves for a site, the team leader must know that the materials for the planned work are in stock, and must act on any shortage: wait, escalate, or use a different solution. Their crew planning depends on the answer.
+A crew should leave only once the leader has confirmed stock for the planned work and dealt with each shortfall by waiting, escalating or switching solution. Crew planning hangs on that answer.
 
-Four things have to be true for that to work in production: the plan is known, the materials per solution are known, stock is known, and a decision reaches the right people. The first three come from other systems. The fourth does not exist today.
+In production this needs four inputs: a known plan, known material per solution, known stock, and a decision that arrives with the right people. Other systems own the first three. Nothing provides the fourth today.
 
-## 2. Why this first slice
+## 2. Choice of slice
 
-| Option considered | Verdict |
+| Candidate | Outcome |
 | --- | --- |
-| Read-only stock check ("what do I need, is it in stock") | Useful but no action. The leader still phones someone. |
-| **Stock check plus recorded decision (wait, escalate, propose substitute)** | **Chosen.** It completes the loop the brief describes and creates the one thing that does not exist yet, a recorded decision. |
-| Automatic substitution | Rejected. The catalogue cannot prove compliance, and the brief says a field match is not proof. |
-| Crew scheduling | Rejected. It belongs to existing operations. The slice only reports blocked or clear. |
-| Mobile, offline-first | Rejected for now. Leaders check before leaving, usually with signal, and the install path is already on mobile. |
+| Read-only stock lookup ("what do I need, is it in stock") | Informative, but the leader still has to ring someone to act. |
+| **Stock lookup plus a stored decision: wait, escalate, or a substitute proposal** | **Selected.** Closes the loop in the brief and produces the missing artefact: a stored decision. |
+| Automatic substitution | Dropped. Catalogue data cannot establish compliance; the brief says a matching field proves nothing. |
+| Crew scheduling | Dropped. Operations already own it; the slice only emits blocked or clear. |
+| Offline-first mobile | Deferred. Leaders check before departure, normally with coverage, and installation already runs on mobile. |
 
-The slice reads from upstream systems and owns only the decisions. That keeps it small, testable on its own, and easy to attach to the real systems later.
+Reading from upstream and owning only decisions keeps the slice small, independently testable, and cheap to connect to production systems later.
 
-## 3. Sequence
+## 3. Roadmap
 
-| # | Iteration | Main value | Depends on |
+| # | Increment | Outcome | Prerequisites |
 | --- | --- | --- | --- |
-| 1 | Readiness and decisions (this slice, delivered) | Leader sees shortages and records a decision. Crew status is reported. | Stubs for sites, nominations, stock, materials |
-| 2 | Real upstream data | Numbers are trustworthy. Auth and roles exist. | Access to real APIs and a login method |
-| 3 | Decisions reach people | Escalations are received, acknowledged, and closed. | Iteration 1 data. Channel for purchasing and warehouse |
-| 4 | Substitution approval | A proposal becomes a controlled, approved variation. | A reviewer role and an update path to the nomination |
-| 5 | Smarter planning | Partial dispatch and stock allocation across sites. | Reliable stock and a reservation model |
-| 6 | Field use | Works on site with poor signal, and in the mobile app. | Iterations 2 and 3 |
-| 7 | AI assistance | A photo of a material fills in its details, confirmed by a person. | Iteration 6's photos, a product image library |
+| 1 | Readiness plus decisions (this slice, live) | Shortages visible, decisions stored, crew status published. | Stubbed sites, nominations, stock, materials |
+| 2 | Production data sources | Trustworthy figures; authentication and roles in place. | Access to production APIs; an identity provider |
+| 3 | Escalation delivery | Escalations get received, acknowledged and closed. | Increment 1 records; a channel to purchasing and warehouse |
+| 4 | Substitute approval | A proposal turns into a controlled, signed-off variation. | A reviewer role; a write path to nominations |
+| 5 | Planning | Partial dispatch; stock allocated across sites. | Dependable stock data; a reservation model |
+| 6 | On-site use | Usable with weak signal and inside the mobile app. | Increments 2 and 3 |
+| 7 | AI assistance | A material photo pre-fills its details for a person to confirm. | Photos from increment 6; a product image library |
 
-### Iteration 1: readiness and decisions (delivered)
+### Increment 1: readiness and decisions (live)
 
-- **Scope:** per `slice-specification.md`. Sample data for upstream systems, real catalogue, Supabase Postgres for decisions, pick reports and reviews.
-- **Value:** closes the leader's loop and proves the decision data model.
-- **Exit criteria:** acceptance criteria 1 to 85 pass in CI. Deployed at a public URL. Demonstration scenario runs from a clean browser. Met: every merge to `main` deploys and passes the smoke test.
-- **Leaves untested:** real upstream latency and data quality, real users, real approval. Also: the sign-in is a browser-only demo with no server check; drive times depend on Mapbox; offline, only pick reports are held, not decisions.
+- **Scope:** as `slice-specification.md` defines. Upstream systems are sampled, the catalogue is real, and Supabase Postgres stores decisions, pick reports and on-site reviews.
+- **Outcome:** the leader's loop is closed, and the decision data model is exercised end to end.
+- **Done when:** CI passes acceptance criteria 1 through 85, a public URL serves the build, and the demo script works in a fresh browser. Status: achieved; each merge into `main` deploys and clears the smoke test.
+- **Not proven:** how production upstreams behave (latency, data quality), actual users, an actual approval. In addition: sign-in is a client-side demo the server never checks; drive times rely on Mapbox; the offline queue holds pick reports but no decisions.
 
-**Delivered beyond the first plan.** Walking the product on a phone added these to iteration 1:
+**Shipped beyond the original plan.** Phone walkthroughs pulled these into increment 1:
 
-| Added | From | Requirements |
+| Feature | Origin | Requirements |
 | --- | --- | --- |
-| Pick check, review on site, pick-error reports to the warehouse | Iteration 3 (decisions reach people), in part | FR26 to FR28 |
-| Pick reports held offline and sent once back online, with idempotency keys | Iteration 6 (field use), in part | AC 66 |
-| Demo sign-in with a role (team leader or operator) | Iteration 2 (auth), as a stand-in | FR25 |
-| Online switch always in view, offline details, Sync now | New | FR18, FR24 |
-| One big signal per site, by shape and colour, that calls the site's operator | New | FR19, FR22, FR23 |
-| A map, directions and the drive per project, from a default start until the phone shares its location | New | FR30 |
-| Today's verdict, project deadlines and a deadline calendar | Iteration 5 (planning), in part | FR31 to FR33 |
-| Tab bar Map, Calendar, Projects, Guide; back returns where the visit came from | New | FR34, AC 83 to 85 |
-| Readiness filter and search on the projects list | New | FR29 |
+| Pick check, on-site review, pick-error reporting to the warehouse | Partly increment 3 (escalation delivery) | FR26 to FR28 |
+| Offline queue for pick reports, flushed on reconnect, keyed for idempotency | Partly increment 6 (on-site use) | AC 66 |
+| Demo sign-in that assigns a role, leader or operator | Placeholder for increment 2 (authentication) | FR25 |
+| Persistent Online switch, offline details, Sync now | Not planned | FR18, FR24 |
+| A single large per-site signal using shape plus colour, which phones the operator | Not planned | FR19, FR22, FR23 |
+| Per-project map, directions and drive time, measured from a fallback origin until device location is shared | Not planned | FR30 |
+| Daily verdict, deadlines per project, deadline calendar | Partly increment 5 (planning) | FR31 to FR33 |
+| Four tabs (Map, Calendar, Projects, Guide), and back navigation that returns to the originating screen | Not planned | FR34; AC 83, 84, 85 |
+| Readiness filter and text search over projects | Not planned | FR29 |
 
-### Iteration 2: real upstream data
+### Increment 2: production data sources
 
-- **Scope:** replace each stub adapter with the real client behind the same port. Add login through the existing QAntum identity. Add row-level security by site membership. Replace the sample materials mapping with the real source, or extend the catalogue with required products and quantities.
-- **Value:** the leader can rely on the numbers, and only the right people can act.
-- **Open uncertainty:** whether required products and quantities exist anywhere today. The brief says the catalogue includes products, but the excerpt has none. If they do not exist, this iteration starts with capturing them.
-- **Also here:** report the catalogue data findings back to the owner (`catalogue-data-model.md`), and decide whether the app becomes a module of the existing web app.
-- **Carried from iteration 1:** Supabase Auth in place of the demo sign-in; role and assignment checks on the server; a people table; the leader assigns operators to a site on a day.
-- **Exit:** a real site's readiness matches what the stock system and specification show, checked against a manager's own figures.
+- **Scope:** swap every stub adapter for its production client behind the unchanged port. Authenticate through QAntum's existing identity. Enforce row-level security on site membership. Source material mappings from the real system, or add products and quantities to the catalogue.
+- **Outcome:** figures the leader can trust, and actions limited to authorised people.
+- **Unknown:** whether product and quantity data exists anywhere yet. The brief claims the catalogue lists products; the excerpt lists none. If the data is missing, the increment begins by capturing it.
+- **Also:** hand the catalogue defects in `catalogue-data-model.md` to their owner, and decide whether this app becomes a module inside the web app.
+- **Moved from increment 1:** Supabase Auth replacing the demo sign-in; server-side role and assignment checks; a people table; leaders assigning operators to a site for a date.
+- **Done when:** one real site's readiness agrees with the stock system and the specification, verified against a manager's own numbers.
 
-### Iteration 3: decisions reach people
+### Increment 3: escalation delivery
 
-- **Scope:** purchasing and warehouse see escalations, acknowledge them, and mark them resolved. The leader sees the status. Notification by email or the existing channel.
-- **Value:** an escalation stops being a note nobody reads. The leader knows who is dealing with it and by when.
-- **Open uncertainty:** who receives escalations today, and in what tool.
-- **Carried from iteration 1:** the warehouse's status on a pick report, back to the leader; a one-tap restock request from site; arrival notices by app and text.
-- **Exit:** an escalated shortage is acknowledged by a real recipient in a trial, and the leader sees that.
+- **Scope:** purchasing and the warehouse get an inbox for escalations, acknowledge them and close them; the leader can see each state. Notifications go by email or whatever channel is already in use.
+- **Outcome:** an escalation is no longer an unread note; the leader knows the owner and the due date.
+- **Unknown:** today's recipients of escalations and the tool they use.
+- **Moved from increment 1:** warehouse-side status on pick reports, reported back to the leader; one-tap restock requests from site; arrival alerts in the app and by SMS.
+- **Done when:** during a trial a real recipient acknowledges an escalated shortage, and the leader sees the acknowledgement.
 
-### Iteration 4: substitution approval
+### Increment 4: substitute approval
 
-- **Scope:** reviewers see proposals with the evidence they need (supplier assessment, test scope, installation constraints), approve or reject with a reason, and the web app updates the nomination. The result appears to the leader, and a crew can be released.
-- **Value:** substitution becomes a legitimate way to unblock work, and the golden thread records who approved what and why.
-- **Open uncertainty:** whether an approval workflow exists. The brief shows managers reviewing install progress and variations, not a pre-site approval queue. Compliance review rules and who is qualified to approve need the business.
-- **Exit:** an approved substitute updates the nomination, clears the shortage, and appears in the audit trail. A rejected one tells the leader why.
-- **Carried from iteration 1:** substitution by risk. Fire-stopping materials are never substituted automatically; low-risk consumables only within equivalents approved in advance.
+- **Scope:** reviewers get each proposal with its evidence (supplier assessment, tested scope, installation limits), accept or reject it, giving a reason; the web app then rewrites the nomination. The leader sees the outcome, and the crew can be released.
+- **Outcome:** substitution becomes a sanctioned way to release blocked work, while the golden thread stores approver, decision and reason.
+- **Unknown:** whether any approval process exists. The brief describes managers checking installation progress and variations; it never mentions a queue ahead of site work. The business must define review rules and who holds approval authority.
+- **Done when:** an accepted substitute rewrites the nomination, clears the shortfall and is written to the audit log; a rejection tells the leader why.
+- **Moved from increment 1:** risk-based substitution. Fire-stopping products are never swapped automatically; low-risk consumables are swapped only for equivalents approved beforehand.
 
-### Iteration 5: smarter planning
+### Increment 5: planning
 
-- **Scope:** partial dispatch (send the crew to penetrations that are not affected), stock allocation or reservation across sites, and delivery dates so "wait" has an expected date.
-- **Value:** removes the two known limits of iteration 1: the all-or-nothing site block, and shared stock that can over-promise.
-- **Depends on:** a reservation model owned by inventory, and delivery data.
-- **Exit:** two sites competing for the same stock are told the truth, and a partly ready site can be worked.
-- **Carried from iteration 1:** a decision deadline before departure, falling back to the safest option (affected penetrations wait, purchasing is told); a leader's ordered shortage preferences, with "escalate and hold" always last; a waste allowance on required quantities; a packing slip before departure (planned against picked, exceptions first).
+- **Scope:** partial dispatch (crews work the unaffected penetrations), stock allocation or reservation between sites, and delivery dates that give "wait" an expected end.
+- **Outcome:** lifts both known constraints of increment 1, the whole-site block and pooled stock that can be promised twice.
+- **Prerequisites:** inventory-owned reservations; delivery data.
+- **Done when:** two sites contending for one stock line both get accurate answers, and a partially ready site can start.
+- **Moved from increment 1:** a decision cut-off before departure that defaults to the safest outcome (penetrations that are short wait, and purchasing gets notified); per-leader ranked shortage strategies with "escalate and hold" fixed in last place; a wastage factor on demand; a pre-departure packing slip (planned versus picked, exceptions on top).
 
-### Iteration 6: field use
+### Increment 6: on-site use
 
-- **Scope:** offline reads, queued writes using the existing idempotency keys, and a Flutter surface sharing the same API.
-- **Value:** works at a site with weak signal, and fits where operatives already work.
-- **Depends on:** stable contracts from iterations 2 and 3, and the mobile sync pattern.
-- **Exit:** a leader records a decision offline and it syncs without duplicates.
-- **Carried from iteration 1:** offline reads (IndexedDB); decisions queued like pick reports; real photo upload, several per report (today only "photo attached" is recorded); location on reports (GPS or a point on the floor plan); a "drawing does not match" report type.
+- **Scope:** read access without signal, a write queue built on the existing idempotency keys, plus a Flutter client on the same API.
+- **Outcome:** works at sites with poor signal, inside the app operatives already use.
+- **Prerequisites:** stable contracts out of increments 2 and 3; the mobile sync pattern.
+- **Done when:** a decision captured offline syncs later with no duplicate.
+- **Moved from increment 1:** offline reads in IndexedDB; decisions queued the same way as pick reports; actual photo upload, more than one per report (the current build stores only a "photo attached" flag); a position attached to each report (GPS coordinates or a floor-plan pin); a report type for drawing mismatches.
 
-### Iteration 7: AI assistance
+### Increment 7: AI assistance
 
-- **Scope:** a photo of a material is matched against the product library to suggest its product, size and fire rating, with a confidence shown. Below a threshold a person must confirm; every field can be changed; the record keeps what the AI suggested and what the person changed. AR stays with the mobile app.
-- **Value:** less typing on site, without handing the compliance decision to a model.
-- **Depends on:** iteration 6's photos and a labelled product image library.
-- **Exit:** suggestions are right often enough to save time in a trial, and no unconfirmed suggestion reaches a record.
+- **Scope:** a material photo is compared with the product library to propose the product, its size and its fire rating, plus a confidence score. Under a threshold a person has to confirm; any field stays editable; the record stores both the model's suggestion and the human edits. AR remains a mobile-app concern.
+- **Outcome:** less data entry on site, while the compliance call stays with a person.
+- **Prerequisites:** increment 6 photos; a labelled product image set.
+- **Done when:** a trial shows the suggestions save time, and nothing unconfirmed is ever persisted.
 
-## 4. What stays where
+## 4. Ownership
 
-| Concern | Stays in | Why |
+| Concern | Owner | Reason |
 | --- | --- | --- |
-| Install, pins, photos | Mobile app | Out of the leader's path |
-| Sites, penetrations, nominations | Existing web app | The slice only reads |
-| Stock | Inventory system | The slice only reads |
-| Crew schedule | Existing operations | The slice reports blocked or clear |
-| Decisions (wait, escalate, proposal), pick reports, reviews on site | This app | The one thing that is new |
+| Installation, pins, photos | Mobile app | Not on the leader's path |
+| Sites, penetrations, nominations | Existing web app | Read-only for the slice |
+| Stock | Inventory system | Read-only for the slice |
+| Crew schedule | Existing operations | Consumes blocked or clear |
+| Decisions (waits, escalations, proposals), pick reports, on-site reviews | This app | The genuinely new data |
 
-## 5. Biggest uncertainties and how each iteration reduces them
+## 5. Key unknowns
 
-| Uncertainty | First addressed | How |
+| Question | Increment | Approach |
 | --- | --- | --- |
-| Do materials and quantities exist per solution? | 2 | Check the source of truth, or capture it |
-| Who receives escalations and in what form? | 3 | Trial with real recipients |
-| Does an approval workflow exist? | 4 | Confirm with the business before building |
-| Is shared stock misleading in practice? | 1 (labelled), 5 (fixed) | Watch for over-commit in a trial |
-| Do leaders want site-wide or per-penetration blocking? | 1 (site-wide), 5 | Observe how they plan crews |
+| Are materials and quantities per solution recorded anywhere? | 2 | Find the system of record, or begin capturing the data |
+| Who handles escalations, and through what? | 3 | Pilot with actual recipients |
+| Is there an approval process? | 4 | Confirm with the business first |
+| Does pooled stock mislead in practice? | 1 (labelled), 5 (resolved) | Look for double commitment in a pilot |
+| Should blocking apply per site or per penetration? | 1 (per site), 5 | Watch how leaders actually plan crews |
 
 ## 6. Notes
 
-- Order is driven by dependency and risk. Iterations 3 and 4 could swap if the business needs approvals sooner than escalation tracking.
-- Each iteration keeps the ports and contracts from iteration 1, so earlier work is extended rather than replaced.
-- Iteration 1 is deliberately honest about its limits: stub upstream data, shared unreserved stock, site-wide blocking, a browser-only demo sign-in.
-- Known debts: the default start's coordinates are more precise than a demo needs and should be coarsened; one catalogue unit test reads the file by a path that breaks under non-ASCII folder names on a local machine (CI passes) and should not depend on the path; browser tests use Playwright, kept over the Robot Framework first considered, because they already carry axe, the AC check and three server configurations.
+- Sequencing follows dependencies and risk. If approvals matter sooner than escalation tracking, increments 3 and 4 can swap.
+- Ports and contracts from increment 1 carry forward, so later increments extend the code instead of rewriting it.
+- Increment 1 states its limits openly: stubbed upstreams, pooled unreserved stock, whole-site blocking, a client-side demo sign-in.
+- Technical debt: the fallback origin's coordinates carry more precision than a demo requires and should be rounded; one catalogue unit test locates the CSV by a path that fails in folders with non-ASCII names on a developer machine (CI is unaffected) and should not rely on the path; end-to-end tests stay on Playwright rather than the Robot Framework option considered early, as the existing suite already runs axe, the AC gate and three server configurations.

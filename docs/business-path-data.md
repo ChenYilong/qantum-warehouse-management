@@ -1,105 +1,105 @@
-# Business path and data gaps
+# Team-leader workflow and missing data
 
-Walk of the team-leader path in the brief. Each step names the records it needs, which fields the catalogue already has, and what is missing.
+Step-by-step trace of the workflow in the brief. For each step: the records involved, what the catalogue already supplies, and what has to come from elsewhere.
 
-Legend: **have** = in `solutions-excerpt.csv`. **assume** = exists in QAntum but not in this file. **sample** = invent for the slice.
+Key: **have** = present in `solutions-excerpt.csv`. **assume** = held somewhere in QAntum, absent from this file. **sample** = fabricated for this slice.
 
-## Path
+## Workflow
 
-1. A site has planned penetrations, each tied to a nominated solution.
-2. Before the crew leaves, the team leader asks what materials that plan needs and whether they are in stock.
-3. A shortage is either escalated, waited on, or met by a different solution.
-4. The leader uses that result to schedule the crew.
+1. Each site carries planned penetrations; every penetration references a nominated solution.
+2. Ahead of departure, the leader needs the material list for that plan and its stock position.
+3. Every shortfall ends in one of three outcomes: escalation, a wait, or another solution.
+4. The outcome feeds crew scheduling.
 
-Operatives installing, pinning, and photographing stay on the mobile app. This path stops at "ready to send the crew, or not."
+Installation, pinning and photo capture belong to operatives in the mobile app. The trace ends at the go/no-go call for the crew.
 
-## 1. Nominated work
+## 1. Planned work
 
-Lives in the existing web specification, not the catalogue, and not in this slice's database.
+Owned by the existing web specification. Neither the catalogue nor this slice's database holds it.
 
-The team-leader app is isolated from that system. It does not join penetration or nomination tables. It calls two read APIs and treats the responses as an upstream contract. In the exercise both are stubbed with sample JSON of the same shape.
+The leader app has no direct access to that system's tables: no joins on penetrations or nominations. It consumes two read endpoints as an upstream contract. During the exercise, sample JSON with the identical shape answers both.
 
-- `GET /sites` returns the sites a team leader can open (id, name, address or job reference).
-- `GET /sites/{id}/nominations` returns that site's planned penetrations and nominated `internal_code` values.
+- `GET /sites`: sites visible to the leader (id, name, plus a street address or job ref).
+- `GET /sites/{id}/nominations`: planned penetrations for one site with their nominated `internal_code`.
 
-**Penetration** (assume, one opening on a site)
+**Penetration** (assume; a single opening at a site)
 
-- site, floor/plan, location
-- orientation, substrate, service type, size (so it can match a solution)
-- required integrity and insulation
-- nominated `solution.internal_code`
-- status: planned / ready / blocked
+- site, floor or plan, position
+- the attributes a solution must fit: size, orientation, substrate, service type
+- integrity and insulation the opening requires
+- the nominated `solution.internal_code`
+- state: planned, ready or blocked
 
-**Gap:** the CSV has no site, plan, or nomination. Sample a few penetrations that point at real `internal_code` values.
+**Gap:** sites, plans and nominations are absent from the CSV. A handful of sampled penetrations reference genuine `internal_code` values.
 
-## 2. What the solution needs
+## 2. Solution requirements
 
-**Solution** (have): codes, supplier, orientation, substrate, service, size, integrity, insulation. See `docs/catalogue-data-model.md`.
+**Solution** (have): internal and supplier codes, plus the orientation, substrate and service it covers, its size, and its integrity and insulation ratings. Field notes: `docs/catalogue-data-model.md`.
 
-**Gap:** no products and no quantities. The brief says the catalogue includes required products; this excerpt does not.
+**Gap:** the excerpt names neither products nor quantities, although the brief says the full catalogue has products.
 
-**Solution material** (sample, join solution to a material)
+**Solution material** (sample; links a solution to a material)
 
 - `solution.internal_code`
 - material
-- quantity per installation
+- amount used per installation
 
-Without this join, "materials required for the planned work" cannot be computed.
+This link is the only route from a plan to its material demand.
 
-## 3. Is it in stock?
+## 3. Stock position
 
-**Material** (sample): name, unit.
+**Material** (sample): name and unit.
 
-**Stock balance** (upstream, sample): material, quantity on hand, location (warehouse or van).
+**Stock balance** (upstream, sampled): the material, the amount on hand, and where it sits (warehouse or van).
 
-The team-leader app does not own inventory and does not write it. It reads balances from an existing system, stubbed as `GET /stock` (or stock for the materials a site needs). The brief does not show this inside the catalogue or the spec app, so treat it as another upstream system, not as tables in this slice.
+Inventory belongs to another system; the leader app reads balances and writes nothing back. The stub is `GET /stock` (optionally narrowed to a site's materials). The brief places stock in neither the catalogue nor the spec app, so the design treats it as its own upstream service instead of storing it in this slice's schema.
 
-**Gap:** no stock, delivery dates, or warehouse in the supplied file. Sample balances, including at least one short item.
+**Gap:** the supplied file has no balances, no delivery dates and no warehouse. Sampled balances include at least one material that runs short.
 
-Derived, not stored: for a set of penetrations, required quantity = sum of solution-material quantities. Shortage = required − on hand, when required is greater.
+Computed on read, never stored: demand across a group of penetrations is the sum of their solution-material amounts; the shortfall is demand minus on hand whenever demand is larger.
 
-## 4. What the leader does
+## 4. Leader decision
 
-**Shortage** (sample, the decision record)
+**Shortage** (sample; the record of the decision)
 
-- which penetrations and material
-- shortfall quantity
-- choice: escalate / wait / substitute
-- status: open / escalated / waiting / resolved
+- the affected penetrations and the material
+- shortfall amount
+- outcome: escalate, wait or substitute
+- state: open, escalated, waiting or resolved
 
-**Escalation** (sample): shortage, who it goes to (purchasing or warehouse), note, created at.
+**Escalation** (sample): the shortage, its recipient (purchasing, or the warehouse), a note, a timestamp.
 
-**Substitution** (owned as a proposal, only if the slice includes it): penetration, from solution, to solution, why it might fit, status `proposed`.
+**Substitution** (stored as a proposal, only when the slice covers it): penetration, current solution, proposed solution, the rationale, status `proposed`.
 
-Approval is downstream, not in this app. A manager would accept or reject it in the existing web app before the nomination changes. The brief shows managers and clients reviewing install progress and variations, not a pre-site approval queue, so do not assume that audit workflow already exists. Catalogue match is not approval. Escalate and wait do not need that approval.
+Sign-off sits downstream in QAntum's current web application, where a manager accepts or rejects before any nomination changes. What the brief describes is managers and clients watching progress and variations during installation, not a review queue before work starts, so this design does not take such an audit step for granted. Matching catalogue fields does not equal approval. Escalate and wait need no sign-off at all.
 
-**Schedule** (assume exists for crews; sample only the bit this slice needs): crew, site, date, blocked or clear based on open shortages.
+**Schedule** (assume crews are scheduled elsewhere; only the slice's part is sampled): crew, site, date, and whether open shortages block it.
 
-## Where it lives
+## System of record
 
-| Record | Where |
+| Record | Owner |
 | --- | --- |
-| Solution | Catalogue. Real CSV. |
-| Penetration, nomination | Existing spec system, read via API. Sample JSON stands in for that endpoint. |
-| Material, quantity per solution | Not in the excerpt. Sampled. |
-| Stock balance | Upstream inventory system, read-only via API. Sample JSON stands in. |
-| Shortage, escalation, substitution | New team-leader slice. |
-| Crew schedule | Existing operations. Slice only reads "blocked or not." |
-| Install, pin, photo | Mobile app. Out of this slice. |
+| Solution | Catalogue (supplied CSV). |
+| Penetration, nomination | Current spec system, through its API; sample JSON replaces the endpoint. |
+| Material, per-solution amount | Missing from the excerpt; sampled. |
+| Stock balance | Upstream inventory, read-only API; sample JSON replaces it. |
+| Shortage, escalation, substitution | This new leader slice. |
+| Crew schedule | Existing operations; the slice only reads blocked versus clear. |
+| Installation, pin, photo | Mobile app, outside the slice. |
 
-## First-slice boundary
+## Iteration 1 scope
 
-In: nominated penetrations, materials those solutions need, stock check, one action (escalate or wait).
+Included: nominated penetrations, the materials their solutions use, the stock comparison, and one leader outcome (escalate or wait).
 
-Out: real auth, real stock system, automatic compliant substitution, mobile install.
+Excluded: production authentication, a live inventory system, automatic substitution claimed as compliant, mobile installation.
 
-## Action endpoints
+## Write endpoints
 
-The leader experience stores actions only. It does not persist sites, nominations, stock, or the catalogue. Those are read from upstream systems (the catalogue from the supplied CSV in this exercise).
+Leader actions are the only persisted data. Sites, nominations, stock and the catalogue come from upstream (during the exercise the catalogue is read from the CSV it was given).
 
-- `POST /sites/{id}/shortages/{shortageId}/wait` records wait. Crew stays blocked until stock changes.
-- `POST /sites/{id}/shortages/{shortageId}/escalate` records an escalation to purchasing or the warehouse. Body: note, who it goes to.
-- `POST /sites/{id}/penetrations/{penetrationId}/substitutions` records a proposed substitute. Body: from `internal_code`, to `internal_code`, reason. Status stays `proposed`.
-- `GET /sites/{id}/actions` lists wait, escalate, and substitution proposals for that site.
+- `POST /sites/{id}/shortages/{shortageId}/wait`: store a wait; the crew remains blocked until stock moves.
+- `POST /sites/{id}/shortages/{shortageId}/escalate`: store an escalation; the body names the recipient (purchasing or warehouse) and carries a note.
+- `POST /sites/{id}/penetrations/{penetrationId}/substitutions`: store a substitute proposal; body carries the current and proposed `internal_code` and a reason; status fixed at `proposed`.
+- `GET /sites/{id}/actions`: every wait, escalation and proposal for one site.
 
-Approval of a substitution is not here. The existing web app would later update the nomination.
+Approving a substitution is out of scope; changing the nomination afterwards is a job for QAntum's web application.

@@ -1,41 +1,41 @@
-# Decisions so far
+# Slice boundary decisions
 
-First slice is the team-leader action experience. Other systems are documented and stubbed, not built.
+Iteration 1 builds the team leader's decision flow. Neighbouring systems are described and replaced by stubs; none of them is implemented here.
 
-## Boundary
+## What the app owns
 
-The leader app stores actions only: wait, escalate, and a proposed substitute.
+Persisted records are limited to leader actions: wait, escalate, substitute proposal.
 
-It does not write sites, nominations, stock, or the solution catalogue. It reads those from upstream systems.
+Sites, nominations, stock and the solution catalogue are upstream data. The app reads them and never writes back.
 
-## Upstream reads
+## Inbound reads
 
-- `GET /sites` lists sites the leader can open.
-- `GET /sites/{id}/nominations` returns planned penetrations and the nominated `internal_code`.
-- `GET /stock` returns inventory balances, read-only.
+- `GET /sites`: the sites a leader is allowed to open.
+- `GET /sites/{id}/nominations`: planned penetrations, each with its nominated `internal_code`.
+- `GET /stock`: inventory balances (read-only).
 
-In the exercise these are stubbed with sample JSON. The solution catalogue is loaded from `data/solutions-excerpt.csv` so codes can be resolved locally. Production owns that catalogue; nominations only reference `internal_code`.
+For the exercise, sample JSON answers all three. `data/solutions-excerpt.csv` is parsed at runtime so codes resolve without a network call. In production the catalogue has its own owner, and a nomination carries only the `internal_code`.
 
-## Actions this app owns
+## Write endpoints
 
 - `POST /sites/{id}/shortages/{shortageId}/wait`
 - `POST /sites/{id}/shortages/{shortageId}/escalate`
 - `POST /sites/{id}/penetrations/{penetrationId}/substitutions`
 - `GET /sites/{id}/actions`
 
-A substitute selects another existing catalogue solution. It does not invent one. Status stays `proposed`.
+A proposal points at a solution that already exists in the catalogue; it never creates a new one. The status is always `proposed`.
 
-## Downstream, not built
+## Consumers outside the slice
 
-- Approval of a substitute happens in the existing web app. Only then does that app update the nomination row. The brief does not show this approval queue already existing.
-- Crew planning consumes ready vs blocked.
-- Escalate is received by purchasing or the warehouse.
-- Install, pins, and photos stay on the mobile app.
+- The existing web app would approve or reject a proposal and then change the nomination. The brief gives no evidence that such a review queue exists today.
+- Crew scheduling reads the ready/blocked outcome.
+- Purchasing or the warehouse picks up escalations.
+- Installation, floor-plan pins and photo evidence remain in the mobile app.
 
-## Still a gap inside the slice
+## Gap the slice has to fill
 
-The CSV has no materials or quantities. Shortage math needs sample data that maps a solution to materials and a quantity per install.
+The CSV carries neither materials nor quantities. A shortfall calculation therefore relies on invented rows linking every solution to its materials, with an amount per install.
 
-## Left for later
+## Deferred
 
-Real auth, a real inventory system, nomination writes, crew scheduling, and compliant-substitution approval.
+Production authentication, a live inventory feed, writing nominations, crew scheduling, and a compliance review for substitutes.
