@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MenuBar } from "@/ui/AppBar";
-import { ACTIONS_PATH, CALENDAR_PATH, MAP_PATH, MATERIALS_PATH, penetrationPath, sitePath } from "@/ui/format";
+import { CALENDAR_PATH, MAP_PATH, penetrationPath, sitePath } from "@/ui/format";
 import { KindIcon, type EntityKind } from "@/ui/KindIcon";
 import { NAV } from "@/ui/messages";
 import { SignOutButton } from "@/ui/SignOutButton";
@@ -129,12 +129,6 @@ export default function LandingPage() {
             <li>Everything here is sample data. Only the fire-stopping product list is genuine.</li>
             <li>Sign in as qantum with the password sdfkjh&amp;_24. Everyone who visits shares one set of choices.</li>
             <li>Nothing is ordered or messaged for real. A suggested swap stays a suggestion until a manager checks it.</li>
-            <li>
-              <p>
-                Two more pages hold the detail: <Link href={MATERIALS_PATH}>{NAV.materials}</Link> totals the stock every job
-                draws on, and <Link href={ACTIONS_PATH}>{NAV.actions}</Link> lists each choice made so far.
-              </p>
-            </li>
             <li>
               <p>
                 Curious how it was built? <a href="https://github.com/ChenYilong/qantum-warehouse-management">Browse the source on GitHub</a>.

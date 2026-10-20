@@ -32,8 +32,9 @@ test("landing page explains the demo, no screen carries a Demo tag, and there is
   ] as const) {
     await expect(main.getByRole("link", { name, exact: true })).toHaveAttribute("href", href);
   }
-  // No tab it no longer has: Inventory and Decisions are pages, not tabs.
-  await expect(main.getByText(/\b(tab|tabs)\b.*\b(Inventory|Decisions)\b/)).toHaveCount(0);
+  // Inventory and Decisions are no longer part of the Guide: neither named nor linked.
+  await expect(main.getByText(/\b(Inventory|Decisions)\b/)).toHaveCount(0);
+  await expect(main.locator('a[href="/materials"], a[href="/actions"]')).toHaveCount(0);
   await expect(page.getByText("Everything here is sample data", { exact: false })).toBeVisible();
   await expect(page.getByText("Sign in as qantum with the password sdfkjh&_24", { exact: false })).toBeVisible();
   await expect(page.getByText("shares one set of choices", { exact: false })).toBeVisible();
@@ -52,8 +53,6 @@ test("landing page explains the demo, no screen carries a Demo tag, and there is
     ["Northgate Depot", "/sites/site-c?show=data-problems"],
     ["Map", "/map"],
     ["Calendar", "/calendar"],
-    ["Inventory", "/materials"],
-    ["Decisions", "/actions"],
   ] as const) {
     await expect(main.getByRole("link", { name, exact: true })).toHaveAttribute("href", href);
   }

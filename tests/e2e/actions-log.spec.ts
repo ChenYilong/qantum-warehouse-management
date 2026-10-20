@@ -10,12 +10,8 @@ const SITES = [
   ["site-d", "Foundry Lane Annex"],
 ] as const;
 
-test("AC 43, AC 83: the Guide opens the actions log, one section per site; it has no tab of its own", async ({ page }) => {
-  await gotoApp(page, "/about-this-demo");
-  const item = page.getByRole("main").getByRole("link", { name: "Decisions", exact: true }).first();
-  await expect(item).toBeVisible();
-  await item.click();
-  await expect(page).toHaveURL(/\/actions$/);
+test("AC 43, AC 83: the actions log at /actions, one section per site; it has no tab of its own", async ({ page }) => {
+  await gotoApp(page, "/actions");
   await expect(page.getByRole("heading", { level: 1, name: "Decisions" })).toBeVisible();
 
   const tabs = page.getByRole("navigation", { name: "Main" });
