@@ -481,6 +481,17 @@ From the author: make the card's Deadline line and Operator line buttons. The de
 | Operator line | "Operator · Mere Tane" as a muted 48px button with a chevron; Text operator and Call operator beneath as before, following the chosen person |
 | Operator dialog | Cancel, "Change operator", Confirm; the project's name; the app's radio rows (as in pick reports), each with name and number. Confirming the same person just closes |
 | Pop-up | An alert dialog with the sentence and OK: "Cedar Court, Block A: deadline updated to Mon 2 Nov 2026. Saved on this device only." / "You've updated the operator for Cedar Court, Block A to Wiremu Ngata. Saved on this device only." Focus returns to the line |
-| Where it is kept | The deployed app cannot write `data/sample`, so the change is stored in this browser (localStorage) and read before the sample data on every card, the Calendar tab's grid, and the big signal's call. Other devices and the site page still show the sample data |
+| Where it is kept | The deployed app cannot write `data/sample`, so the change is stored in this browser (localStorage) and read before the sample data on every card, the Calendar tab's grid, and the big signal's call. Other devices still show the sample data |
 | Idle cards | A project with nothing planned now has one button, its deadline; it still has no call or text (AC 57) |
+
+## 23. Inner pages follow the card (20 Oct 2026)
+
+From the author: apply the same browser-first rule to the second-level pages wherever "Operator" or "Deadline" appears. Requirement: AC 88. Components: `StoredOperatorRow`, `StoredContacts` and `useOperator` in `src/ui/SiteEdits.tsx`.
+
+| Place | Now reads this device's operator first |
+| --- | --- |
+| Site page header (shared by its inner pages) | "Operator · …", Text operator, Call operator (`OperatorRow` itself, fed the stored person), and the big signal's call |
+| Blocked panel, "Ask before you decide" | The operator's row and its "Call … , operator" button; picker and operator share one row only when they are the same person |
+| Picks section | Send the crew texts the stored operator |
+| Deadline | Shown on no inner page, so nothing changed |
 

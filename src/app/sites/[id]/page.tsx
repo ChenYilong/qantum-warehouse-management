@@ -8,7 +8,7 @@ import { getCachedActions, getCachedMaterialDetail, getCachedPickCheck, getCache
 import { loadPage } from "../../_lib/load";
 import { Notice } from "@/ui/Notice";
 import { PickSummary } from "@/ui/PickSummary";
-import { readyText, smsHref } from "@/ui/contacts";
+import { readyText } from "@/ui/contacts";
 import { PenetrationFilters } from "@/ui/PenetrationFilters";
 import { PenetrationGroups, type PenetrationPlace } from "@/ui/PenetrationGroups";
 import { fromLogPath, materialPagePath, siteFromMaterialPath, sitePath } from "@/ui/format";
@@ -60,7 +60,8 @@ export default async function SitePage({ params, searchParams }: PageProps) {
           siteName={frame.site.name}
           view={picksLoad?.status === "ready" ? picksLoad.value : null}
           siteClear={frame.readiness?.crewStatus === "clear"}
-          operatorTextHref={frame.site.operator ? smsHref(frame.site.operator.phone, readyText(frame.site.name, frame.site.reference)) : null}
+          operator={frame.site.operator}
+          operatorText={readyText(frame.site.name, frame.site.reference)}
         />
       ) : null}
       {frame.status === "ready" && frame.readiness && frame.places ? (

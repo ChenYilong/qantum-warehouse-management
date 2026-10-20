@@ -114,3 +114,37 @@ test("AC 87: the operator opens a list with the current one ticked; only a diffe
   await expect(selected.getByRole("button", { name: "Operator · Wiremu Ngata" })).toBeVisible();
   await expect(selected.locator("[data-signal]")).toHaveAttribute("href", "tel:+447700900158");
 });
+
+async function changeOperator(page: Page, site: string, from: string, to: string) {
+  await gotoApp(page, "/sites");
+  await page.getByRole("list", { name: "Projects" }).getByRole("listitem").filter({ hasText: site }).getByRole("button", { name: `Operator · ${from}` }).click();
+  const dialog = page.getByRole("dialog", { name: "Change operator" });
+  await dialog.getByRole("radio", { name: new RegExp(to) }).check();
+  await dialog.getByRole("button", { name: "Confirm" }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "OK" }).click();
+}
+
+test("AC 88: a site's own page reads the operator chosen on its card first: the row, the signal, Send the crew and who to ask", async ({ page }) => {
+  // Before any change: the sample data's operator.
+  await gotoApp(page, "/sites/site-b");
+  await expect(page.getByRole("main").getByText("Operator · Wiremu Ngata")).toBeVisible();
+
+  // Quayside House (blocked) to Tama Rewi.
+  await changeOperator(page, "Quayside House, Levels 3 to 5", "Wiremu Ngata", "Tama Rewi");
+  await gotoApp(page, "/sites/site-b");
+  const main = page.getByRole("main");
+  await expect(main.getByText("Operator · Tama Rewi")).toBeVisible();
+  await expect(main.getByRole("link", { name: "Call operator" })).toHaveAttribute("href", "tel:+447700900159");
+  await expect(main.getByRole("link", { name: "Text operator" })).toHaveAttribute("href", /^sms:\+447700900159\?&body=Quayside%20House/);
+  await expect(main.locator("[data-signal]")).toHaveAttribute("href", "tel:+447700900159");
+  const panel = page.getByRole("region", { name: "Needs your decision" });
+  await expect(panel.getByRole("link", { name: "Call Tama Rewi, operator" })).toHaveAttribute("href", "tel:+447700900159");
+  await expect(panel.getByText("Wiremu Ngata")).toHaveCount(0);
+  await assertAxe(page);
+
+  // Cedar Court (clear, picks match) to Wiremu Ngata: Send the crew texts him.
+  await changeOperator(page, "Cedar Court, Block A", "Mere Tane", "Wiremu Ngata");
+  await gotoApp(page, "/sites/site-a");
+  await expect(page.getByRole("main").getByText("Operator · Wiremu Ngata")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Picks" }).getByRole("link", { name: "Send the crew" })).toHaveAttribute("href", /^sms:\+447700900158\?&body=/);
+});

@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useId } from "react";
 import { useConnection } from "./ConnectionBar";
 import { clockLabel } from "./connection";
-import { telHref } from "./contacts";
+import { smsHref, telHref, type ContactView } from "./contacts";
 import { formatRecordedAt } from "./format";
 import { Icon } from "./Icon";
 import { PICKS } from "./messages";
 import { useWaiting } from "./PickOutboxSync";
+import { useOperator } from "./SiteEdits";
 import type { CheckedPickLine } from "@/domain";
 import { crewGate, initials, pickAmountLine, pickEmailHref, pickLineAnchor, pickLineLabel, pickReviewPath, picksPath, reportFinding, type PickView } from "./picks";
 import type { StatusView } from "./status";
@@ -32,14 +33,18 @@ export function PickSummary({
   siteName,
   view,
   siteClear,
-  operatorTextHref,
+  operator,
+  operatorText,
 }: {
   siteId: string;
   siteName: string;
   /** Null when the pick system could not be read. */
   view: PickView | null;
   siteClear: boolean;
-  operatorTextHref: string | null;
+  /** The sample data's operator; the one a card changed on this device wins (AC 88). */
+  operator: ContactView | undefined;
+  /** The "you can go" message the crew is sent. */
+  operatorText: string;
 }) {
   const connection = useConnection();
   const phase = connection.state;
@@ -49,6 +54,8 @@ export function PickSummary({
   const reasonId = useId();
   const savedAt = clockLabel(connection.lastOkAt ?? connection.pageLoadedAt, connection.now) ?? "unknown";
   const gate = crewGate(view ? view.check.status : "unavailable", siteClear, phase);
+  const chosen = useOperator(siteId, operator);
+  const operatorTextHref = chosen ? smsHref(chosen.phone, operatorText) : null;
   const canSend = gate.enabled && operatorTextHref !== null;
 
   return (
