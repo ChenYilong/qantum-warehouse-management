@@ -187,5 +187,5 @@ Config failures return a generic 500 and log one fixed reason token (`config_inv
 ## Known limits
 
 - The Postgres store is proven by a contract suite against a real Postgres 17 (locally and in CI): appends, idempotent replay, ordering, constraints, and that the app role cannot update, delete, truncate or create tables. Set `REQUIRE_DB_CONTRACT=1` to make a skipped run fail.
-- No login. Anyone with the URL can add demo actions.
+- No server-side login. The demo sign-in lives in the browser, so anyone with the URL can add demo actions.
 - `src/server/*` is not yet marked `server-only` (needs a dependency). Nothing client-side imports it today, and a test enforces that.

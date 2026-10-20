@@ -1,6 +1,6 @@
 # Iteration plan
 
-A short sequence of iterations, each useful on its own. Iteration 1 is the slice specified in `slice-specification.md`. Later iterations are directions with reasons, not commitments. Terms are in `glossary.md`.
+A short sequence of iterations, each useful on its own. Iteration 1 is the slice specified in `slice-specification.md`, now delivered (section 3); what it did not finish is carried into iterations 2 to 7. Later iterations are directions with reasons, not commitments. Terms are in `glossary.md`.
 
 ## 1. The need
 
@@ -24,19 +24,34 @@ The slice reads from upstream systems and owns only the decisions. That keeps it
 
 | # | Iteration | Main value | Depends on |
 | --- | --- | --- | --- |
-| 1 | Readiness and decisions (this slice) | Leader sees shortages and records a decision. Crew status is reported. | Stubs for sites, nominations, stock, materials |
+| 1 | Readiness and decisions (this slice, delivered) | Leader sees shortages and records a decision. Crew status is reported. | Stubs for sites, nominations, stock, materials |
 | 2 | Real upstream data | Numbers are trustworthy. Auth and roles exist. | Access to real APIs and a login method |
 | 3 | Decisions reach people | Escalations are received, acknowledged, and closed. | Iteration 1 data. Channel for purchasing and warehouse |
 | 4 | Substitution approval | A proposal becomes a controlled, approved variation. | A reviewer role and an update path to the nomination |
 | 5 | Smarter planning | Partial dispatch and stock allocation across sites. | Reliable stock and a reservation model |
 | 6 | Field use | Works on site with poor signal, and in the mobile app. | Iterations 2 and 3 |
+| 7 | AI assistance | A photo of a material fills in its details, confirmed by a person. | Iteration 6's photos, a product image library |
 
-### Iteration 1: readiness and decisions
+### Iteration 1: readiness and decisions (delivered)
 
-- **Scope:** per `slice-specification.md`. Sample data for upstream systems, real catalogue, Supabase for actions.
+- **Scope:** per `slice-specification.md`. Sample data for upstream systems, real catalogue, Supabase Postgres for decisions, pick reports and reviews.
 - **Value:** closes the leader's loop and proves the decision data model.
-- **Exit criteria:** acceptance criteria 1 to 47 pass in CI. Deployed at a public URL. Demonstration scenario runs from a clean browser.
-- **Leaves untested:** real upstream latency and data quality, real users, real approval.
+- **Exit criteria:** acceptance criteria 1 to 85 pass in CI. Deployed at a public URL. Demonstration scenario runs from a clean browser. Met: every merge to `main` deploys and passes the smoke test.
+- **Leaves untested:** real upstream latency and data quality, real users, real approval. Also: the sign-in is a browser-only demo with no server check; drive times depend on Mapbox; offline, only pick reports are held, not decisions.
+
+**Delivered beyond the first plan.** Walking the product on a phone added these to iteration 1:
+
+| Added | From | Requirements |
+| --- | --- | --- |
+| Pick check, review on site, pick-error reports to the warehouse | Iteration 3 (decisions reach people), in part | FR26 to FR28 |
+| Pick reports held offline and sent once back online, with idempotency keys | Iteration 6 (field use), in part | AC 66 |
+| Demo sign-in with a role (team leader or operator) | Iteration 2 (auth), as a stand-in | FR25 |
+| Online switch always in view, offline details, Sync now | New | FR18, FR24 |
+| One big signal per site, by shape and colour, that calls the site's operator | New | FR19, FR22, FR23 |
+| A map, directions and the drive per project, from a default start until the phone shares its location | New | FR30 |
+| Today's verdict, project deadlines and a deadline calendar | Iteration 5 (planning), in part | FR31 to FR33 |
+| Tab bar Map, Calendar, Projects, Guide; back returns where the visit came from | New | FR34, AC 83 to 85 |
+| Readiness filter and search on the projects list | New | FR29 |
 
 ### Iteration 2: real upstream data
 
@@ -44,6 +59,7 @@ The slice reads from upstream systems and owns only the decisions. That keeps it
 - **Value:** the leader can rely on the numbers, and only the right people can act.
 - **Open uncertainty:** whether required products and quantities exist anywhere today. The brief says the catalogue includes products, but the excerpt has none. If they do not exist, this iteration starts with capturing them.
 - **Also here:** report the catalogue data findings back to the owner (`catalogue-data-model.md`), and decide whether the app becomes a module of the existing web app.
+- **Carried from iteration 1:** Supabase Auth in place of the demo sign-in; role and assignment checks on the server; a people table; the leader assigns operators to a site on a day.
 - **Exit:** a real site's readiness matches what the stock system and specification show, checked against a manager's own figures.
 
 ### Iteration 3: decisions reach people
@@ -51,6 +67,7 @@ The slice reads from upstream systems and owns only the decisions. That keeps it
 - **Scope:** purchasing and warehouse see escalations, acknowledge them, and mark them resolved. The leader sees the status. Notification by email or the existing channel.
 - **Value:** an escalation stops being a note nobody reads. The leader knows who is dealing with it and by when.
 - **Open uncertainty:** who receives escalations today, and in what tool.
+- **Carried from iteration 1:** the warehouse's status on a pick report, back to the leader; a one-tap restock request from site; arrival notices by app and text.
 - **Exit:** an escalated shortage is acknowledged by a real recipient in a trial, and the leader sees that.
 
 ### Iteration 4: substitution approval
@@ -59,6 +76,7 @@ The slice reads from upstream systems and owns only the decisions. That keeps it
 - **Value:** substitution becomes a legitimate way to unblock work, and the golden thread records who approved what and why.
 - **Open uncertainty:** whether an approval workflow exists. The brief shows managers reviewing install progress and variations, not a pre-site approval queue. Compliance review rules and who is qualified to approve need the business.
 - **Exit:** an approved substitute updates the nomination, clears the shortage, and appears in the audit trail. A rejected one tells the leader why.
+- **Carried from iteration 1:** substitution by risk. Fire-stopping materials are never substituted automatically; low-risk consumables only within equivalents approved in advance.
 
 ### Iteration 5: smarter planning
 
@@ -66,6 +84,7 @@ The slice reads from upstream systems and owns only the decisions. That keeps it
 - **Value:** removes the two known limits of iteration 1: the all-or-nothing site block, and shared stock that can over-promise.
 - **Depends on:** a reservation model owned by inventory, and delivery data.
 - **Exit:** two sites competing for the same stock are told the truth, and a partly ready site can be worked.
+- **Carried from iteration 1:** a decision deadline before departure, falling back to the safest option (affected penetrations wait, purchasing is told); a leader's ordered shortage preferences, with "escalate and hold" always last; a waste allowance on required quantities; a packing slip before departure (planned against picked, exceptions first).
 
 ### Iteration 6: field use
 
@@ -73,6 +92,14 @@ The slice reads from upstream systems and owns only the decisions. That keeps it
 - **Value:** works at a site with weak signal, and fits where operatives already work.
 - **Depends on:** stable contracts from iterations 2 and 3, and the mobile sync pattern.
 - **Exit:** a leader records a decision offline and it syncs without duplicates.
+- **Carried from iteration 1:** offline reads (IndexedDB); decisions queued like pick reports; real photo upload, several per report (today only "photo attached" is recorded); location on reports (GPS or a point on the floor plan); a "drawing does not match" report type.
+
+### Iteration 7: AI assistance
+
+- **Scope:** a photo of a material is matched against the product library to suggest its product, size and fire rating, with a confidence shown. Below a threshold a person must confirm; every field can be changed; the record keeps what the AI suggested and what the person changed. AR stays with the mobile app.
+- **Value:** less typing on site, without handing the compliance decision to a model.
+- **Depends on:** iteration 6's photos and a labelled product image library.
+- **Exit:** suggestions are right often enough to save time in a trial, and no unconfirmed suggestion reaches a record.
 
 ## 4. What stays where
 
@@ -82,7 +109,7 @@ The slice reads from upstream systems and owns only the decisions. That keeps it
 | Sites, penetrations, nominations | Existing web app | The slice only reads |
 | Stock | Inventory system | The slice only reads |
 | Crew schedule | Existing operations | The slice reports blocked or clear |
-| Decisions (wait, escalate, proposal) | This app | The one thing that is new |
+| Decisions (wait, escalate, proposal), pick reports, reviews on site | This app | The one thing that is new |
 
 ## 5. Biggest uncertainties and how each iteration reduces them
 
@@ -98,4 +125,5 @@ The slice reads from upstream systems and owns only the decisions. That keeps it
 
 - Order is driven by dependency and risk. Iterations 3 and 4 could swap if the business needs approvals sooner than escalation tracking.
 - Each iteration keeps the ports and contracts from iteration 1, so earlier work is extended rather than replaced.
-- Iteration 1 is deliberately honest about its limits: stub upstream data, shared unreserved stock, site-wide blocking, no login.
+- Iteration 1 is deliberately honest about its limits: stub upstream data, shared unreserved stock, site-wide blocking, a browser-only demo sign-in.
+- Known debts: the default start's coordinates are more precise than a demo needs and should be coarsened; one catalogue unit test reads the file by a path that breaks under non-ASCII folder names on a local machine (CI passes) and should not depend on the path; browser tests use Playwright, kept over the Robot Framework first considered, because they already carry axe, the AC check and three server configurations.
