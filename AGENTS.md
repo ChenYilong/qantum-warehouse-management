@@ -18,7 +18,7 @@ Skills are pulled from [Skill Forge](https://github.com/more-than-code/skill-for
 - `src/domain/` stays framework-free: no imports from Next.js, React, a DB driver, the file system or any adapter. ESLint blocks violations.
 - Each upstream source (site list, nominations, solution materials, stock) is reached through a port in `src/ports/`, implemented in `src/adapters/`. The catalogue CSV has no port: one adapter parses it into a typed map.
 - Handlers under `src/app/` do three things only: Zod validation, one use-case call, and mapping failures to `{ code, message }`.
-- Persistence is limited to wait, escalate and substitute-proposal records, pick-error reports and on-site reviews. The app treats the catalogue, pick lists, stock, nominations and sites as read-only.
+- Persistence is limited to wait, escalate and substitute-proposal records, pick-error reports and on-site reviews. The app treats the catalogue, pick lists, stock, nominations and sites as read-only; a leader's deadline or operator change on a card stays in their browser's localStorage (AC 86, 87).
 
 ## Safety invariants (never relax)
 

@@ -117,6 +117,8 @@ One row per acceptance criterion: the behaviour in a few words, then every test 
 | 83 | Map and Calendar tabs | `e2e/actions-log.spec.ts`, `e2e/calendar.spec.ts`, `e2e/home-status.spec.ts`, `e2e/navigation-tabs.spec.ts`, `e2e/scenario.spec.ts`, `e2e/today.spec.ts`, `e2e/wide-screen.spec.ts`, `unit/ui-nav-section.test.ts` |
 | 84 | First tab on entry | `e2e/entry.spec.ts`, `unit/entry.test.ts` |
 | 85 | Back returns to the originating page | `e2e/back-navigation.spec.ts`, `unit/nav-back.test.ts` |
+| 86 | Move a deadline on the card, kept on the device | `e2e/schedule-edits.spec.ts`, `e2e/field-ui.spec.ts`, `unit/site-edits.test.ts` |
+| 87 | Change the operator on the card, kept on the device | `e2e/schedule-edits.spec.ts`, `unit/site-edits.test.ts` |
 
 CI runs a script that enumerates AC numbers and fails if any lacks a referencing test.
 

@@ -36,7 +36,7 @@ Reading from upstream and owning only decisions keeps the slice small, independe
 
 - **Scope:** as `slice-specification.md` defines. Upstream systems are sampled, the catalogue is real, and Supabase Postgres stores decisions, pick reports and on-site reviews.
 - **Outcome:** the leader's loop is closed, and the decision data model is exercised end to end.
-- **Done when:** CI passes acceptance criteria 1 through 85, a public URL serves the build, and the demo script works in a fresh browser. Status: achieved; each merge into `main` deploys and clears the smoke test.
+- **Done when:** CI passes acceptance criteria 1 through 87, a public URL serves the build, and the demo script works in a fresh browser. Status: achieved; each merge into `main` deploys and clears the smoke test.
 - **Not proven:** how production upstreams behave (latency, data quality), actual users, an actual approval. In addition: sign-in is a client-side demo the server never checks; drive times rely on Mapbox; the offline queue holds pick reports but no decisions.
 
 **Shipped beyond the original plan.** Phone walkthroughs pulled these into increment 1:
@@ -52,6 +52,7 @@ Reading from upstream and owning only decisions keeps the slice small, independe
 | Daily verdict, deadlines per project, deadline calendar | Partly increment 5 (planning) | FR31 to FR33 |
 | Four tabs (Map, Calendar, Projects, Guide), and back navigation that returns to the originating screen | Not planned | FR34; AC 83, 84, 85 |
 | Readiness filter and text search over projects | Not planned | FR29 |
+| Move a deadline and change the operator on a card, kept in the browser | Partly increment 5 (planning: write back to the planning system) | FR35; AC 86, 87 |
 
 ### Increment 2: production data sources
 

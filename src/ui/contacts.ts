@@ -74,6 +74,8 @@ export type TapAction =
 
 export interface OperatorActions {
   readonly name: string;
+  /** The prepared message, so a card can address it to another operator (AC 87). */
+  readonly text: string;
   readonly textHref: string;
   readonly callHref: string;
 }
@@ -105,7 +107,7 @@ export const SITE_ACTIONS = {
 } as const;
 
 function operatorActions(operator: ContactView, text: string): OperatorActions {
-  return { name: operator.name, textHref: smsHref(operator.phone, text), callHref: telHref(operator.phone) };
+  return { name: operator.name, text, textHref: smsHref(operator.phone, text), callHref: telHref(operator.phone) };
 }
 
 export function siteAction(site: SiteActionInput): SiteAction {

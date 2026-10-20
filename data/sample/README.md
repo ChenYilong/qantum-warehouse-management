@@ -20,5 +20,7 @@ Per site, `sites.json` also carries:
 - `location`: a made-up point in Auckland;
 - the operator and picker, both fictional.
 
+The app never writes these files. A deadline or operator a leader changes on a card (AC 86, 87) is kept in that browser's localStorage and read before the value here; the candidates for operator are the operators and pickers listed in `sites.json`, so no extra file is needed.
+
 Phone numbers come from the block Ofcom reserves for TV and film (`07700 900000`–`07700 900999`, stored as `+44 7700 900156`), so Call and
 Text in the app connect to nobody. Northgate Depot has a single person who both picks and installs, listed once.

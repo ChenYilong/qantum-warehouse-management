@@ -1,4 +1,5 @@
-import type { SiteAction } from "./contacts";
+import type { ContactView, SiteAction } from "./contacts";
+import { OperatorCall } from "./SiteEdits";
 import { ReloadSignal } from "./ReloadSignal";
 import type { KnobShape, SignalTone } from "./signal";
 import type { StatusView } from "./status";
@@ -60,8 +61,21 @@ function Mark({ mark }: { mark: "I" | "O" }) {
  * with the knob left means blocked. Tapping it calls the operator, the same as Call operator, because that is the
  * most common action. A site that can't be checked asks again; one with nothing to do is not tappable.
  * `describedBy` names the card's title, so the site name is a description and never part of the control's name.
+ * On a card (`siteId` and `operator` given) the call goes to the operator this device chose (AC 87).
  */
-export function SiteSignal({ status, action, describedBy }: { status: StatusView; action: SiteAction; describedBy?: string }) {
+export function SiteSignal({
+  status,
+  action,
+  describedBy,
+  siteId,
+  operator,
+}: {
+  status: StatusView;
+  action: SiteAction;
+  describedBy?: string;
+  siteId?: string;
+  operator?: ContactView;
+}) {
   const { signal, tap } = action;
   const className = `${styles.signal} ${TONE_CLASS[signal.tone]}`;
   const onRight = signal.knob === "right";
@@ -75,6 +89,13 @@ export function SiteSignal({ status, action, describedBy }: { status: StatusView
       {onRight ? <Knob shape={signal.shape} /> : <Mark mark={signal.mark} />}
     </>
   );
+  if (tap.kind === "call" && siteId && operator) {
+    return (
+      <OperatorCall siteId={siteId} upstream={operator} className={className} tone={signal.tone} knob={signal.knob} describedBy={describedBy}>
+        {face}
+      </OperatorCall>
+    );
+  }
   if (tap.kind === "call") {
     return (
       <a className={className} href={tap.href} data-signal={signal.tone} data-knob={signal.knob} aria-describedby={describedBy}>
