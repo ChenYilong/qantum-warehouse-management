@@ -203,7 +203,8 @@ describe("input contrast", () => {
     // The signal replaces the banner, and a blocked site opens with it, then its operator row, then the panel.
     expect(frame).not.toContain("<Banner");
     const signal = frame.indexOf("<SiteSignal");
-    const operator = frame.indexOf("<OperatorRow");
+    // The row reads the operator this device chose first (AC 88).
+    const operator = frame.indexOf("<StoredOperatorRow");
     const panel = frame.indexOf("<ActionNeeded");
     expect(signal).toBeGreaterThan(-1);
     expect(signal).toBeLessThan(operator);

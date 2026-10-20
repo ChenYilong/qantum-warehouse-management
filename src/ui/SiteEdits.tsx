@@ -3,10 +3,12 @@
 import { useMemo, useRef, useState, useSyncExternalStore, type ReactNode, type RefObject } from "react";
 import { CALENDAR, localDate, monthOf, monthTitle, monthWeeks, shiftMonth, type Month } from "./calendar";
 import { MiniKnob } from "./MiniKnob";
-import { smsHref, SITE_ACTIONS, telHref, type ContactView } from "./contacts";
+import { ACTION_NEEDED } from "./action-needed";
+import { contactRoles, smsHref, SITE_ACTIONS, telHref, type ContactView } from "./contacts";
 import { DEADLINE, deadlineOf } from "./deadline";
 import dialogStyles from "./decisions/decisions.module.css";
 import { Icon } from "./Icon";
+import { OperatorRow } from "./OperatorRow";
 import type { SignalView, SignalTone } from "./signal";
 import {
   effectiveDate,
@@ -379,5 +381,62 @@ export function OperatorCall({
     <a className={className} href={telHref(operator.phone)} data-signal={tone} data-knob={knob} aria-describedby={describedBy}>
       {children}
     </a>
+  );
+}
+
+/** The operator this device chose for a project, else the sample data's: what every inner page shows (AC 88). */
+export function useOperator(siteId: string, upstream: ContactView | undefined): ContactView | undefined {
+  return effectiveOperator(useSiteEdits(), siteId, upstream);
+}
+
+/**
+ * The site page's "Operator · Mere Tane" row (AC 55, 88): `OperatorRow` itself, with the name, Text operator and
+ * Call operator following the operator this device chose on a card.
+ */
+export function StoredOperatorRow({
+  siteId,
+  upstream,
+  text,
+  nameId,
+  describedBy,
+}: {
+  siteId: string;
+  upstream: ContactView;
+  text: string;
+  nameId?: string;
+  describedBy?: string;
+}) {
+  const operator = useOperator(siteId, upstream) ?? upstream;
+  return (
+    <OperatorRow
+      operator={{ name: operator.name, text, textHref: smsHref(operator.phone, text), callHref: telHref(operator.phone) }}
+      nameId={nameId}
+      describedBy={describedBy}
+    />
+  );
+}
+
+/** A blocked site's "Who to call" (AC 50, 88): picker and operator, the operator as this device chose. */
+export function StoredContacts({ siteId, operator, picker }: { siteId: string; operator?: ContactView; picker?: ContactView }) {
+  const contacts = contactRoles(useOperator(siteId, operator), picker);
+  if (contacts.length === 0) return null;
+  return (
+    <>
+      <h3>{ACTION_NEEDED.contactsHeading}</h3>
+      <ul className={styles.actionList}>
+        {contacts.map(({ role, contact }) => (
+          <li key={role} className={styles.contactRow}>
+            <span>
+              <span className={styles.muted}>{role}</span>
+              <br />
+              <strong>{contact.name}</strong>
+            </span>
+            <a className={styles.button} href={telHref(contact.phone)} aria-label={`${ACTION_NEEDED.call} ${contact.name}, ${role.toLowerCase()}`}>
+              {ACTION_NEEDED.call}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

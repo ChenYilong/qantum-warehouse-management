@@ -11,7 +11,7 @@ import { siteAction } from "@/ui/contacts";
 import { UnavailablePanel } from "@/ui/UnavailablePanel";
 import { formatReference, plannedWorkLine } from "@/ui/format";
 import { NAV, readinessBanner } from "@/ui/messages";
-import { OperatorRow } from "@/ui/OperatorRow";
+import { StoredOperatorRow } from "@/ui/SiteEdits";
 import type { PenetrationPlace } from "@/ui/PenetrationGroups";
 import styles from "@/ui/primitives.module.css";
 import { shortageFacts } from "@/ui/signal";
@@ -109,6 +109,8 @@ export function SiteFrame({
         </p>
         {readiness ? (
           <SiteSignal
+            siteId={site.id}
+            operator={site.operator}
             status={crewStatus === "blocked" ? siteChip("blocked", shortageCount, dataProblemCount) : readinessBanner(crewStatus)}
             action={action}
             describedBy={action.operator ? OPERATOR_ID : undefined}
@@ -116,7 +118,10 @@ export function SiteFrame({
         ) : (
           <UnavailablePanel status={readinessBanner("unavailable")} />
         )}
-        {action.operator ? <OperatorRow operator={action.operator} nameId={OPERATOR_ID} /> : null}
+        {/* The operator a card changed on this device comes first, then the sample data's (AC 88). */}
+        {action.operator && site.operator ? (
+          <StoredOperatorRow siteId={site.id} upstream={site.operator} text={action.operator.text} nameId={OPERATOR_ID} />
+        ) : null}
         {/* A blocked site opens with what needs a decision (AC 50), right after its signal. */}
         {readiness && readiness.crewStatus === "blocked" ? (
           <ActionNeeded
