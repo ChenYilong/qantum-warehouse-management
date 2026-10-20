@@ -50,6 +50,8 @@ test("landing page explains the demo, no screen carries a Demo tag, and there is
     ["Quayside House", "/sites/site-b"],
     ["L3, Riser 2", "/sites/site-b/penetrations/pen-b-01"],
     ["Northgate Depot", "/sites/site-c?show=data-problems"],
+    ["Map", "/map"],
+    ["Calendar", "/calendar"],
     ["Inventory", "/materials"],
     ["Decisions", "/actions"],
   ] as const) {

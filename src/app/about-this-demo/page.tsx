@@ -115,8 +115,9 @@ export default function LandingPage() {
             </li>
             <li>
               <p>
-                <Link href={MATERIALS_PATH}>{NAV.materials}</Link> sums up stock shared by all jobs, and{" "}
-                <Link href={ACTIONS_PATH}>{NAV.actions}</Link> keeps a record of every choice made so far.
+                On <Link href={MAP_PATH}>{NAV.map}</Link>, tap Crew can go and pick a green pin to see which crew is ready to
+                leave. Then open <Link href={CALENDAR_PATH}>{NAV.calendar}</Link>, set the dates, and tap a job to see what is
+                due next.
               </p>
             </li>
           </ol>
@@ -128,6 +129,12 @@ export default function LandingPage() {
             <li>Everything here is sample data. Only the fire-stopping product list is genuine.</li>
             <li>Sign in as qantum with the password sdfkjh&amp;_24. Everyone who visits shares one set of choices.</li>
             <li>Nothing is ordered or messaged for real. A suggested swap stays a suggestion until a manager checks it.</li>
+            <li>
+              <p>
+                Two more pages hold the detail: <Link href={MATERIALS_PATH}>{NAV.materials}</Link> totals the stock every job
+                draws on, and <Link href={ACTIONS_PATH}>{NAV.actions}</Link> lists each choice made so far.
+              </p>
+            </li>
             <li>
               <p>
                 Curious how it was built? <a href="https://github.com/ChenYilong/qantum-warehouse-management">Browse the source on GitHub</a>.

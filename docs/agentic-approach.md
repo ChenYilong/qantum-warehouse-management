@@ -45,7 +45,6 @@ Applied to each worker run, cheapest step first:
 - **Spec gap after delivery.** Live check: substitute `0451` read "Materials in stock" despite needing sealant, the very material short on that site. The requirement only asked whether materials are in stock; the code compared a single install against raw stock. AC 33 was clarified, then the implementation.
 - **Orchestrator mistakes.** Edited docs in a live worker's worktree (they were rolled back by the worker as unexplained edits); pushed to a PR that had merged minutes earlier. Both now rules in `tasks/lessons.md`.
 - **Bad expected value.** Haversine test asserted 1784 m from a mental estimate; independent computation says 1759 m. Test fixed; expected values are now derived outside the code under test.
-- **Measuring the wrong artefact.** The "no five-word run left from the old Guide" check initially diffed source tokens. Redone against rendered text.
 - **CI-only failure.** Calendar spec green locally, red in CI (UTC runner). Spec now pins `Pacific/Auckland`.
 - **Vendor constraints.** 48px target check flagged the Mapbox logo, which Mapbox requires; the check now ignores Mapbox-owned controls. SonarCloud blocked twice: S6505 (`npx vercel` may execute install scripts) → global install with `--ignore-scripts`; S1082 (mouse-only handler on the map) → an anchor element layered over it.
 - **Unrequested lockfile churn.** Adding a single dependency made npm rewrite 120 `libc` entries. Reverted to only the new package; confirmed via `npm ci`.
