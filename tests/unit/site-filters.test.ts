@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SITE_FILTER } from "@/ui/messages";
-import { filterSites, isFiltered, parseQuery, parseReadiness, parseSiteFilters, readinessOf, READINESS_FILTERS, SEARCH_MAX } from "@/ui/site-filters";
+import { feedSites, filterSites, isFiltered, parseQuery, parseReadiness, parseSiteFilters, readinessOf, READINESS_FILTERS, SEARCH_MAX } from "@/ui/site-filters";
 
 // The projects list's filter (AC 72, 73), after qantum-stock's work-package list: readiness and search, in the URL.
 
@@ -97,5 +97,12 @@ describe("AC 73: search, and the words around the filter", () => {
       "Apply",
       "Reset",
     ]);
+  });
+});
+
+describe("AC 93, AC 95: the list's client side gets only what the filter reads", () => {
+  it("keeps the id, name, job ref, address and status, and nothing else", () => {
+    const site = { id: "site-a", name: "Cedar Court", reference: "CC-A2", address: "12 Quay Road", crewStatus: "clear", operator: { name: "Mere", phone: "+44 7700 900156" } };
+    expect(feedSites([site])).toEqual([{ id: "site-a", name: "Cedar Court", reference: "CC-A2", address: "12 Quay Road", crewStatus: "clear" }]);
   });
 });

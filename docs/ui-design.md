@@ -520,3 +520,18 @@ From the author: learn from the stock app (`qantum-stock-main`) how its shortage
 | Kept on the device | Ticks and note under `team-leader:evidence`, keyed by site id; a reload or another penetration of the same site fills them back in |
 | Known gap | Solution stock is a separate invented feed. A substitute can read READY while one of its materials is short at this site (the short-material line still says so), and crew readiness is still worked out from material stock alone |
 
+
+## 26. Pick up from other sites (20 Oct 2026)
+
+From the author: on a blocked site, give every row of its material table (the rows with Review) a button that opens a new page, Pick up from other sites. The page reuses the projects list whole (its filter, location and cards) with a tick on the left of each card; a ticked site must turn Blocked. Cancel top left, Confirm top right; Confirm then says that the status changed, so the deadline and operator need changing. Keep each touched site in the browser by site id (its materials, quantities and status), and read that before the sample data on the list and on each site. Requirements: FR37, AC 92 to AC 95. Copy: `src/ui/pickups.ts`; components: `src/ui/PickupChooser.tsx`, `src/ui/PickupStore.tsx`, `src/ui/SiteFeed.tsx`, `src/ui/HeldSiteSignal.tsx`.
+
+| Topic | Implemented |
+| --- | --- |
+| Row button | "Pick up from other sites" under Review, the same 56px bordered button, on a line of its own so it never squeezes Review or the label |
+| Header | The inner page's black bar with Cancel on the left, the Online switch, and Confirm (yellow, disabled until a ticked site gives something) on the right; the picker line under it |
+| The line | A pick card: the material, "Quayside House, Levels 3 to 5 · need 10 · has 6", then in bold what it needs. A line with its planned amount says there is nothing to pick up |
+| The list | Use my location, the filter and the cards of Projects, without this site. Each row is a 3rem column with a 48px tick, then what the site holds of the material and its card. A tick that can't be used is faded and says why |
+| Ticked | The card turns Blocked straight away: red signal, the chip counting one shortage more, the material listed under Short. A bold line counts what the ticks take and what is still short |
+| After Confirm | An alert dialog with the sentence and OK; a warning banner "Status changed…", Cancel reads Done, and the cards that gave stay in place with their Deadline and Operator buttons to change |
+| On the site screens | The row says "2 picked up from other sites · on this phone" (tick) or "2 given to another site · on this phone" (stop, in the reported style); the signal of a site that gave is red |
+| Known gap | The Map and Calendar verdicts, tabs and pins, the Pick check and review pages and the API still read the sample data. The move is on this device only |

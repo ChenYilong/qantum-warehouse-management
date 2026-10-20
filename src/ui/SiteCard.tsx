@@ -1,14 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import { siteAction, SITE_ACTIONS, type ContactView, type SiteActionInput } from "./contacts";
 import type { Deadline } from "./deadline";
 import { sitePath } from "./format";
 import { Icon } from "./Icon";
+import { heldSite } from "./pickups";
+import { usePickups, useTicked } from "./PickupStore";
 import { KindIcon } from "./KindIcon";
 import { SiteDeadline, SiteOperator } from "./SiteEdits";
 import { SiteMap, SitePlace } from "./SitePlace";
 import { SiteSignal } from "./SiteSignal";
-import type { StatusView } from "./status";
-import type { LatLng } from "./travel";
+import { siteChip, type StatusView } from "./status";
+import { markerColour, type LatLng } from "./travel";
 import styles from "./primitives.module.css";
 
 /**
@@ -18,7 +22,8 @@ import styles from "./primitives.module.css";
  * under its name, above the signal and as wide as it, and ends with the trip there and Directions (AC 74, 75).
  * `idPrefix` keeps its ids unique when today's panel shows the same card again above the list (AC 79). A project
  * with a deadline ends with it, in English (AC 80). The deadline and the operator are buttons: either opens a dialog
- * that changes it on this device, and the card then shows the change before the sample data (AC 86, 87).
+ * that changes it on this device, and the card then shows the change before the sample data (AC 86, 87). A site
+ * this device stored as Blocked by a pick-up, or ticked on the pick-up page, reads Blocked first (AC 93, 95).
  */
 export function SiteCard({
   site,
@@ -36,12 +41,17 @@ export function SiteCard({
   /** Who the operator can be changed to (AC 87). */
   candidates?: readonly ContactView[];
 }) {
-  const action = siteAction(site);
+  const pickups = usePickups();
+  const ticked = useTicked(site.id);
+  const held = heldSite(site, pickups, ticked);
+  const changed = held !== site;
+  const shown = changed ? siteChip("blocked", held.shortageCount, held.dataProblemCount) : status;
+  const action = siteAction(held);
   const titleId = `${idPrefix}-${site.id}`;
   const operatorId = `${titleId}-operator`;
   const { short } = action;
   return (
-    <div className={styles.siteCard}>
+    <div className={styles.siteCard} data-held-blocked={changed ? "" : undefined}>
       <Link id={titleId} className={styles.siteCardTitle} href={sitePath(site.id)}>
         <span className={styles.kindTitle}>
           <KindIcon kind="site" />
@@ -49,8 +59,8 @@ export function SiteCard({
         </span>
         <Icon name="chevron-right" />
       </Link>
-      {place?.token ? <SiteMap siteId={site.id} token={place.token} location={place.location} colour={place.colour} /> : null}
-      <SiteSignal siteId={site.id} operator={site.operator} status={status} action={action} describedBy={action.operator ? `${titleId} ${operatorId}` : titleId} />
+      {place?.token ? <SiteMap siteId={site.id} token={place.token} location={place.location} colour={changed ? markerColour("blocked") : place.colour} /> : null}
+      <SiteSignal siteId={site.id} operator={site.operator} status={shown} action={action} describedBy={action.operator ? `${titleId} ${operatorId}` : titleId} />
       {short.items.length > 0 ? (
         <div className={styles.shortFacts}>
           <p>

@@ -11,7 +11,7 @@ apart from `9999`, left absent from the catalogue on purpose.
 | `solution-materials.json` | per-solution material and quantity per install, absent from the supplied catalogue |
 | `stock.json` | `GET /stock` from the inventory system |
 | `solution-stock.json` | solution-level stock: complete install kits on hand per catalogue Internal Code, with when it was counted (AC 90). All 148 solutions in stock, random counts |
-| `picks.json` | each site's warehouse pick list: quantity planned, quantity picked, spec and required parts |
+| `picks.json` | each site's warehouse pick list: quantity planned, quantity picked, how many of those came from other sites (`pickedUpQty`, 0 here), spec and required parts |
 
 `docs/sample-data-and-stubs.md` explains the scenario and the reasoning behind each number.
 
@@ -25,3 +25,5 @@ The app never writes these files. A deadline or operator a leader changes on a c
 
 Phone numbers come from the block Ofcom reserves for TV and film (`07700 900000`–`07700 900999`, stored as `+44 7700 900156`), so Call and
 Text in the app connect to nobody. Northgate Depot has a single person who both picks and installs, listed once.
+
+A pick-up from other sites (AC 92 to 95) is kept the same way: in that browser's localStorage under `team-leader:site-pickups`, keyed by site id, holding each touched site's status (Blocked) and every one of its pick lines with the quantities after the move. The cards and the site screens read it before `picks.json` and the computed status, and fall back to them for a site or line it does not hold.

@@ -47,6 +47,7 @@ const readSpecs = [
   "**/pick-check.spec.ts",
   "**/sites-filter.spec.ts",
   "**/site-maps.spec.ts",
+  "**/pickup.spec.ts",
 ];
 
 const writeSpecs = ["**/ac31-keyboard.spec.ts", "**/idempotency-key.spec.ts", "**/scenario.spec.ts", "**/pick-report.spec.ts", "**/pick-review.spec.ts"];

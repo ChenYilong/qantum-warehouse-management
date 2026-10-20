@@ -123,6 +123,10 @@ One row per acceptance criterion: the behaviour in a few words, then every test 
 | 89 | Controls use theme colours only | `e2e/theme-controls.spec.ts`, `e2e/sign-in.spec.ts` |
 | 90 | Inventory captured and Status; only stocked substitutes proposable | `e2e/solution-stock.spec.ts`, `e2e/penetration-page.spec.ts`, `unit/solution-stock.test.ts`, `unit/ui-messages.test.ts` |
 | 91 | Portable evidence before Propose, kept per site | `e2e/solution-stock.spec.ts`, `unit/evidence.test.ts` |
+| 92 | Pick up from other sites on each row of a blocked site; `pickedUpQty` in the sample | `e2e/pickup.spec.ts`, `unit/pickups.test.ts` |
+| 93 | The pick-up page: Cancel and Confirm, the projects list with ticks, a ticked site Blocked at once | `e2e/pickup.spec.ts`, `unit/pickups.test.ts`, `unit/site-filters.test.ts` |
+| 94 | Confirm keeps every touched site in `team-leader:site-pickups` and asks for a new deadline and operator | `e2e/pickup.spec.ts`, `unit/pickups.test.ts` |
+| 95 | Cards, the Readiness filter and site screens read the device's copy first; it only ever blocks | `e2e/pickup.spec.ts`, `unit/pickups.test.ts`, `unit/ui-screens.test.ts` |
 
 CI runs a script that enumerates AC numbers and fails if any lacks a referencing test.
 

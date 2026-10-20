@@ -15,7 +15,7 @@ import { StoredOperatorRow } from "@/ui/SiteEdits";
 import type { PenetrationPlace } from "@/ui/PenetrationGroups";
 import styles from "@/ui/primitives.module.css";
 import { shortageFacts } from "@/ui/signal";
-import { SiteSignal } from "@/ui/SiteSignal";
+import { HeldSiteSignal } from "@/ui/HeldSiteSignal";
 import { siteChip } from "@/ui/status";
 
 /** The operator's name on the page, so the big signal is described by who it calls. */
@@ -88,7 +88,7 @@ export function SiteFrame({
   const crewStatus = readiness ? readiness.crewStatus : "unavailable";
   const shortageCount = readiness ? readiness.shortages.length : 0;
   const dataProblemCount = readiness ? readiness.blockers.length : 0;
-  const action = siteAction({
+  const input = {
     id: site.id,
     name: site.name,
     reference: site.reference,
@@ -97,7 +97,8 @@ export function SiteFrame({
     dataProblemCount,
     shortages: readiness ? shortageFacts(readiness.shortages, readiness.materials, frame.referencedMaterials) : [],
     operator: site.operator,
-  });
+  };
+  const action = siteAction(input);
   return (
     <>
       <AppBar backHref={back.href} backName={back.name} />
@@ -108,11 +109,10 @@ export function SiteFrame({
           {plannedWork ? <span>{plannedWork}</span> : null}
         </p>
         {readiness ? (
-          <SiteSignal
-            siteId={site.id}
-            operator={site.operator}
+          // A site a pick-up on this device stored as Blocked reads Blocked first (AC 95).
+          <HeldSiteSignal
+            site={input}
             status={crewStatus === "blocked" ? siteChip("blocked", shortageCount, dataProblemCount) : readinessBanner(crewStatus)}
-            action={action}
             describedBy={action.operator ? OPERATOR_ID : undefined}
           />
         ) : (
