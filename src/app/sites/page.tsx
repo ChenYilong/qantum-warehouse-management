@@ -6,6 +6,7 @@ import { EMPTY, NAV, SITE_FILTER, SITES_UNAVAILABLE } from "@/ui/messages";
 import { SiteFilterForm } from "@/ui/SiteFilterForm";
 import { filterSites, isFiltered, parseSiteFilters, type SiteFilters } from "@/ui/site-filters";
 import { placesOf, ProjectCard } from "@/ui/ProjectCard";
+import { operatorCandidates } from "@/ui/site-edits";
 import { TravelButton, TravelProvider } from "@/ui/TravelProvider";
 import { UnavailablePanel } from "@/ui/UnavailablePanel";
 import styles from "@/ui/primitives.module.css";
@@ -47,6 +48,8 @@ export default async function SitesPage({ searchParams }: PageProps) {
  */
 function FilteredSites({ sites, filters, token }: { sites: readonly ListedSite[]; filters: SiteFilters; token: string }) {
   const shown = filterSites(sites, filters);
+  // Every project's people, not just the filtered ones: a card can be given to anyone (AC 87).
+  const candidates = operatorCandidates(sites);
   return (
     <>
       <SiteFilterForm key={`${filters.status}|${filters.query}`} filters={filters} />
@@ -59,7 +62,7 @@ function FilteredSites({ sites, filters, token }: { sites: readonly ListedSite[]
           <ul className={styles.feed} aria-label={SITE_FILTER.list}>
             {shown.map((site) => (
               <li key={site.id}>
-                <ProjectCard site={site} token={token} />
+                <ProjectCard site={site} token={token} candidates={candidates} />
               </li>
             ))}
           </ul>

@@ -101,7 +101,9 @@ test("AC 49: each site card keeps Text operator, Call operator and Sort out shor
   await expect(mill.getByRole("link")).toHaveCount(2);
   await expect(mill.getByRole("link", { name: "Directions" })).toHaveCount(1);
   await expect(mill.locator('a[href^="tel:"], a[href^="sms:"]')).toHaveCount(0);
-  await expect(mill.getByRole("button")).toHaveCount(0);
+  // Its one button is its deadline, which can be moved like any other (AC 86).
+  await expect(mill.getByRole("button")).toHaveCount(1);
+  await expect(mill.getByRole("button")).toHaveAttribute("data-deadline", "site-d");
   await assertTargets(page);
   await assertNoOverflow(page);
   await assertAxe(page);
@@ -230,7 +232,8 @@ test("AC 54: tapping the signal calls the operator, with the same link as Call o
   }
   // Nothing planned has nothing to tap: the card's one link is its title.
   const mill = page.getByRole("listitem").filter({ hasText: "Foundry Lane Annex" });
-  await expect(mill.locator("a[href^='tel:'], a[href^='sms:'], button")).toHaveCount(0);
+  // Bar its deadline (AC 86) and that deadline's dialog, closed until it is tapped.
+  await expect(mill.locator("a[href^='tel:'], a[href^='sms:'], button:not([data-deadline]):not(dialog *)")).toHaveCount(0);
   await expect(page.locator("a[data-signal][href^='sms:']")).toHaveCount(0);
 });
 

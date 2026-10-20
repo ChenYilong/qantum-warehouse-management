@@ -607,11 +607,117 @@ button.signal:active {
 }
 
 /* The project's deadline, the card's last line (AC 80): the label, then the date in bold. */
+/* The deadline line is a button (AC 86): it still reads as the card's last line, with a chevron saying it opens. */
 .siteDeadline {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.375rem;
+  width: 100%;
+  min-height: 48px;
   margin: 0;
+  padding: 0.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.siteDeadline > span,
+.operatorName > span {
+  flex: 1;
+  min-width: 0;
+}
+
+/* "Operator · Mere Tane" as a button (AC 87), muted like the line it replaces. */
+.operatorName {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 0.25rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* The schedule dialogs (AC 86, 87): Cancel top left, Confirm top right, the title between them. The deadline's
+   dialog is a little wider on a phone so its seven day columns stay 48px. */
+.editDialog {
+  width: calc(100% - 1rem);
+  padding: 0.75rem 0.5rem;
+}
+
+.editHead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editTitle {
+  text-align: center;
+}
+
+.editFacts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.editFacts p {
+  margin: 0;
+}
+
+.editGrid td {
+  padding: 0;
+}
+
+.editDay {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.125rem;
+  width: 100%;
+  min-width: 48px;
+  min-height: 3.25rem;
+  padding: 0.125rem 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* The picked day: filled like the selected tab, so it stands out from today's ring. */
+.editDay[aria-pressed="true"] .calendarDay {
+  background: var(--button-bg);
+  color: var(--button-text);
+  font-weight: 700;
+}
+
+.editPerson {
+  display: flex;
+  flex-direction: column;
+}
+
+.editNotice {
+  margin: 0;
+  font-weight: 700;
+}
+
+.editNoticeActions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .siteDeadline time {

@@ -469,3 +469,18 @@ From the author: red, green and pink panel backgrounds did not fit the black-and
 | Segments | Green and red survive only here: the go colour, and the stop colour with a bright outline for visibility on black; dimmed segments at 50% |
 | First line | "Map · today is Tuesday 20 October 2026" on Map, "Calendar · …" on Calendar: the tab name in capitals followed by the browser's date, always in English. The server render shows only the tab name; the date is filled in as the page starts |
 | Pins | Black on white labels (previously an off-black) |
+
+## 22. Schedule changes on the card (20 Oct 2026)
+
+From the author: make the card's Deadline line and Operator line buttons. The deadline opens the Calendar tab's calendar holding only this project; the operator opens a list of candidates with the current one chosen; each has Cancel top left and Confirm top right, and a pop-up says what changed. Keep the change in `data/sample` if the app can write there, otherwise in the browser, read before the sample data. Requirements: FR35, AC 86, AC 87. Copy: `src/ui/site-edits.ts`; components: `src/ui/SiteEdits.tsx`.
+
+| Topic | Implemented |
+| --- | --- |
+| Deadline line | Unchanged words ("Deadline · Fri 23 Oct 2026"), now a full-width 48px button with a hairline above and a chevron at the end. Still the card's last line |
+| Deadline dialog | Cancel, title "Change deadline", Confirm on one row; the project's name, its current deadline, then "Tap another date to move the deadline." (or "New deadline · …" once a day is picked). The calendar tab's month heading and steps; a grid where every day is a 48px button, the project's small signal on its current deadline and the picked day filled in the button colour. A little wider than other dialogs on a phone so the seven columns stay 48px |
+| Operator line | "Operator · Mere Tane" as a muted 48px button with a chevron; Text operator and Call operator beneath as before, following the chosen person |
+| Operator dialog | Cancel, "Change operator", Confirm; the project's name; the app's radio rows (as in pick reports), each with name and number. Confirming the same person just closes |
+| Pop-up | An alert dialog with the sentence and OK: "Cedar Court, Block A: deadline updated to Mon 2 Nov 2026. Saved on this device only." / "You've updated the operator for Cedar Court, Block A to Wiremu Ngata. Saved on this device only." Focus returns to the line |
+| Where it is kept | The deployed app cannot write `data/sample`, so the change is stored in this browser (localStorage) and read before the sample data on every card, the Calendar tab's grid, and the big signal's call. Other devices and the site page still show the sample data |
+| Idle cards | A project with nothing planned now has one button, its deadline; it still has no call or text (AC 57) |
+

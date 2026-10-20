@@ -182,3 +182,8 @@ Pickers in `sites.json` have `example.com` email addresses, a domain set aside f
 ## 11. Site coordinates (fabricated, 19 Oct 2026)
 
 Every site in `sites.json` has a `location` (`{ lat, lng }`) that drives the map and the directions link (AC 74). The points are invented, in Auckland, close to each fictional address: the waterfront for Cedar Court, Wynyard Quarter for Quayside House, Albany for Northgate Depot, Onehunga for Foundry Lane Annex. They sit on public streets, not on real projects. End-to-end tests place the simulated phone in Grafton (-36.8615, 174.769), giving straight-line distances of 1.9, 2.5, 15.7 and 7.0 km.
+
+## 12. Changing a deadline or operator (20 Oct 2026)
+
+The cards let a leader move a deadline and hand a project to another operator (AC 86, 87). `data/sample/` stays read-only: the deployed function cannot write it, and upstream owns the data. A change goes to the browser's localStorage under `team-leader:site-edits` and is read before `sites.json`. The operator list is built from `sites.json` itself, every operator and picker once (Mere Tane, Sam Lee, Wiremu Ngata, Tama Rewi), so no new fixture was added. The end-to-end tests start each browser with empty storage, so they always see the sample values first.
+
