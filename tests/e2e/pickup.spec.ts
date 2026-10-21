@@ -42,14 +42,17 @@ test("AC 92: a blocked site's material rows each offer Pick up from other sites 
 
 test("AC 93: the projects list with a tick on the left of each card; a ticked site reads Blocked at once", async ({ page }) => {
   await gotoApp(page, PAGE);
-  // Cancel top left, Confirm top right, in the header with the Online switch.
-  const bar = page.locator("header").first();
-  const cancel = bar.getByRole("link", { name: "Cancel" });
-  const confirm = bar.getByRole("button", { name: "Confirm" });
+  // The header keeps the Online switch; Cancel top left and Confirm top right sit on the row under it, above the title.
+  await expect(page.locator("header").first().getByRole("switch", { name: "Online" })).toBeVisible();
+  const actions = page.locator("[data-pickup-actions]");
+  const cancel = actions.getByRole("link", { name: "Cancel" });
+  const confirm = actions.getByRole("button", { name: "Confirm" });
   await expect(cancel).toHaveAttribute("href", "/sites/site-b");
-  await expect(bar.getByRole("switch", { name: "Online" })).toBeVisible();
-  const [cancelBox, confirmBox] = [await cancel.boundingBox(), await confirm.boundingBox()];
-  expect(cancelBox!.x).toBeLessThan(confirmBox!.x);
+  const [cancelBox, confirmBox, titleBox] = [await cancel.boundingBox(), await confirm.boundingBox(), await page.getByRole("heading", { level: 1 }).boundingBox()];
+  expect(cancelBox!.x).toBeLessThan(24);
+  expect(confirmBox!.x + confirmBox!.width).toBeGreaterThan(375 - 24);
+  expect(Math.abs(cancelBox!.y - confirmBox!.y)).toBeLessThan(1);
+  expect(cancelBox!.y).toBeLessThan(titleBox!.y);
   await expect(confirm).toBeDisabled();
 
   await expect(page.getByRole("region", { name: "The line to pick up for" })).toContainText("Intumescent sealant, 310 ml cartridge");

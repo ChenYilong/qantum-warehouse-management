@@ -17,7 +17,9 @@ import styles from "./primitives.module.css";
 type Outcome = { readonly ok: boolean; readonly message: string } | null;
 
 /**
- * The pick-up page's own parts (AC 93, 94): Cancel top left and Confirm top right around the Online switch, the line
+ * The pick-up page's own parts (AC 93, 94): the header with the Online switch, then Cancel top left and Confirm top
+ * right on a row of their own that stays under the header (three controls in the header overflow 375px with a wider
+ * system font), the line
  * and what it needs, then the projects list with a tick on the left of each card. A ticked site reads Blocked at once;
  * a site with none of the material, or none left to give once the need is covered, can't be ticked. The ticks travel
  * with the filter as `pick`, so filtering keeps them. Confirm stores the move on this device and says that the sites
@@ -78,16 +80,18 @@ export function PickupChooser({
   return (
     <>
       <header className={`${styles.appBar} ${styles.pickupBar}`}>
-        <Link className={styles.button} href={sitePath(target.siteId)}>
-          {outcome?.ok ? PICKUP.doneLink : PICKUP.cancel}
-        </Link>
         <ConnectionSwitch />
-        <button type="button" className={`${styles.button} ${styles.primary}`} disabled={plan.total === 0} onClick={confirm} aria-describedby={titleId}>
-          {PICKUP.confirm}
-        </button>
       </header>
       <PickerLine />
       <main>
+        <div className={styles.pickupActions} data-pickup-actions="">
+          <Link className={styles.button} href={sitePath(target.siteId)}>
+            {outcome?.ok ? PICKUP.doneLink : PICKUP.cancel}
+          </Link>
+          <button type="button" className={`${styles.button} ${styles.primary}`} disabled={plan.total === 0} onClick={confirm} aria-describedby={titleId}>
+            {PICKUP.confirm}
+          </button>
+        </div>
         <h1 id={titleId}>{PICKUP.title}</h1>
         {outcome?.ok ? (
           <div className={`${styles.banner} ${styles.warning}`} role="status">

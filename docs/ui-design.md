@@ -528,7 +528,8 @@ From the author: on a blocked site, give every row of its material table (the ro
 | Topic | Implemented |
 | --- | --- |
 | Row button | "Pick up from other sites" under Review, the same 56px bordered button, on a line of its own so it never squeezes Review or the label |
-| Header | The inner page's black bar with Cancel on the left, the Online switch, and Confirm (yellow, disabled until a ticked site gives something) on the right; the picker line under it |
+| Header | The black bar with the Online switch only, then the picker line. Under them a sticky row, full bleed, with Cancel on the left and Confirm (yellow, disabled until a ticked site gives something) on the right. All three in the bar overflowed 375px in CI, whose system font (DejaVu Sans) is wider than a phone's |
+| Narrow cards | The tick column takes 3.5rem, so the cards' signal label is 1.25rem and wraps between words |
 | The line | A pick card: the material, "Quayside House, Levels 3 to 5 · need 10 · has 6", then in bold what it needs. A line with its planned amount says there is nothing to pick up |
 | The list | Use my location, the filter and the cards of Projects, without this site. Each row is a 3rem column with a 48px tick, then what the site holds of the material and its card. A tick that can't be used is faded and says why |
 | Ticked | The card turns Blocked straight away: red signal, the chip counting one shortage more, the material listed under Short. A bold line counts what the ticks take and what is still short |
