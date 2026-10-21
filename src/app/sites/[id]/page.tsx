@@ -60,6 +60,7 @@ export default async function SitePage({ params, searchParams }: PageProps) {
           siteName={frame.site.name}
           view={picksLoad?.status === "ready" ? picksLoad.value : null}
           siteClear={frame.readiness?.crewStatus === "clear"}
+          siteBlocked={frame.readiness?.crewStatus === "blocked"}
           operator={frame.site.operator}
           operatorText={readyText(frame.site.name, frame.site.reference)}
         />

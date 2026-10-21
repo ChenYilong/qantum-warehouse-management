@@ -22,6 +22,11 @@ export interface PickLine {
   readonly usedAt: string | null;
   readonly plannedQty: number;
   readonly pickedQty: number;
+  /**
+   * Of `pickedQty`, how many came from other sites (AC 92). The sample's pick lists all say 0; a move made on this
+   * device is kept in its browser (`src/ui/pickups.ts`). Shown only, never read by the check.
+   */
+  readonly pickedUpQty?: number;
   /** The rating or grade asked for ("FRR −/120/120"). Null when the plan names none. */
   readonly plannedSpec: string | null;
   readonly pickedSpec: string | null;

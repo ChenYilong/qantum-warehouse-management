@@ -123,6 +123,8 @@ export const PickLineSchema = z.object({
   usedAt: z.string().max(120).nullable(),
   plannedQty: z.number(),
   pickedQty: z.number(),
+  /** Of pickedQty, how many came from other sites (AC 92). Optional: an older list without it has taken none. */
+  pickedUpQty: z.number().optional(),
   plannedSpec: z.string().max(80).nullable(),
   pickedSpec: z.string().max(80).nullable(),
   requiredParts: z.array(RequiredPartSchema),

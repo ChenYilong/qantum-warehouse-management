@@ -202,7 +202,8 @@ describe("input contrast", () => {
     const frame = readFileSync("src/app/sites/[id]/site-frame.tsx", "utf8");
     // The signal replaces the banner, and a blocked site opens with it, then its operator row, then the panel.
     expect(frame).not.toContain("<Banner");
-    const signal = frame.indexOf("<SiteSignal");
+    // The signal reads this device's pick-ups first (AC 95).
+    const signal = frame.indexOf("<HeldSiteSignal");
     // The row reads the operator this device chose first (AC 88).
     const operator = frame.indexOf("<StoredOperatorRow");
     const panel = frame.indexOf("<ActionNeeded");

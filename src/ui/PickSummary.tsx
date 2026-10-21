@@ -9,6 +9,8 @@ import { formatRecordedAt } from "./format";
 import { Icon } from "./Icon";
 import { PICKS } from "./messages";
 import { useWaiting } from "./PickOutboxSync";
+import { isHeldBlocked, lineMoves, PICKUP, pickupPath, withPickups } from "./pickups";
+import { usePickups } from "./PickupStore";
 import { useOperator } from "./SiteEdits";
 import type { CheckedPickLine } from "@/domain";
 import { crewGate, initials, pickAmountLine, pickEmailHref, pickLineAnchor, pickLineLabel, pickReviewPath, picksPath, reportFinding, type PickView } from "./picks";
@@ -26,13 +28,16 @@ export function useStamp(iso: string | null): string | null {
 /**
  * The site screen's Picks section (AC 62, 63): the pick check's result, who picked with Call and Email, each
  * material planned against picked, reports waiting to send, and Send the crew, locked unless the picks match,
- * the site is clear and the phone is online. Offline, everything reads as last known.
+ * the site is clear and the phone is online. Offline, everything reads as last known. Pick-ups made on this device
+ * are read first (AC 95): the moved quantities, and Blocked for a site that gave. A blocked site's rows each offer
+ * Pick up from other sites beside Review (AC 92).
  */
 export function PickSummary({
   siteId,
   siteName,
-  view,
+  view: upstream,
   siteClear,
+  siteBlocked,
   operator,
   operatorText,
 }: {
@@ -41,11 +46,16 @@ export function PickSummary({
   /** Null when the pick system could not be read. */
   view: PickView | null;
   siteClear: boolean;
+  /** The server read the site as Blocked. */
+  siteBlocked: boolean;
   /** The sample data's operator; the one a card changed on this device wins (AC 88). */
   operator: ContactView | undefined;
   /** The "you can go" message the crew is sent. */
   operatorText: string;
 }) {
+  const pickups = usePickups();
+  const view = upstream ? { ...upstream, check: withPickups(siteId, upstream.check, pickups) } : null;
+  const heldBlocked = isHeldBlocked(siteId, pickups, false);
   const connection = useConnection();
   const phase = connection.state;
   const saved = phase === "offline";
@@ -53,7 +63,7 @@ export function PickSummary({
   const headingId = useId();
   const reasonId = useId();
   const savedAt = clockLabel(connection.lastOkAt ?? connection.pageLoadedAt, connection.now) ?? "unknown";
-  const gate = crewGate(view ? view.check.status : "unavailable", siteClear, phase);
+  const gate = crewGate(view ? view.check.status : "unavailable", siteClear && !heldBlocked, phase);
   const chosen = useOperator(siteId, operator);
   const operatorTextHref = chosen ? smsHref(chosen.phone, operatorText) : null;
   const canSend = gate.enabled && operatorTextHref !== null;
@@ -78,7 +88,14 @@ export function PickSummary({
           <p className={styles.pickEyebrow}>{saved ? PICKS.materialsSaved(savedAt) : PICKS.materials}</p>
           <ul className={styles.pickLines}>
             {view.check.lines.map((checked) => (
-              <PickRow key={checked.line.id} siteId={siteId} checked={checked} saved={saved} />
+              <PickRow
+                key={checked.line.id}
+                siteId={siteId}
+                checked={checked}
+                saved={saved}
+                moves={lineMoves(siteId, checked.line.id, pickups)}
+                pickup={siteBlocked || heldBlocked}
+              />
             ))}
           </ul>
         </div>
@@ -104,9 +121,22 @@ export function PickSummary({
 /**
  * One material, planned against picked (AC 62, 67, 70). Its name opens its card on the Pick check page; its own
  * Review button opens the review on site, whatever the label, so a line the warehouse got "right" can still be
- * checked. Under the label: an open report from site, or when it was last checked right on site.
+ * checked. Under the label: an open report from site, or when it was last checked right on site. A pick-up on this
+ * device says how many came in or went out (AC 95); on a blocked site the row offers Pick up from other sites (AC 92).
  */
-function PickRow({ siteId, checked, saved }: { siteId: string; checked: CheckedPickLine; saved: boolean }) {
+function PickRow({
+  siteId,
+  checked,
+  saved,
+  moves,
+  pickup,
+}: {
+  siteId: string;
+  checked: CheckedPickLine;
+  saved: boolean;
+  moves: { readonly pickedUp: number; readonly lent: number };
+  pickup: boolean;
+}) {
   const nameId = useId();
   const reportedAt = useStamp(checked.openReport?.createdAt ?? null);
   const checkedAt = useStamp(checked.checkedAt);
@@ -121,6 +151,18 @@ function PickRow({ siteId, checked, saved }: { siteId: string; checked: CheckedP
           <span className={styles.muted}>{pickAmountLine(checked)}</span>
         </span>
       </Link>
+      {moves.pickedUp > 0 ? (
+        <p className={styles.pickRowNote} data-pickup-note="in">
+          <Icon name="check" />
+          <span>{PICKUP.fromOthers(moves.pickedUp)}</span>
+        </p>
+      ) : null}
+      {moves.lent > 0 ? (
+        <p className={`${styles.pickRowNote} ${styles.pickRowReported}`} data-pickup-note="out">
+          <Icon name="stop" />
+          <span>{PICKUP.lent(moves.lent)}</span>
+        </p>
+      ) : null}
       {checked.openReport && reportedAt ? (
         <p className={`${styles.pickRowNote} ${styles.pickRowReported}`}>
           <Icon name="stop" />
@@ -139,6 +181,12 @@ function PickRow({ siteId, checked, saved }: { siteId: string; checked: CheckedP
           {PICKS.reviewButton}
           <Icon name="chevron-right" />
         </Link>
+        {pickup ? (
+          <Link className={`${styles.button} ${styles.pickReview} ${styles.pickupButton}`} href={pickupPath(siteId, line.id)} aria-describedby={nameId}>
+            {PICKUP.button}
+            <Icon name="chevron-right" />
+          </Link>
+        ) : null}
       </div>
     </li>
   );

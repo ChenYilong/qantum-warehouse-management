@@ -25,6 +25,16 @@ export interface FilterableSite {
   readonly crewStatus: string;
 }
 
+/** A project as the list's client side gets it: what the filter reads, and its id. */
+export interface FeedSite extends FilterableSite {
+  readonly id: string;
+}
+
+/** Only what the filter reads, so the browser isn't sent the whole project twice (AC 93, 95). */
+export function feedSites(sites: readonly FeedSite[]): FeedSite[] {
+  return sites.map(({ id, name, reference, address, crewStatus }) => ({ id, name, reference, address, crewStatus }));
+}
+
 type Param = string | string[] | undefined;
 
 /** A known readiness, in any case and trimmed. Missing, unknown, empty or repeated is All statuses. */
