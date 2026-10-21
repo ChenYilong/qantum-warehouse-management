@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useId, useRef, useState, type ReactNode } from "react";
 import type { PickLine } from "@/domain";
+import { HistoryBackLink } from "./BackControl";
 import { ConnectionSwitch, PickerLine } from "./ConnectionBar";
 import dialogStyles from "./decisions/decisions.module.css";
 import { sitePath } from "./format";
 import { Icon } from "./Icon";
-import { applyPickup, available, heldLines, PICKUP, pickupPath, planPickup, type HeldLine, type Lender, type PickupPlan } from "./pickups";
+import { applyPickup, available, heldLines, PICKUP, pickupPath, planPickup, type HeldInput, type HeldLine, type Lender, type PickupPlan } from "./pickups";
 import { savePickups, TickedContext, usePickups } from "./PickupStore";
 import { SiteFeed } from "./SiteFeed";
 import { SiteFilterForm } from "./SiteFilterForm";
@@ -35,7 +35,8 @@ export function PickupChooser({
   travel,
   children,
 }: {
-  target: { readonly siteId: string; readonly siteName: string; readonly lineId: string; readonly lines: readonly PickLine[] };
+  /** `site` is the server's status and shortages of this site, to store it clear when the pick-up covers them (AC 97). */
+  target: { readonly siteId: string; readonly siteName: string; readonly lineId: string; readonly lines: readonly PickLine[]; readonly site?: HeldInput };
   /** Every other site and its pick list as the sample has it; null when it can't be read. */
   lenders: readonly { readonly siteId: string; readonly name: string; readonly lines: readonly PickLine[] | null }[];
   sites: readonly FeedSite[];
@@ -66,8 +67,8 @@ export function PickupChooser({
   function confirm() {
     if (plan.total === 0) return;
     const names = plan.siteIds.map((siteId) => held.find((lender) => lender.siteId === siteId)!.name);
-    const saved = savePickups((current) => applyPickup(current, { siteId: target.siteId, lineId: line.id, lines: targetLines }, held, plan, new Date().toISOString()));
-    setOutcome(saved ? { ok: true, message: `${PICKUP.changed(target.siteName, plan.total, line.unit, names)} ${PICKUP.saved}` } : { ok: false, message: PICKUP.notSaved });
+    const saved = savePickups((current) => applyPickup(current, { siteId: target.siteId, lineId: line.id, lines: targetLines, site: target.site }, held, plan, new Date().toISOString()));
+    setOutcome(saved ? { ok: true, message: PICKUP.changed(target.siteName, plan.total, line.unit, names) } : { ok: false, message: PICKUP.notSaved });
     if (saved) setChosen([]);
     const dialog = dialogRef.current;
     if (dialog && !dialog.open) dialog.showModal();
@@ -85,9 +86,10 @@ export function PickupChooser({
       <PickerLine />
       <main>
         <div className={styles.pickupActions} data-pickup-actions="">
-          <Link className={styles.button} href={sitePath(target.siteId)}>
+          {/* Back the way the browser goes (AC 96): the site screen as it was, its own back still leading where it led. */}
+          <HistoryBackLink className={styles.button} href={sitePath(target.siteId)}>
             {outcome?.ok ? PICKUP.doneLink : PICKUP.cancel}
-          </Link>
+          </HistoryBackLink>
           <button type="button" className={`${styles.button} ${styles.primary}`} disabled={plan.total === 0} onClick={confirm} aria-describedby={titleId}>
             {PICKUP.confirm}
           </button>

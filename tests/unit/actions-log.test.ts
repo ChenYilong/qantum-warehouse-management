@@ -21,12 +21,13 @@ function withSiteDown(siteId: string, failure: "upstream" | "missing" = "upstrea
 describe("AC 43: the actions log lists every site", () => {
   it("returns every site in list order, with that site's actions", async () => {
     const listed = await listAllActions(testDependencies());
-    expect(listed.sites.map((site) => site.siteId)).toEqual(["site-a", "site-b", "site-c", "site-d"]);
+    expect(listed.sites.map((site) => site.siteId)).toEqual(["site-a", "site-b", "site-c", "site-d", "site-e"]);
     expect(listed.sites.map((site) => site.siteName)).toEqual([
       "Cedar Court, Block A",
       "Quayside House, Levels 3 to 5",
       "Northgate Depot, Phase 2",
       "Foundry Lane Annex",
+      "Harbour View, Unit 7",
     ]);
     for (const site of listed.sites) {
       expect(site.status).toBe("ready");
@@ -52,6 +53,7 @@ describe("AC 43: the actions log lists every site", () => {
           ["site-b", "unavailable"],
           ["site-c", "ready"],
           ["site-d", "ready"],
+          ["site-e", "ready"],
         ]);
         expect(listed.sites[1]).toEqual({
           status: "unavailable",

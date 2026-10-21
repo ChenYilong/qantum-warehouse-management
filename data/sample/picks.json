@@ -125,6 +125,26 @@
           "warehouseStatus": "picked"
         }
       ]
+    },
+    "site-e": {
+      "picker": "Sam Lee",
+      "lastAction": "Marked part picked",
+      "lastActionAt": "2026-10-03T07:55:00Z",
+      "lines": [
+        {
+          "id": "e-collar",
+          "materialName": "Pipe collar for 25 mm pipe",
+          "unit": "each",
+          "usedAt": "L1, Plant room · 3 openings",
+          "plannedQty": 3,
+          "pickedQty": 2,
+          "pickedUpQty": 0,
+          "plannedSpec": null,
+          "pickedSpec": null,
+          "requiredParts": [{ "id": "e-kit", "name": "Fixing kit (anchors and screws)", "plannedQty": 3, "pickedQty": 3 }],
+          "warehouseStatus": "part picked"
+        }
+      ]
     }
   }
 }

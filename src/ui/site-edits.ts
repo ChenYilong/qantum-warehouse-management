@@ -35,7 +35,6 @@ export const SITE_EDITS = {
   newDeadline: "New deadline",
   currentDeadline: "current deadline",
   candidates: "Operators",
-  savedHere: "Saved on this device only.",
   notSaved: "This device couldn't save the change. Nothing was changed.",
   deadlineUpdated: (site: string, date: string) => `${site}: deadline updated to ${date}.`,
   operatorUpdated: (site: string, name: string) => `You've updated the operator for ${site} to ${name}.`,

@@ -14,6 +14,7 @@ Four sites. Each is built so a particular screen state of the demo script appear
 | `site-b` Quayside House, Levels 3 to 5 | blocked | Two shortages, a stock figure that only adds up across two locations, substitutes both in and out of stock, all empty states |
 | `site-c` Northgate Depot, Phase 2 | blocked | Missing data and non-fitting solutions: code `9999` absent from the catalogue; `0393` with no material mapping; `0943` whose catalogue substrate is truncated (cannot fit, AC 35); `pen-c-02` requiring 90 min insulation where `0435` offers 60 (fabricated); `pen-c-05` (`0348`) needing fire mastic, which has no stock row |
 | `site-d` Foundry Lane Annex | nothing planned | Must never render as clear |
+| `site-e` Harbour View, Unit 7 | blocked | Short of one material only: three `0452` penetrations (copies of Cedar Court's PEX-AL pipes) need three 25 mm pipe collars against a stock of two. Picking up the one missing collar from Cedar Court makes it ready (AC 97) |
 
 ## 2. Data set
 
@@ -176,12 +177,13 @@ Settled at approval (3 Oct 2026): generic material names remain, a single `Van 2
 | Quayside House (`site-b`) | sealant 6/10 with no nozzle (part-picked); collar 6/6 lacking fixing kits (missing parts); batt picked at FRR −/60/60 where the plan says −/120/120 (wrong spec); wrap 2/2 | Not ready, 3 issues |
 | Northgate Depot (`site-c`) | mastic 1/1; collar 2/2 with kits | Matches the plan |
 | Foundry Lane Annex (`site-d`) | — | Can't check: there is no pick list |
+| Harbour View (`site-e`) | collar 2/3 with 3 fixing kits; the warehouse marked it part picked | Not ready, 1 issue, until a pick-up from Cedar Court brings the third collar |
 
 Pickers in `sites.json` have `example.com` email addresses, a domain set aside for documentation, so Email links go nowhere. The UI labels the picker "(sample)".
 
 ## 11. Site coordinates (fabricated, 19 Oct 2026)
 
-Every site in `sites.json` has a `location` (`{ lat, lng }`) that drives the map and the directions link (AC 74). The points are invented, in Auckland, close to each fictional address: the waterfront for Cedar Court, Wynyard Quarter for Quayside House, Albany for Northgate Depot, Onehunga for Foundry Lane Annex. They sit on public streets, not on real projects. End-to-end tests place the simulated phone in Grafton (-36.8615, 174.769), giving straight-line distances of 1.9, 2.5, 15.7 and 7.0 km.
+Every site in `sites.json` has a `location` (`{ lat, lng }`) that drives the map and the directions link (AC 74). The points are invented, in Auckland, close to each fictional address: the waterfront for Cedar Court, Wynyard Quarter for Quayside House, Albany for Northgate Depot, Onehunga for Foundry Lane Annex, St Marys Bay for Harbour View. They sit on public streets, not on real projects. End-to-end tests place the simulated phone in Grafton (-36.8615, 174.769), giving straight-line distances of 1.9, 2.5, 15.7 and 7.0 km.
 
 ## 12. Changing a deadline or operator (20 Oct 2026)
 

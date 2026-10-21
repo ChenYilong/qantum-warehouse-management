@@ -16,7 +16,7 @@ describe("AC 74: GET /api/sites carries each site's location", () => {
     const listed = await readResponse(await getSites());
     expect(listed.status).toBe(200);
     const sites = listed.body.sites as { id: string; location?: unknown }[];
-    expect(sites).toHaveLength(4);
+    expect(sites).toHaveLength(5);
     for (const site of sites) expect(validLocation(site.location), site.id).not.toBeNull();
   });
 

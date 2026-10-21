@@ -1,5 +1,4 @@
 import { checkPickLine, isNonNegativeFinite, type CheckedPickLine, type PickCheck, type PickLine, type SiteFindings } from "@/domain";
-import type { SiteActionInput } from "./contacts";
 import type { ShortageFact } from "./signal";
 import { sitePath } from "./format";
 
@@ -33,8 +32,12 @@ export interface StoredLine {
 }
 
 export interface SitePickup {
-  /** The site's status as the move left it. Only "blocked" is ever stored: the store never clears a site. */
-  readonly status: "blocked";
+  /**
+   * The site's status as the move left it: "blocked" for a site that gave, "clear" for a site whose pick-up covered
+   * every shortage. A stored "clear" is never trusted on its own: `heldSite` clears a site only when the server's own
+   * shortages are all covered by what this device picked up (AC 97).
+   */
+  readonly status: "blocked" | "clear";
   readonly updatedAt: string;
   /** Every pick line of the site, by line id. `null` is a line that was stored but can't be read. */
   readonly lines: Readonly<Record<string, StoredLine | null>>;
@@ -68,9 +71,9 @@ export const PICKUP = {
   enough: "Not needed: the sites ticked already cover it",
   choose: (name: string) => `Pick up from ${name}`,
   noneChosen: "No site ticked yet.",
-  willTake: (qty: number, need: number, unit: string) => `Takes ${qty} of the ${need} ${unitText(need, unit)} needed.`,
+  willTake: (qty: number, need: number, unit: string) =>
+    qty === need ? `Takes the ${need} ${unitText(need, unit)} needed.` : `Takes ${qty} of the ${need} ${unitText(need, unit)} needed.`,
   stillShort: (short: number, unit: string) => `${short} ${unitText(short, unit)} still short.`,
-  saved: "Saved on this device only.",
   notSaved: "This device couldn't save the change. Nothing was changed.",
   changed: (target: string, qty: number, unit: string, names: readonly string[]) =>
     `${target} picked up ${qty} ${unitText(qty, unit)} from ${listText(names)}. Because ${names.length === 1 ? "its" : "their"} status changed to Blocked, change the deadline and the operator of ${names.length === 1 ? "that site" : "each of those sites"}.`,
@@ -135,7 +138,7 @@ export function parsePickups(raw: string | null): Pickups {
   for (const [siteId, entry] of Object.entries(value as Record<string, unknown>)) {
     if (!ID.test(siteId) || typeof entry !== "object" || entry === null) continue;
     const { status, updatedAt, lines } = entry as { status?: unknown; updatedAt?: unknown; lines?: unknown };
-    if (status !== "blocked" || typeof lines !== "object" || lines === null || Array.isArray(lines)) continue;
+    if ((status !== "blocked" && status !== "clear") || typeof lines !== "object" || lines === null || Array.isArray(lines)) continue;
     const kept: Record<string, StoredLine | null> = {};
     for (const [lineId, line] of Object.entries(lines as Record<string, unknown>)) {
       if (ID.test(lineId)) kept[lineId] = storedLine(line);
@@ -273,38 +276,39 @@ function stored(line: HeldLine): StoredLine {
   };
 }
 
-function snapshot(lines: readonly HeldLine[], change: (line: HeldLine) => HeldLine, at: string): SitePickup {
-  return { status: "blocked", updatedAt: at, lines: Object.fromEntries(lines.map((line) => [line.id, stored(change(line))])) };
+function lines(held: readonly HeldLine[], change: (line: HeldLine) => HeldLine): Record<string, StoredLine> {
+  return Object.fromEntries(held.map((line) => [line.id, stored(change(line))]));
 }
 
 /**
  * The store after a move: the site that picked up and every site that gave are stored whole, with the quantities
- * moved and the status Blocked. The site that picked up was blocked already (the button is only there then).
+ * moved. A site that gave is Blocked. The site that picked up is stored "clear" when, with the move, its pick-ups
+ * cover every shortage the server gave it (`target.site`) and it gave nothing away; otherwise Blocked, as it was.
  */
 export function applyPickup(
   pickups: Pickups,
-  target: { readonly siteId: string; readonly lineId: string; readonly lines: readonly HeldLine[] },
+  target: { readonly siteId: string; readonly lineId: string; readonly lines: readonly HeldLine[]; readonly site?: HeldInput },
   lenders: readonly Lender[],
   plan: PickupPlan,
   at: string,
 ): Pickups {
   if (plan.total === 0) return pickups;
   const next: Record<string, SitePickup> = { ...pickups };
-  next[target.siteId] = snapshot(
-    target.lines,
-    (line) => (line.id === target.lineId ? { ...line, pickedQty: line.pickedQty + plan.total, pickedUpQty: line.pickedUpQty + plan.total } : line),
-    at,
+  const gained = lines(target.lines, (line) =>
+    line.id === target.lineId ? { ...line, pickedQty: line.pickedQty + plan.total, pickedUpQty: line.pickedUpQty + plan.total } : line,
   );
+  const gave = Object.values(gained).some((line) => line.lentQty > 0);
+  next[target.siteId] = { status: !gave && target.site && covers(target.site, gained) ? "clear" : "blocked", updatedAt: at, lines: gained };
   for (const siteId of plan.siteIds) {
     const lender = lenders.find((item) => item.siteId === siteId)!;
-    next[siteId] = snapshot(
-      lender.lines!,
-      (line) => {
+    next[siteId] = {
+      status: "blocked",
+      updatedAt: at,
+      lines: lines(lender.lines!, (line) => {
         const given = plan.moves.filter((move) => move.siteId === siteId && move.lineId === line.id).reduce((sum, move) => sum + move.qty, 0);
         return given === 0 ? line : { ...line, pickedQty: line.pickedQty - given, lentQty: line.lentQty + given };
-      },
-      at,
-    );
+      }),
+    };
   }
   return next;
 }
@@ -339,21 +343,60 @@ export function lineMoves(siteId: string, lineId: string, pickups: Pickups): { r
   return { pickedUp: line?.pickedUpQty ?? 0, lent: line?.lentQty ?? 0 };
 }
 
+/** A short material as the server gave it, with how many are missing when it said. */
+export interface HeldShortage extends ShortageFact {
+  readonly shortfallQty?: number | null;
+}
+
+/** What `heldSite` reads of a site: the server's status and its shortages. */
+export interface HeldInput {
+  readonly id: string;
+  readonly crewStatus: string;
+  readonly shortageCount: number;
+  readonly dataProblemCount: number;
+  readonly shortages?: readonly HeldShortage[];
+}
+
+/**
+ * True when what this device picked up covers every shortage the server gave the site (AC 97). Fail closed: the site
+ * must be blocked by shortages alone (no data problems, no stock it can't read, every shortage listed with how many
+ * are missing), every stored line must be readable, and each short material must have been picked up, by name,
+ * at least as many as are missing.
+ */
+export function covers(site: HeldInput, stored: Readonly<Record<string, StoredLine | null>>): boolean {
+  const shortages = site.shortages ?? [];
+  if (site.crewStatus !== "blocked" || site.dataProblemCount !== 0 || shortages.length === 0 || shortages.length !== site.shortageCount) return false;
+  const held = Object.values(stored);
+  if (held.some((line) => line === null)) return false;
+  return shortages.every((shortage) => {
+    const missing = shortage.shortfallQty;
+    if (shortage.kind !== "short" || typeof missing !== "number" || !Number.isFinite(missing) || missing <= 0) return false;
+    const picked = held.filter((line) => sameMaterial(line!.materialName, shortage.name)).reduce((sum, line) => sum + line!.pickedUpQty, 0);
+    return picked >= missing;
+  });
+}
+
 /** Blocked here: this browser stored the site as blocked, or it is ticked on the pick-up page right now. */
 export function isHeldBlocked(siteId: string, pickups: Pickups, ticked: boolean): boolean {
   return ticked || pickups[siteId]?.status === "blocked";
 }
 
 /**
- * A site as this browser has it (AC 94, 95): the stored status first, then the sample's. Blocked here, it is blocked
- * whatever the server said, and each material it gave (or would give, while ticked) is one of its shortages.
+ * A site as this browser has it (AC 94, 95, 97): the stored status first, then the sample's. Blocked here, it is
+ * blocked whatever the server said, and each material it gave (or would give, while ticked) is one of its shortages.
+ * Stored "clear", it is clear only when its pick-ups still cover every shortage the server gives it now; otherwise
+ * the server's status stands.
  */
-export function heldSite<T extends SiteActionInput>(site: T, pickups: Pickups, tickedMaterial: string | null): T {
-  if (!isHeldBlocked(site.id, pickups, tickedMaterial !== null)) return site;
-  const given = Object.values(pickups[site.id]?.lines ?? {})
+export function heldSite<T extends HeldInput>(site: T, pickups: Pickups, tickedMaterial: string | null): T {
+  const record = pickups[site.id];
+  if (!isHeldBlocked(site.id, pickups, tickedMaterial !== null)) {
+    if (record?.status === "clear" && covers(site, record.lines)) return { ...site, crewStatus: "clear", shortageCount: 0, dataProblemCount: 0, shortages: [] };
+    return site;
+  }
+  const given = Object.values(record?.lines ?? {})
     .filter((line): line is StoredLine => line !== null && line.lentQty > 0)
     .map((line) => line.materialName);
-  const shortages: ShortageFact[] = [...(site.crewStatus === "blocked" ? (site.shortages ?? []) : [])];
+  const shortages: HeldShortage[] = [...(site.crewStatus === "blocked" ? (site.shortages ?? []) : [])];
   for (const name of tickedMaterial ? [...given, tickedMaterial] : given) {
     if (!shortages.some((item) => sameMaterial(item.name, name))) shortages.push({ name, kind: "short" });
   }
@@ -366,4 +409,26 @@ export function heldSite<T extends SiteActionInput>(site: T, pickups: Pickups, t
     dataProblemCount: site.crewStatus === "blocked" ? site.dataProblemCount : 0,
     shortages,
   };
+}
+
+/** What the Map and Calendar panels read of a project, with its shortages for this device's pick-ups (AC 97). */
+export interface PanelSite extends HeldInput {
+  readonly name: string;
+  readonly location?: unknown;
+  readonly date?: unknown;
+  readonly shortages: readonly HeldShortage[];
+}
+
+/** Only what the panels read, so the browser isn't sent the whole project twice. */
+export function panelSites(sites: readonly PanelSite[]): PanelSite[] {
+  return sites.map(({ id, name, crewStatus, shortageCount, dataProblemCount, location, date, shortages }) => ({
+    id,
+    name,
+    crewStatus,
+    shortageCount,
+    dataProblemCount,
+    location,
+    date,
+    shortages: shortages.map(({ name: material, kind, shortfallQty }) => ({ name: material, kind, shortfallQty })),
+  }));
 }

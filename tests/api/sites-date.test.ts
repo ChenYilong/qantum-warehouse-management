@@ -21,6 +21,7 @@ describe("AC 80: GET /api/sites carries each site's deadline", () => {
       ["site-b", "2026-10-27"],
       ["site-c", "2026-11-03"],
       ["site-d", "2026-11-13"],
+      ["site-e", "2026-10-30"],
     ]);
     for (const site of sites) expect(deadlineOf(site.date), site.id).not.toBeNull();
   });

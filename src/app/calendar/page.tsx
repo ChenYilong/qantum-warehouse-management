@@ -2,9 +2,9 @@ import { listSites } from "@/application";
 import { getDependencies } from "@/server/deps";
 import { mapboxPublicToken } from "@/server/mapbox";
 import { MenuBar } from "@/ui/AppBar";
-import { buildCalendar } from "@/ui/calendar";
-import { CalendarPanel } from "@/ui/CalendarPanel";
+import { HeldCalendarPanel } from "@/ui/HeldPanels";
 import { EMPTY, NAV, SITES_UNAVAILABLE } from "@/ui/messages";
+import { panelSites } from "@/ui/pickups";
 import { placesOf, projectCards } from "@/ui/ProjectCard";
 import { TravelButton, TravelProvider } from "@/ui/TravelProvider";
 import { UnavailablePanel } from "@/ui/UnavailablePanel";
@@ -33,7 +33,7 @@ export default async function CalendarPage() {
           <TravelProvider token={token} places={placesOf(sites)}>
             {/* At the top of every tab's page, under the picker's line (AC 75, AC 83). */}
             <TravelButton />
-            <CalendarPanel calendar={buildCalendar(sites)} cards={projectCards(sites, token, "calendar-card")} />
+            <HeldCalendarPanel sites={panelSites(sites)} cards={projectCards(sites, token, "calendar-card")} />
           </TravelProvider>
         )}
       </main>

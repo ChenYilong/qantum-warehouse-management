@@ -86,8 +86,9 @@ test("AC 38: the materials list shows each planned material against the shared s
   await expect(page.locator("main a[href='/materials/MAT-PUTTY']")).toHaveCount(0);
 
   const collar = page.locator("main a[href='/materials/MAT-COLLAR-25']");
-  await expect(collar).toContainText("On hand 2 · planned across sites 6");
-  await expect(collar).toContainText("Short at 1 site");
+  // Quayside House and Harbour View are both short of it; Cedar Court plans two and is covered.
+  await expect(collar).toContainText("On hand 2 · planned across sites 9");
+  await expect(collar).toContainText("Short at 2 sites");
   const mastic = page.locator("main a[href='/materials/MAT-MASTIC']");
   await expect(mastic).toContainText("Planned across sites 1 tube");
   await expect(mastic).toContainText("Stock unknown · needed at 1 site");

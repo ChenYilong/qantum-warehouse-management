@@ -25,14 +25,29 @@ export interface FilterableSite {
   readonly crewStatus: string;
 }
 
-/** A project as the list's client side gets it: what the filter reads, and its id. */
+/** A project as the list's client side gets it: what the filter reads, its id, and what its pick-ups read. */
 export interface FeedSite extends FilterableSite {
   readonly id: string;
+  readonly shortageCount: number;
+  readonly dataProblemCount: number;
+  readonly shortages: readonly { readonly name: string; readonly kind: "short" | "unknown"; readonly shortfallQty?: number | null }[];
 }
 
-/** Only what the filter reads, so the browser isn't sent the whole project twice (AC 93, 95). */
+/**
+ * Only what the filter and this device's pick-ups read, so the browser isn't sent the whole project twice
+ * (AC 93, 95, 97).
+ */
 export function feedSites(sites: readonly FeedSite[]): FeedSite[] {
-  return sites.map(({ id, name, reference, address, crewStatus }) => ({ id, name, reference, address, crewStatus }));
+  return sites.map(({ id, name, reference, address, crewStatus, shortageCount, dataProblemCount, shortages }) => ({
+    id,
+    name,
+    reference,
+    address,
+    crewStatus,
+    shortageCount,
+    dataProblemCount,
+    shortages: shortages.map(({ name: material, kind, shortfallQty }) => ({ name: material, kind, shortfallQty })),
+  }));
 }
 
 type Param = string | string[] | undefined;

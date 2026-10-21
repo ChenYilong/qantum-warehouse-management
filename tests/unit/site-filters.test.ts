@@ -101,8 +101,11 @@ describe("AC 73: search, and the words around the filter", () => {
 });
 
 describe("AC 93, AC 95: the list's client side gets only what the filter reads", () => {
-  it("keeps the id, name, job ref, address and status, and nothing else", () => {
-    const site = { id: "site-a", name: "Cedar Court", reference: "CC-A2", address: "12 Quay Road", crewStatus: "clear", operator: { name: "Mere", phone: "+44 7700 900156" } };
-    expect(feedSites([site])).toEqual([{ id: "site-a", name: "Cedar Court", reference: "CC-A2", address: "12 Quay Road", crewStatus: "clear" }]);
+  it("keeps the id, name, job ref, address, status and shortages, and nothing else", () => {
+    const shortage = { materialId: "MAT-COLLAR-25", name: "Pipe collar for 25 mm pipe", unit: "each", kind: "short" as const, requiredQty: 3, shortfallQty: 1 };
+    const site = { id: "site-e", name: "Harbour View", reference: "HV-07", address: "7 Wharf Lane", crewStatus: "blocked", shortageCount: 1, dataProblemCount: 0, shortages: [shortage], operator: { name: "Hana", phone: "+44 7700 900160" } };
+    expect(feedSites([site])).toEqual([
+      { id: "site-e", name: "Harbour View", reference: "HV-07", address: "7 Wharf Lane", crewStatus: "blocked", shortageCount: 1, dataProblemCount: 0, shortages: [{ name: "Pipe collar for 25 mm pipe", kind: "short", shortfallQty: 1 }] },
+    ]);
   });
 });

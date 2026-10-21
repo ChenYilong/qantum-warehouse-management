@@ -26,4 +26,6 @@ The app never writes these files. A deadline or operator a leader changes on a c
 Phone numbers come from the block Ofcom reserves for TV and film (`07700 900000`–`07700 900999`, stored as `+44 7700 900156`), so Call and
 Text in the app connect to nobody. Northgate Depot has a single person who both picks and installs, listed once.
 
+Harbour View, Unit 7 (`site-e`) is blocked by a single shortage: one pipe collar for 25 mm pipe. Cedar Court, the project whose crew can go, has four collars picked, so picking one up from it makes Harbour View ready (AC 97).
+
 A pick-up from other sites (AC 92 to 95) is kept the same way: in that browser's localStorage under `team-leader:site-pickups`, keyed by site id, holding each touched site's status (Blocked) and every one of its pick lines with the quantities after the move. The cards and the site screens read it before `picks.json` and the computed status, and fall back to them for a site or line it does not hold.

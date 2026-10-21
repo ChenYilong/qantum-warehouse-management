@@ -68,7 +68,7 @@ describe("server boundary", () => {
     const result = await readResponse(response);
     expect(response.status).toBe(200);
     expect(result.cache).toBe("no-store");
-    expect((result.body.sites as { id: string }[]).map((site) => site.id)).toEqual(["site-a", "site-b", "site-c", "site-d"]);
+    expect((result.body.sites as { id: string }[]).map((site) => site.id)).toEqual(["site-a", "site-b", "site-c", "site-d", "site-e"]);
   });
 
   it("returns 500 internal_error in production when postgres is not configured", async () => {

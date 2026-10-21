@@ -6,7 +6,7 @@ describe("sample stubs", () => {
   it("returns validated sample data and only the requested stock and codes", async () => {
     const stubs = makeStubs();
     const sites = await stubs.sites.listSites();
-    expect(sites.map((site) => site.id)).toEqual(["site-a", "site-b", "site-c", "site-d"]);
+    expect(sites.map((site) => site.id)).toEqual(["site-a", "site-b", "site-c", "site-d", "site-e"]);
     expect(await stubs.sites.getSite("site-d")).toMatchObject({ id: "site-d", name: "Foundry Lane Annex" });
     expect(await stubs.sites.getSite("missing")).toBeNull();
 

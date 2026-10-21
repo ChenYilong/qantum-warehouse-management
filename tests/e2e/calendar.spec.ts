@@ -40,10 +40,10 @@ test("AC 81: the Calendar tab holds the deadline calendar, a copy of the Map tab
   // Only the panel: main holds its h1, the location button at the top (AC 83) and the panel, nothing else.
   await expect(page.locator("main > *")).toHaveCount(3);
   // The same verdict, totals, bar and tabs as the map panel.
-  await expect(panel(page).getByRole("heading", { level: 2 })).toHaveText("2 of 3 crews can't go yet");
-  await expect(panel(page).getByText("3 shortages · 4 data problems", { exact: true })).toBeVisible();
-  await expect(panel(page).getByRole("img", { name: "1 can go, 2 blocked" })).toBeVisible();
-  await expect(tabs(page)).toHaveText(["All 4", "Blocked 2", "Crew can go 1", "Other 1"]);
+  await expect(panel(page).getByRole("heading", { level: 2 })).toHaveText("3 of 4 crews can't go yet");
+  await expect(panel(page).getByText("4 shortages · 4 data problems", { exact: true })).toBeVisible();
+  await expect(panel(page).getByRole("img", { name: "1 can go, 3 blocked" })).toBeVisible();
+  await expect(tabs(page)).toHaveText(["All 5", "Blocked 3", "Crew can go 1", "Other 1"]);
   await expect(tab(page, "Crew can go 1")).toHaveAttribute("aria-selected", "true");
   // The month of the first project's deadline, Monday first, today ringed.
   await expect(month(page)).toHaveText("October 2026");
@@ -74,9 +74,10 @@ test("AC 81: the Calendar tab holds the deadline calendar, a copy of the Map tab
 
 test("AC 81: a tab puts its own projects on the calendar, opens on its first and its month, and a tapped oval takes the card", async ({ page }) => {
   await gotoApp(page, "/calendar");
-  // Blocked: Quayside House on Tue 27 Oct; Northgate Depot is in November.
-  await tab(page, "Blocked 2").click();
-  await expect(ovals(page)).toHaveCount(1);
+  // Blocked: Quayside House on Tue 27 Oct and Harbour View on Fri 30 Oct; Northgate Depot is in November.
+  await tab(page, "Blocked 3").click();
+  await expect(ovals(page)).toHaveCount(2);
+  await expect(cell(page, "2026-10-30").locator('[data-calendar-site="site-e"] [data-oval]')).toHaveAttribute("data-tone", "stop");
   await expect(oval(page, "site-b")).toHaveAttribute("aria-pressed", "true");
   await expect(cell(page, "2026-10-27").locator('[data-calendar-site="site-b"] [data-oval]')).toHaveAttribute("data-tone", "stop");
   await expect(card(page).getByRole("link", { name: "Quayside House, Levels 3 to 5" }).first()).toBeVisible();
@@ -89,9 +90,9 @@ test("AC 81: a tab puts its own projects on the calendar, opens on its first and
   await calendar(page).getByRole("button", { name: "Previous month" }).click();
   await expect(month(page)).toHaveText("October 2026");
   // All: every project, opening on the first in list order.
-  await tab(page, "All 4").click();
+  await tab(page, "All 5").click();
   await expect(month(page)).toHaveText("October 2026");
-  await expect(ovals(page)).toHaveCount(2);
+  await expect(ovals(page)).toHaveCount(3);
   await expect(oval(page, "site-a")).toHaveAttribute("aria-pressed", "true");
   await calendar(page).getByRole("button", { name: "Next month" }).click();
   await expect(ovals(page)).toHaveCount(2);
@@ -110,32 +111,32 @@ test("AC 82: From and To start at today and the end of the year, choose the dead
   const to = calendar(page).getByLabel("To", { exact: true });
   await expect(from).toHaveValue("2026-10-20");
   await expect(to).toHaveValue("2026-12-31");
-  await tab(page, "All 4").click();
-  await expect(ovals(page)).toHaveCount(2);
+  await tab(page, "All 5").click();
+  await expect(ovals(page)).toHaveCount(3);
   // To the end of October: November's deadlines go.
   await to.fill("2026-10-31");
   await calendar(page).getByRole("button", { name: "Next month" }).click();
   await expect(ovals(page)).toHaveCount(0);
   await calendar(page).getByRole("button", { name: "Previous month" }).click();
-  await expect(ovals(page)).toHaveCount(2);
+  await expect(ovals(page)).toHaveCount(3);
   // From the 24th: Cedar Court's 23 Oct goes, and the card moves to the first that stays.
   await from.fill("2026-10-24");
-  await expect(ovals(page)).toHaveCount(1);
+  await expect(ovals(page)).toHaveCount(2);
   await expect(oval(page, "site-b")).toHaveAttribute("aria-pressed", "true");
   // Crew can go now holds no deadline between the dates; the tabs still count every project.
   await tab(page, "Crew can go 1").click();
   await expect(ovals(page)).toHaveCount(0);
   await expect(card(page)).toHaveText("No deadlines between these dates.");
-  await expect(tabs(page)).toHaveText(["All 4", "Blocked 2", "Crew can go 1", "Other 1"]);
+  await expect(tabs(page)).toHaveText(["All 5", "Blocked 3", "Crew can go 1", "Other 1"]);
   // From after To: it says so and holds none.
   await from.fill("2026-11-05");
   await expect(calendar(page).getByText("From is after To.", { exact: true })).toBeVisible();
-  await tab(page, "All 4").click();
+  await tab(page, "All 5").click();
   await expect(ovals(page)).toHaveCount(0);
   await expect(card(page)).toHaveText("No deadlines between these dates.");
   // Empty fields leave both ends open.
   await from.fill("");
   await to.fill("");
-  await expect(ovals(page)).toHaveCount(2);
+  await expect(ovals(page)).toHaveCount(3);
   await expect(oval(page, "site-a")).toHaveAttribute("aria-pressed", "true");
 });

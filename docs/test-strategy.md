@@ -126,7 +126,9 @@ One row per acceptance criterion: the behaviour in a few words, then every test 
 | 92 | Pick up from other sites on each row of a blocked site; `pickedUpQty` in the sample | `e2e/pickup.spec.ts`, `unit/pickups.test.ts` |
 | 93 | The pick-up page: Cancel and Confirm, the projects list with ticks, a ticked site Blocked at once | `e2e/pickup.spec.ts`, `unit/pickups.test.ts`, `unit/site-filters.test.ts` |
 | 94 | Confirm keeps every touched site in `team-leader:site-pickups` and asks for a new deadline and operator | `e2e/pickup.spec.ts`, `unit/pickups.test.ts` |
-| 95 | Cards, the Readiness filter and site screens read the device's copy first; it only ever blocks | `e2e/pickup.spec.ts`, `unit/pickups.test.ts`, `unit/ui-screens.test.ts` |
+| 95 | Cards, lists, the Map and Calendar panels and site screens read the device's copy first | `e2e/pickup.spec.ts`, `unit/pickups.test.ts`, `unit/ui-screens.test.ts` |
+| 96 | Cancel and Done go back the way the browser does | `e2e/pickup.spec.ts`, `unit/nav-history.test.ts` |
+| 97 | Harbour View picks up its one missing collar and reads Crew can go everywhere; a stored "clear" is checked against the server | `e2e/pickup.spec.ts`, `unit/pickups.test.ts` |
 
 CI runs a script that enumerates AC numbers and fails if any lacks a referencing test.
 
@@ -210,7 +212,7 @@ Each push and pull request runs, in sequence:
 6. Secret scan; dependency audit.
 7. Playwright E2E with axe against dev servers. Five projects: read-only, writing, two stock-failure servers (`STUB_STOCK_MODE=down` and `malformed`); and a maps server given a dummy `pk.` token, whose spec answers all Mapbox traffic on its own. Each server has its own build directory; every server but the maps one gets a blank token, so Mapbox is never contacted.
 8. AC coverage script.
-9. `main` only, once everything above is green: Vercel deploy (`vercel pull`, `build --prod`, `npm run db:migrate` against production, which aborts without `SUPABASE_DB_PASSWORD`, then `deploy --prebuilt --prod`), followed by `scripts/smoke.mjs` on the production URL: `/api/sites` 200 with `no-store` and four sites; `/` redirecting to `/about-this-demo` and rendering "Know which crews can roll out today"; `/sites` rendering "Projects"; Cedar Court's pick check showing either ready or not-ready status, never "Can't check picks", which is the symptom of a missing migration.
+9. `main` only, once everything above is green: Vercel deploy (`vercel pull`, `build --prod`, `npm run db:migrate` against production, which aborts without `SUPABASE_DB_PASSWORD`, then `deploy --prebuilt --prod`), followed by `scripts/smoke.mjs` on the production URL: `/api/sites` 200 with `no-store` and five sites; `/` redirecting to `/about-this-demo` and rendering "Know which crews can roll out today"; `/sites` rendering "Projects"; Cedar Court's pick check showing either ready or not-ready status, never "Can't check picks", which is the symptom of a missing migration.
 
 Any failure blocks merging to the default branch. Only a green default branch can reach Vercel, and the smoke run against the public URL after deployment proves the release works.
 

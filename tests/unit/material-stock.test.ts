@@ -49,7 +49,7 @@ describe("AC 38: the materials list, across sites", () => {
       ["MAT-SEALANT", 8, 12, 2, 1],
       ["MAT-WRAP", 12, 9, 2, 0],
       ["MAT-BATT", 10, 6, 1, 0],
-      ["MAT-COLLAR-25", 2, 6, 2, 1],
+      ["MAT-COLLAR-25", 2, 9, 3, 2],
       ["MAT-COLLAR-32", 5, 3, 1, 0],
     ]);
     // Putty is mapped only to a substitute nobody nominates, so no site plans it.
@@ -71,8 +71,8 @@ describe("AC 38: the materials list, across sites", () => {
       expect(list.materials.every((item) => item.plannedQty === null), failure).toBe(true);
       expect(list.materials.find((item) => item.id === "MAT-COLLAR-25"), failure).toMatchObject({
         onHandQty: 2,
-        neededSiteCount: 1,
-        shortSiteCount: 1,
+        neededSiteCount: 2,
+        shortSiteCount: 2,
       });
     }
   });
@@ -100,9 +100,11 @@ describe("AC 38: the materials list, across sites", () => {
 describe("AC 39: one material across sites", () => {
   it("gives each planning site, in site order, its need, places and shortage", async () => {
     const detail = await describeMaterialStock(testDependencies(), "MAT-COLLAR-25");
-    expect(detail.material).toMatchObject({ name: "Pipe collar for 25 mm pipe", onHandQty: 2, plannedQty: 6, shortSiteCount: 1 });
-    expect(detail.sites.map((site) => site.siteId)).toEqual(["site-a", "site-b"]);
-    const [riverside, harbour] = detail.sites;
+    expect(detail.material).toMatchObject({ name: "Pipe collar for 25 mm pipe", onHandQty: 2, plannedQty: 9, shortSiteCount: 2 });
+    expect(detail.sites.map((site) => site.siteId)).toEqual(["site-a", "site-b", "site-e"]);
+    const [riverside, harbour, harbourView] = detail.sites;
+    // Harbour View is short of this one material only (AC 97).
+    expect(harbourView).toMatchObject({ status: "ready", requiredQty: 3, shortage: { id: "site-e:MAT-COLLAR-25", kind: "short", shortfallQty: 1 } });
     expect(riverside).toMatchObject({ status: "ready", siteName: "Cedar Court, Block A", requiredQty: 2, shortage: null });
     expect(harbour).toMatchObject({
       status: "ready",
@@ -126,6 +128,7 @@ describe("AC 39: one material across sites", () => {
     const detail = await describeMaterialStock(withSiteDown("site-a"), "MAT-COLLAR-25");
     expect(detail.sites.map((site) => [site.siteId, site.status])).toEqual([
       ["site-b", "ready"],
+      ["site-e", "ready"],
       ["site-a", "unavailable"],
     ]);
     expect(detail.material.plannedQty).toBeNull();

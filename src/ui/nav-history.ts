@@ -25,10 +25,31 @@ export function previousScreen(): string | null {
   return stack[stack.length - 2] ?? null;
 }
 
+/**
+ * True when this visit has a screen under the current one in this tab, so a back control can pop to it like the
+ * browser's own back (or a swipe back) instead of opening a fixed page as a new visit (AC 96).
+ */
+export function canGoBack(): boolean {
+  return stack.length >= 2;
+}
+
 /** Drops the stack. Tests call this between cases; a full page load starts empty on its own. */
 export function clearNavHistory(): void {
   stack.splice(0, stack.length);
   changed();
+}
+
+/**
+ * Takes back a push of `href` that was really a back or forward (AC 96): Next re-renders on popstate before other
+ * listeners run, so the route effect can record the screen a pop lands on as a new visit before the pop is seen.
+ * Only the top entry, and only when it is that screen.
+ */
+export function retractPush(href: string): void {
+  const key = locationKey(href);
+  if (stack.length > 0 && stack[stack.length - 1] === key) {
+    stack.pop();
+    changed();
+  }
 }
 
 export function noteNavigation(href: string, popped: boolean): void {

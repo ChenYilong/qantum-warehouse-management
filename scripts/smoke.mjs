@@ -34,7 +34,7 @@ while (Date.now() <= deadline) {
     const pickStatus = /data-pick-status="([a-z_]+)"/.exec(siteText)?.[1] ?? "missing";
     const picksOk = siteResponse.status === 200 && (pickStatus === "ready" || pickStatus === "not_ready");
     const pagesOk = homeOk && listOk && picksOk;
-    if (sitesResponse.status === 200 && noStore && count === 4 && pagesOk) {
+    if (sitesResponse.status === 200 && noStore && count === 5 && pagesOk) {
       console.log("smoke ok");
       process.exit(0);
     }

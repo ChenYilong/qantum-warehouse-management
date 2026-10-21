@@ -38,6 +38,7 @@ describe("AC 49: sites carry who to call", () => {
       ["site-b", "Wiremu Ngata", "Sam Lee"],
       ["site-c", "Tama Rewi", "Tama Rewi"],
       ["site-d", "Mere Tane", "Sam Lee"],
+      ["site-e", "Hana Pohatu", "Sam Lee"],
     ]);
     // Ofcom's drama range: dialling a sample number reaches no one.
     for (const site of sites) expect(site.operator?.phone).toMatch(/^\+44 7700 900\d{3}$/);

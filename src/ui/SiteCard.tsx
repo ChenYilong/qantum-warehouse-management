@@ -45,13 +45,13 @@ export function SiteCard({
   const ticked = useTicked(site.id);
   const held = heldSite(site, pickups, ticked);
   const changed = held !== site;
-  const shown = changed ? siteChip("blocked", held.shortageCount, held.dataProblemCount) : status;
+  const shown = changed ? siteChip(held.crewStatus, held.shortageCount, held.dataProblemCount) : status;
   const action = siteAction(held);
   const titleId = `${idPrefix}-${site.id}`;
   const operatorId = `${titleId}-operator`;
   const { short } = action;
   return (
-    <div className={styles.siteCard} data-held-blocked={changed ? "" : undefined}>
+    <div className={styles.siteCard} data-held={changed ? held.crewStatus : undefined}>
       <Link id={titleId} className={styles.siteCardTitle} href={sitePath(site.id)}>
         <span className={styles.kindTitle}>
           <KindIcon kind="site" />
@@ -59,7 +59,7 @@ export function SiteCard({
         </span>
         <Icon name="chevron-right" />
       </Link>
-      {place?.token ? <SiteMap siteId={site.id} token={place.token} location={place.location} colour={changed ? markerColour("blocked") : place.colour} /> : null}
+      {place?.token ? <SiteMap siteId={site.id} token={place.token} location={place.location} colour={changed ? markerColour(held.crewStatus) : place.colour} /> : null}
       <SiteSignal siteId={site.id} operator={site.operator} status={shown} action={action} describedBy={action.operator ? `${titleId} ${operatorId}` : titleId} />
       {short.items.length > 0 ? (
         <div className={styles.shortFacts}>

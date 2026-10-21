@@ -306,6 +306,47 @@
         "nominatedCode": "0348"
       }
     ],
-    "site-d": []
+    "site-d": [],
+    "site-e": [
+      {
+        "id": "pen-e-01",
+        "siteId": "site-e",
+        "floor": "L1",
+        "location": "Plant room",
+        "orientation": "Wall",
+        "substrateDetail": "FR plasterboard, FR plasterboard wall ( 1 layer 13mm)",
+        "serviceType": "PEX-AL Pipe",
+        "serviceSize": "Ø25mm",
+        "requiredIntegrityMinutes": 60,
+        "requiredInsulationMinutes": 60,
+        "nominatedCode": "0452"
+      },
+      {
+        "id": "pen-e-02",
+        "siteId": "site-e",
+        "floor": "L1",
+        "location": "Plant room",
+        "orientation": "Wall",
+        "substrateDetail": "FR plasterboard, FR plasterboard wall ( 1 layer 13mm)",
+        "serviceType": "PEX-AL Pipe",
+        "serviceSize": "Ø25mm",
+        "requiredIntegrityMinutes": 60,
+        "requiredInsulationMinutes": 60,
+        "nominatedCode": "0452"
+      },
+      {
+        "id": "pen-e-03",
+        "siteId": "site-e",
+        "floor": "L1",
+        "location": "Plant room",
+        "orientation": "Wall",
+        "substrateDetail": "FR plasterboard, FR plasterboard wall ( 1 layer 13mm)",
+        "serviceType": "PEX-AL Pipe",
+        "serviceSize": "Ø25mm",
+        "requiredIntegrityMinutes": 60,
+        "requiredInsulationMinutes": 60,
+        "nominatedCode": "0452"
+      }
+    ]
   }
 }

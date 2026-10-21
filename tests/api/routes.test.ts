@@ -59,6 +59,7 @@ describe("site readiness over HTTP", () => {
       ["site-b", "blocked", 2, 0],
       ["site-c", "blocked", 1, 4],
       ["site-d", "nothing_planned", 0, 0],
+      ["site-e", "blocked", 1, 0],
     ]);
     for (const site of sites) {
       expect(Number.isInteger(site.shortageCount)).toBe(true);
@@ -109,6 +110,10 @@ describe("site readiness over HTTP", () => {
         [{ materialId: "MAT-MASTIC", name: "Fire mastic tube", unit: "tube", kind: "unknown", requiredQty: 1, shortfallQty: null }],
       ],
       ["site-d", []],
+      [
+        "site-e",
+        [{ materialId: "MAT-COLLAR-25", name: "Pipe collar for 25 mm pipe", unit: "each", kind: "short", requiredQty: 3, shortfallQty: 1 }],
+      ],
     ]);
     for (const site of sites) expect(site.shortages).toHaveLength(site.shortageCount);
   });
@@ -248,9 +253,10 @@ describe("site readiness over HTTP", () => {
       ["unavailable", 0, 0],
       ["unavailable", 0, 0],
       ["unavailable", 0, 0],
+      ["unavailable", 0, 0],
     ]);
     // AC 56: a site that could not be checked lists no shortages, so nothing reads as short or as covered.
-    expect(sites.map((site) => site.shortages)).toEqual([[], [], [], []]);
+    expect(sites.map((site) => site.shortages)).toEqual([[], [], [], [], []]);
 
     setDependenciesForTests(testDependencies({ stock: "malformed" }));
     const invalid = await expectCache(await readiness("site-b"));
@@ -280,6 +286,7 @@ describe("site readiness over HTTP", () => {
       ["site-b", "unavailable", 0, 0],
       ["site-c", "blocked", 1, 4],
       ["site-d", "nothing_planned", 0, 0],
+      ["site-e", "blocked", 1, 0],
     ]);
   });
 

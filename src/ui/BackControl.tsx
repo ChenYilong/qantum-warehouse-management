@@ -1,10 +1,10 @@
 "use client";
 
-import { useSyncExternalStore, type MouseEvent } from "react";
+import { useSyncExternalStore, type MouseEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "./Icon";
-import { backTarget, previousScreen, returnsToPrevious, subscribeNavHistory } from "./nav-history";
+import { backTarget, canGoBack, previousScreen, returnsToPrevious, subscribeNavHistory } from "./nav-history";
 import styles from "./primitives.module.css";
 
 /**
@@ -28,6 +28,28 @@ export function BackControl({ href, name, className }: { href: string; name: str
     <Link className={className} href={target.href} aria-label={`Back to ${target.name}`} onClick={onClick}>
       <Icon name="chevron-left" />
       <span className={styles.backLabel}>{target.name}</span>
+    </Link>
+  );
+}
+
+/**
+ * A control that goes back the way the browser does (AC 96): with a screen under this one in the visit, a tap pops
+ * history, so that screen comes back exactly as it was, its own back control included. Opened directly, it opens
+ * `href`. A modified click (new tab, new window) always follows `href`.
+ */
+export function HistoryBackLink({ href, className, children }: { href: string; className?: string; children: ReactNode }) {
+  const router = useRouter();
+
+  function onClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (event.button !== 0 || event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) return;
+    if (!canGoBack()) return;
+    event.preventDefault();
+    router.back();
+  }
+
+  return (
+    <Link className={className} href={href} onClick={onClick}>
+      {children}
     </Link>
   );
 }

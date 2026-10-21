@@ -10,14 +10,14 @@ const inList = (page: Page) => page.getByRole("list", { name: "Projects" });
 const HERE = { latitude: -36.8615, longitude: 174.769 };
 test.use({ geolocation: HERE, permissions: ["geolocation"] });
 
-const IDS = ["site-a", "site-b", "site-c", "site-d"] as const;
+const IDS = ["site-a", "site-b", "site-c", "site-d", "site-e"] as const;
 
 test("AC 74: each project has its map with a pin, and a tap on the map opens the directions", async ({ page }) => {
   await answerMapbox(page);
   // The directions open in a new tab; answer Google here too, so the test never leaves the machine.
   await page.context().route("https://www.google.com/**", (route) => route.fulfill({ contentType: "text/plain", body: "directions" }));
   await gotoApp(page, "/sites");
-  await expect(inList(page).locator("[data-map]")).toHaveCount(4);
+  await expect(inList(page).locator("[data-map]")).toHaveCount(5);
   for (const id of IDS) {
     const map = inList(page).locator(`[data-map="${id}"]`);
     await map.scrollIntoViewIfNeeded();
@@ -66,11 +66,11 @@ test("AC 79: with a token the pins sit on a Mapbox map fitted to the chosen tab,
   };
   await expect(page.locator("[data-pin]")).toHaveCount(1);
   expect(await insideMap("site-a")).toBe(true);
-  // Blocked: the map fits both of its projects, 13 km apart.
+  // Blocked: the map fits all three of its projects, up to 13 km apart.
   // The map panel's own tabs; the deadline calendar above it has a set of its own (AC 81).
-  await page.getByRole("tablist", { name: "Projects by status" }).getByRole("tab", { name: "Blocked 2", exact: true }).click();
-  await expect(page.locator("[data-pin]")).toHaveCount(2);
-  await expect.poll(async () => (await insideMap("site-b")) && (await insideMap("site-c"))).toBe(true);
+  await page.getByRole("tablist", { name: "Projects by status" }).getByRole("tab", { name: "Blocked 3", exact: true }).click();
+  await expect(page.locator("[data-pin]")).toHaveCount(3);
+  await expect.poll(async () => (await insideMap("site-b")) && (await insideMap("site-c")) && (await insideMap("site-e"))).toBe(true);
   // Mapbox's wordmark, required on every map, is never under the card.
   const logo = await map.locator(".mapboxgl-ctrl-logo").boundingBox();
   const sheet = await card.boundingBox();
@@ -106,9 +106,9 @@ test("AC 74: each project's map sits under its name and above its signal, exactl
   await assertNoOverflow(page);
 });
 
-const DRIVES = ["2.3 km · 7 min drive", "3.1 km · 9 min drive", "16.8 km · 21 min drive", "7.4 km · 13 min drive"];
-const FROM_PHONE = "/directions-matrix/v1/mapbox/driving/174.769,-36.8615;174.7676,-36.8443;174.7571,-36.841;174.702,-36.7309;174.786,-36.9228";
-const FROM_DEFAULT = "/directions-matrix/v1/mapbox/driving/174.7661,-36.8643;174.7676,-36.8443;174.7571,-36.841;174.702,-36.7309;174.786,-36.9228";
+const DRIVES = ["2.3 km · 7 min drive", "3.1 km · 9 min drive", "16.8 km · 21 min drive", "7.4 km · 13 min drive", "4.1 km · 10 min drive"];
+const FROM_PHONE = "/directions-matrix/v1/mapbox/driving/174.769,-36.8615;174.7676,-36.8443;174.7571,-36.841;174.702,-36.7309;174.786,-36.9228;174.7431,-36.8467";
+const FROM_DEFAULT = "/directions-matrix/v1/mapbox/driving/174.7661,-36.8643;174.7676,-36.8443;174.7571,-36.841;174.702,-36.7309;174.786,-36.9228;174.7431,-36.8467";
 
 test.describe("before the phone shares where it is", () => {
   test.use({ permissions: [] });
@@ -141,7 +141,7 @@ test("AC 75, AC 76: one driving-matrix request from the phone, with the public t
   expect(paths.at(-1)).toBe(FROM_PHONE);
   const asked = new URL(matrix.at(-1)!);
   expect(asked.searchParams.get("sources")).toBe("0");
-  expect(asked.searchParams.get("destinations")).toBe("1;2;3;4");
+  expect(asked.searchParams.get("destinations")).toBe("1;2;3;4;5");
   expect(asked.searchParams.get("annotations")).toBe("distance,duration");
   expect(asked.searchParams.get("access_token")).toBe(E2E_MAPBOX_TOKEN);
 

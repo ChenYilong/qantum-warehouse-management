@@ -8,6 +8,7 @@ const DEADLINES = [
   ["Quayside House, Levels 3 to 5", "site-b", "Tue 27 Oct 2026", "2026-10-27"],
   ["Northgate Depot, Phase 2", "site-c", "Tue 3 Nov 2026", "2026-11-03"],
   ["Foundry Lane Annex", "site-d", "Fri 13 Nov 2026", "2026-11-13"],
+  ["Harbour View, Unit 7", "site-e", "Fri 30 Oct 2026", "2026-10-30"],
 ] as const;
 
 test("AC 80: every project's card ends with its deadline in English, the card under today's map too", async ({ page }) => {
