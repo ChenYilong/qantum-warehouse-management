@@ -87,6 +87,7 @@ describe("upstream failures", () => {
       ["site-b", "blocked"],
       ["site-c", "blocked"],
       ["site-d", "nothing_planned"],
+      ["site-e", "blocked"],
     ]);
     expect(lines.map((line) => JSON.parse(line) as unknown)).toEqual([
       { event: "upstream_failed", code: "upstream_invalid", system: "nominations" },
@@ -105,8 +106,9 @@ describe("upstream failures", () => {
       ["site-b", "unavailable"],
       ["site-c", "unavailable"],
       ["site-d", "unavailable"],
+      ["site-e", "unavailable"],
     ]);
-    expect(lines).toHaveLength(4);
+    expect(lines).toHaveLength(5);
     for (const line of lines) {
       expect(JSON.parse(line)).toEqual({ event: "upstream_failed", code: "upstream_unavailable", system: "stock" });
     }
