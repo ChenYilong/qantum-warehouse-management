@@ -2935,11 +2935,28 @@ section:has(> .stickyHeading) {
   justify-content: center;
 }
 
-/* The page's bar: Cancel top left, the Online switch, Confirm top right. */
-.pickupBar > :first-child,
-.pickupBar > :last-child {
-  flex: none;
-  min-width: 5.5rem;
+/* The page's header holds only the Online switch, on the right as on every screen. */
+.pickupBar {
+  justify-content: flex-end;
+}
+
+/* Cancel top left and Confirm top right, on a row that stays under the header while the list scrolls. Full bleed,
+   like the filter dock, so cards don't show beside it. */
+.pickupActions {
+  position: sticky;
+  top: var(--app-bar-height);
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: none;
+  margin-inline: calc(-1 * var(--space));
+  padding: 0.5rem var(--space);
+  background: var(--bg);
+}
+
+.pickupActions > * {
+  min-width: 6rem;
 }
 
 .pickupPlan {
@@ -2985,4 +3002,10 @@ section:has(> .stickyHeading) {
 .pickupCard > p {
   margin: 0;
   min-height: 1.5rem;
+}
+
+/* The card is a tick column narrower here: a smaller signal label that wraps between words, not inside them. */
+.pickupCard .signalLabel {
+  font-size: 1.25rem;
+  overflow-wrap: break-word;
 }
