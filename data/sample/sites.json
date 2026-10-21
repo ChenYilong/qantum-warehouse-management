@@ -80,6 +80,26 @@
         "lat": -36.9228,
         "lng": 174.786
       }
+    },
+    {
+      "id": "site-e",
+      "name": "Harbour View, Unit 7",
+      "reference": "HV-07",
+      "address": "7 Wharf Lane",
+      "date": "2026-10-30",
+      "operator": {
+        "name": "Hana Pohatu",
+        "phone": "+44 7700 900160"
+      },
+      "picker": {
+        "name": "Sam Lee",
+        "phone": "+44 7700 900157",
+        "email": "sam.lee@example.com"
+      },
+      "location": {
+        "lat": -36.8467,
+        "lng": 174.7431
+      }
     }
   ]
 }

@@ -5,16 +5,16 @@ test("AC 9: stock down shows can't check and never crew can go", async ({ page }
   // Runs on the stock-down server (STUB_STOCK_MODE=down), not the main server.
   await gotoApp(page, "/sites");
   // The list's cards; today's panel above them says the same in its own words (AC 77).
-  await expect(page.getByRole("list", { name: "Projects" }).getByText("Can't check")).toHaveCount(4);
+  await expect(page.getByRole("list", { name: "Projects" }).getByText("Can't check")).toHaveCount(5);
   // Exact: the tab "Crew can go 0" is a count, not a claim that a crew can go.
   await expect(page.getByText("Crew can go", { exact: true })).toHaveCount(0);
 
   // AC 52, AC 54: every signal is amber and checks again when tapped. None is a link, so none can call or text.
   const list = page.getByRole("list", { name: "Projects" });
-  await expect(list.locator('[data-signal="unknown"]')).toHaveCount(4);
+  await expect(list.locator('[data-signal="unknown"]')).toHaveCount(5);
   await expect(page.locator('[data-signal="go"], [data-signal="stop"]')).toHaveCount(0);
   await expect(page.locator("a[data-signal]")).toHaveCount(0);
-  await expect(list.getByRole("button", { name: /^Can't check/ })).toHaveCount(4);
+  await expect(list.getByRole("button", { name: /^Can't check/ })).toHaveCount(5);
   // AC 55: the operator can still be told to hold, and the text never says go.
   const hold = page.getByRole("listitem").filter({ hasText: "Cedar Court, Block A" }).getByRole("link", { name: "Text operator" });
   const holdText = decodeURIComponent(((await hold.getAttribute("href")) ?? "").split("body=")[1] ?? "");
@@ -55,14 +55,14 @@ test("AC 9: stock down shows can't check and never crew can go", async ({ page }
 test("AC 77 to 79: with the stock down every crew counts as can't go, the totals never count, and the panel opens on Blocked", async ({ page }) => {
   await gotoApp(page, "/map");
   const verdict = page.locator("[data-verdict]");
-  await expect(verdict.getByRole("heading", { level: 2 })).toHaveText("4 of 4 crews can't go yet");
+  await expect(verdict.getByRole("heading", { level: 2 })).toHaveText("5 of 5 crews can't go yet");
   await expect(verdict.getByText("Stock can't be checked", { exact: true })).toBeVisible();
-  await expect(verdict.getByRole("img", { name: "4 can't be checked" }).locator('[data-segment="unchecked"]')).toHaveCount(4);
+  await expect(verdict.getByRole("img", { name: "5 can't be checked" }).locator('[data-segment="unchecked"]')).toHaveCount(5);
   const tablist = page.getByRole("tablist", { name: "Projects by status" });
-  await expect(tablist.getByRole("tab")).toHaveText(["All 4", "Blocked 4", "Crew can go 0", "Other 0"]);
+  await expect(tablist.getByRole("tab")).toHaveText(["All 5", "Blocked 5", "Crew can go 0", "Other 0"]);
   // Crew can go has no project, so the panel opens on Blocked, every pin in the can't-check yellow.
-  await expect(tablist.getByRole("tab", { name: "Blocked 4" })).toHaveAttribute("aria-selected", "true");
-  await expect(page.locator("[data-pin]")).toHaveCount(4);
+  await expect(tablist.getByRole("tab", { name: "Blocked 5" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator("[data-pin]")).toHaveCount(5);
   // Under the map, the list's own card for the first project: its amber signal checks again and never calls.
   const card = page.getByRole("region", { name: "Selected project" });
   await expect(card.locator('[data-signal="unknown"]')).toHaveCount(1);
@@ -107,6 +107,6 @@ test("AC 72: with stock down no project is Ready or Shortage, and Unknown shows 
     await expect(page.getByRole("list", { name: "Projects" }).locator("[data-signal]"), status).toHaveCount(0);
   }
   await gotoApp(page, "/sites?status=unknown");
-  await expect(page.getByText("4 of 4 projects")).toBeVisible();
-  await expect(page.getByRole("list", { name: "Projects" }).locator('[data-signal="unknown"]')).toHaveCount(4);
+  await expect(page.getByText("5 of 5 projects")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Projects" }).locator('[data-signal="unknown"]')).toHaveCount(5);
 });

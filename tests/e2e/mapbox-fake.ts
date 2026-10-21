@@ -11,8 +11,8 @@ const STYLE = {
   layers: [{ id: "background", type: "background", paint: { "background-color": "#dfe8df" } }],
 };
 
-/** The drive from the test's location to the four sample projects, in list order. */
-export const MATRIX = { code: "Ok", distances: [[2_300, 3_100, 16_800, 7_400]], durations: [[420, 540, 1_260, 780]] };
+/** The drive from the test's location to the five sample projects, in list order. */
+export const MATRIX = { code: "Ok", distances: [[2_300, 3_100, 16_800, 7_400, 4_100]], durations: [[420, 540, 1_260, 780, 600]] };
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
 

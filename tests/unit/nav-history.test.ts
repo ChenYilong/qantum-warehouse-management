@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { clearNavHistory, noteNavigation, returnsToPrevious } from "@/ui/nav-history";
+import { canGoBack, clearNavHistory, noteNavigation, previousScreen, retractPush, returnsToPrevious } from "@/ui/nav-history";
 
 describe("AC 42: the back control pops the screen underneath", () => {
   beforeEach(() => {
@@ -57,5 +57,36 @@ describe("AC 42: the back control pops the screen underneath", () => {
     noteNavigation("/sites", false);
     noteNavigation("/materials", true);
     expect(returnsToPrevious("/sites")).toBe(false);
+  });
+});
+
+describe("AC 96: a back the way the browser goes", () => {
+  beforeEach(() => clearNavHistory());
+
+  it("can go back only with a screen under this one in the visit", () => {
+    expect(canGoBack()).toBe(false);
+    noteNavigation("/sites/site-b", false);
+    expect(canGoBack()).toBe(false);
+    noteNavigation("/sites/site-b/picks/pickup?line=b-sealant", false);
+    expect(canGoBack()).toBe(true);
+    noteNavigation("/sites/site-b", true);
+    expect(canGoBack()).toBe(false);
+  });
+
+  it("takes back a push that was really a back, so the screen under it is kept", () => {
+    noteNavigation("/map", false);
+    noteNavigation("/sites/site-b", false);
+    noteNavigation("/sites/site-b/picks/pickup?line=b-sealant", false);
+    // Next re-rendered first: the effect recorded the screen the back landed on as a visit.
+    noteNavigation("/sites/site-b", false);
+    retractPush("/sites/site-b");
+    noteNavigation("/sites/site-b", true);
+    expect(previousScreen()).toBe("/map");
+    // Only the top entry, and only that screen.
+    retractPush("/map");
+    expect(previousScreen()).toBe("/map");
+    clearNavHistory();
+    retractPush("/map");
+    expect(canGoBack()).toBe(false);
   });
 });

@@ -9,7 +9,7 @@ import { AppBar } from "@/ui/AppBar";
 import { sitePath } from "@/ui/format";
 import { EMPTY, SITES_UNAVAILABLE } from "@/ui/messages";
 import { PickupChooser } from "@/ui/PickupChooser";
-import { PICKUP } from "@/ui/pickups";
+import { panelSites, PICKUP } from "@/ui/pickups";
 import { placesOf, ProjectCard } from "@/ui/ProjectCard";
 import { operatorCandidates } from "@/ui/site-edits";
 import { feedSites, parseSiteFilters } from "@/ui/site-filters";
@@ -58,6 +58,7 @@ export default async function PickupPage({ params, searchParams }: PageProps) {
   const view = load.value;
   const listed = await loadPage(() => listSites(getDependencies()));
   const others = listed.status === "ready" ? listed.value.sites.filter((site) => site.id !== id) : [];
+  const self = listed.status === "ready" ? listed.value.sites.find((site) => site.id === id) : undefined;
   // Each other site's pick list, to say what it holds of this material. One that can't be read gives nothing.
   const lenders = await Promise.all(
     others.map(async (site) => {
@@ -76,7 +77,13 @@ export default async function PickupPage({ params, searchParams }: PageProps) {
   return (
     <TravelProvider token={token} places={placesOf(others)}>
       <PickupChooser
-        target={{ siteId: id, siteName: view.siteName, lineId: checked.line.id, lines: view.check.lines.map((item) => item.line) }}
+        target={{
+          siteId: id,
+          siteName: view.siteName,
+          lineId: checked.line.id,
+          lines: view.check.lines.map((item) => item.line),
+          site: self ? panelSites([self])[0] : undefined,
+        }}
         lenders={lenders}
         sites={feedSites(others)}
         cards={cards}

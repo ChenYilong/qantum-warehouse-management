@@ -172,7 +172,7 @@ export function SiteDeadline({
   const confirm = () => {
     const saved = save((all) => withDeadline(all, siteId, chosen.iso));
     closeDialog(editor);
-    setMessage(saved ? `${SITE_EDITS.deadlineUpdated(siteName, chosen.text)} ${SITE_EDITS.savedHere}` : SITE_EDITS.notSaved);
+    setMessage(saved ? SITE_EDITS.deadlineUpdated(siteName, chosen.text) : SITE_EDITS.notSaved);
     showDialog(notice);
   };
 
@@ -313,7 +313,7 @@ export function SiteOperator({
     closeDialog(editor);
     if (sameContact(chosen, current)) return;
     const saved = save((all) => withOperator(all, siteId, chosen));
-    setMessage(saved ? `${SITE_EDITS.operatorUpdated(siteName, chosen.name)} ${SITE_EDITS.savedHere}` : SITE_EDITS.notSaved);
+    setMessage(saved ? SITE_EDITS.operatorUpdated(siteName, chosen.name) : SITE_EDITS.notSaved);
     showDialog(notice);
   };
 

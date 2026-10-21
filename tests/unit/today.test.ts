@@ -218,9 +218,9 @@ describe("AC 79: the map's pins and the card under it", () => {
 
   it("works from the real sample file too", () => {
     const sites = sitesFile.sites.map((sample, index) =>
-      site(sample.id, sample.name, ["clear", "blocked", "blocked", "nothing_planned"][index]!, { location: sample.location }),
+      site(sample.id, sample.name, ["clear", "blocked", "blocked", "nothing_planned", "blocked"][index]!, { location: sample.location }),
     );
-    expect(buildToday(sites).projects.map((project) => project.shortName)).toEqual(["Cedar Court", "Quayside House", "Northgate Depot", "Foundry Lane Annex"]);
+    expect(buildToday(sites).projects.map((project) => project.shortName)).toEqual(["Cedar Court", "Quayside House", "Northgate Depot", "Foundry Lane Annex", "Harbour View"]);
   });
 });
 

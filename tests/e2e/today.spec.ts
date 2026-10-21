@@ -35,16 +35,16 @@ async function dotWidth(page: Page, id: string): Promise<number> {
     .evaluate((dot) => dot.getBoundingClientRect().width);
 }
 
-test("AC 77: the Map tab opens with today's verdict: 2 of 3 crews can't go yet, the totals, and a bar of one green and two red", async ({ page }) => {
+test("AC 77: the Map tab opens with today's verdict: 3 of 4 crews can't go yet, the totals, and a bar of one green and three red", async ({ page }) => {
   await gotoApp(page, "/map");
   // The page's h1 stays first in main, for structure; the verdict leads what you see.
   await expect(page.locator("main > h1")).toHaveText("Map");
-  await expect(verdict(page).getByRole("heading", { level: 2 })).toHaveText("2 of 3 crews can't go yet");
+  await expect(verdict(page).getByRole("heading", { level: 2 })).toHaveText("3 of 4 crews can't go yet");
   await expect(verdict(page).locator("[data-today-label]")).toHaveText(/^Map · today is (Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday) \d{1,2} [A-Z][a-z]+ \d{4}$/);
-  await expect(verdict(page).getByText("3 shortages · 4 data problems", { exact: true })).toBeVisible();
-  const bar = verdict(page).getByRole("img", { name: "1 can go, 2 blocked" });
-  await expect(bar.locator("[data-segment]")).toHaveCount(3);
-  expect(await segments(page)).toEqual(["go:1", "blocked:0.5", "blocked:0.5"]);
+  await expect(verdict(page).getByText("4 shortages · 4 data problems", { exact: true })).toBeVisible();
+  const bar = verdict(page).getByRole("img", { name: "1 can go, 3 blocked" });
+  await expect(bar.locator("[data-segment]")).toHaveCount(4);
+  expect(await segments(page)).toEqual(["go:1", "blocked:0.5", "blocked:0.5", "blocked:0.5"]);
   // The app's theme, black with white text, whatever the verdict; only the segments are green and red.
   const colours = await verdict(page).evaluate((section) => {
     const style = getComputedStyle(section);
@@ -67,7 +67,7 @@ test("AC 77: the Map tab opens with today's verdict: 2 of 3 crews can't go yet, 
 
 test("AC 78: four tabs inside the verdict open on Crew can go, and the chosen tab's segments are lit while the others fade", async ({ page }) => {
   await gotoApp(page, "/map");
-  await expect(tabs(page)).toHaveText(["All 4", "Blocked 2", "Crew can go 1", "Other 1"]);
+  await expect(tabs(page)).toHaveText(["All 5", "Blocked 3", "Crew can go 1", "Other 1"]);
   await expect(tab(page, "Crew can go 1")).toHaveAttribute("aria-selected", "true");
   // Inside the panel, right under the bar.
   const bar = await verdict(page).getByRole("img").boundingBox();
@@ -76,25 +76,25 @@ test("AC 78: four tabs inside the verdict open on Crew can go, and the chosen ta
   expect(gap).toBeGreaterThanOrEqual(0);
   expect(gap).toBeLessThan(24);
   expect(await verdict(page).getByRole("tablist").count()).toBe(1);
-  await tab(page, "Blocked 2").click();
-  await expect(tab(page, "Blocked 2")).toHaveAttribute("aria-selected", "true");
-  await expect.poll(() => segments(page)).toEqual(["go:0.5", "blocked:1", "blocked:1"]);
+  await tab(page, "Blocked 3").click();
+  await expect(tab(page, "Blocked 3")).toHaveAttribute("aria-selected", "true");
+  await expect.poll(() => segments(page)).toEqual(["go:0.5", "blocked:1", "blocked:1", "blocked:1"]);
   await tab(page, "Other 1").click();
-  await expect.poll(() => segments(page)).toEqual(["go:0.5", "blocked:0.5", "blocked:0.5"]);
+  await expect.poll(() => segments(page)).toEqual(["go:0.5", "blocked:0.5", "blocked:0.5", "blocked:0.5"]);
   // All: no filter, every segment lit.
-  await tab(page, "All 4").click();
-  await expect.poll(() => segments(page)).toEqual(["go:1", "blocked:1", "blocked:1"]);
+  await tab(page, "All 5").click();
+  await expect.poll(() => segments(page)).toEqual(["go:1", "blocked:1", "blocked:1", "blocked:1"]);
   // A tablist: one tab in the tab order; the arrows, Home and End move and choose, wrapping round.
   await expect(page.getByRole("tablist", { name: "Projects by status" }).locator('[role="tab"][tabindex="0"]')).toHaveCount(1);
   await tab(page, "Other 1").click();
   await tab(page, "Other 1").focus();
   await page.keyboard.press("ArrowRight");
-  await expect(tab(page, "All 4")).toBeFocused();
-  await expect(tab(page, "All 4")).toHaveAttribute("aria-selected", "true");
+  await expect(tab(page, "All 5")).toBeFocused();
+  await expect(tab(page, "All 5")).toHaveAttribute("aria-selected", "true");
   await page.keyboard.press("End");
   await expect(tab(page, "Other 1")).toHaveAttribute("aria-selected", "true");
   await page.keyboard.press("Home");
-  await expect(tab(page, "All 4")).toHaveAttribute("aria-selected", "true");
+  await expect(tab(page, "All 5")).toHaveAttribute("aria-selected", "true");
   await page.keyboard.press("ArrowLeft");
   await expect(tab(page, "Other 1")).toBeFocused();
   await expect(tab(page, "Other 1")).toHaveAttribute("aria-selected", "true");
@@ -133,9 +133,9 @@ test("AC 79: the map shows only the chosen tab's pins, and under it the chosen p
   });
   expect(repeated).toEqual([]);
 
-  // Blocked: two pins, and the card is Quayside House, the first in list order.
-  await tab(page, "Blocked 2").click();
-  await expect(pins(page)).toHaveCount(2);
+  // Blocked: three pins, and the card is Quayside House, the first in list order.
+  await tab(page, "Blocked 3").click();
+  await expect(pins(page)).toHaveCount(3);
   await expect(pin(page, "site-b")).toHaveAttribute("aria-pressed", "true");
   await expect(pin(page, "site-c")).toHaveAttribute("aria-pressed", "false");
   await expect(card(page).getByRole("link", { name: "Quayside House, Levels 3 to 5" }).first()).toBeVisible();
@@ -166,8 +166,8 @@ test("AC 79: the map shows only the chosen tab's pins, and under it the chosen p
   expect(onTop).toBe(true);
 
   // All: every project's pin, no filter; the card opens on the first in list order.
-  await tab(page, "All 4").click();
-  await expect(pins(page)).toHaveCount(4);
+  await tab(page, "All 5").click();
+  await expect(pins(page)).toHaveCount(5);
   await expect(pin(page, "site-a")).toHaveAttribute("aria-pressed", "true");
   await expect(card(page).getByRole("link", { name: "Cedar Court, Block A" }).first()).toBeVisible();
   // Other: Foundry Lane Annex, nothing planned.
@@ -175,7 +175,7 @@ test("AC 79: the map shows only the chosen tab's pins, and under it the chosen p
   await expect(pins(page)).toHaveCount(1);
   await expect(card(page).locator("[data-signal]")).toHaveAttribute("data-signal", "idle");
   // Back on Blocked the card opens on its first project again.
-  await tab(page, "Blocked 2").click();
+  await tab(page, "Blocked 3").click();
   await expect(pin(page, "site-b")).toHaveAttribute("aria-pressed", "true");
   await assertNoOverflow(page);
 });
@@ -184,6 +184,6 @@ test("AC 77, AC 78, AC 83: from a filtered projects list, the Map tab's verdict 
   await gotoApp(page, "/sites?status=ready");
   await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Map", exact: true }).click();
   await expect(page).toHaveURL(/\/map$/);
-  await expect(verdict(page).getByRole("heading", { level: 2 })).toHaveText("2 of 3 crews can't go yet");
-  await expect(tabs(page)).toHaveText(["All 4", "Blocked 2", "Crew can go 1", "Other 1"]);
+  await expect(verdict(page).getByRole("heading", { level: 2 })).toHaveText("3 of 4 crews can't go yet");
+  await expect(tabs(page)).toHaveText(["All 5", "Blocked 3", "Crew can go 1", "Other 1"]);
 });

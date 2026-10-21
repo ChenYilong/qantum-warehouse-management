@@ -19,7 +19,7 @@ import { filterCounts, matchingPenetrations, materialValues, parseShow, type Sho
 import { penetrationLog } from "@/ui/penetration-log";
 import { filterByMaterial, logCounts, rowMarks } from "@/ui/penetrations";
 import styles from "@/ui/primitives.module.css";
-import { loadSiteFrame, SiteFrame } from "./site-frame";
+import { frameSite, loadSiteFrame, SiteFrame } from "./site-frame";
 
 export const dynamic = "force-dynamic";
 
@@ -59,8 +59,7 @@ export default async function SitePage({ params, searchParams }: PageProps) {
           siteId={frame.site.id}
           siteName={frame.site.name}
           view={picksLoad?.status === "ready" ? picksLoad.value : null}
-          siteClear={frame.readiness?.crewStatus === "clear"}
-          siteBlocked={frame.readiness?.crewStatus === "blocked"}
+          site={frameSite(frame)}
           operator={frame.site.operator}
           operatorText={readyText(frame.site.name, frame.site.reference)}
         />

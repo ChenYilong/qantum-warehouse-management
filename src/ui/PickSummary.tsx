@@ -9,7 +9,7 @@ import { formatRecordedAt } from "./format";
 import { Icon } from "./Icon";
 import { PICKS } from "./messages";
 import { useWaiting } from "./PickOutboxSync";
-import { isHeldBlocked, lineMoves, PICKUP, pickupPath, withPickups } from "./pickups";
+import { heldSite, lineMoves, PICKUP, pickupPath, withPickups, type HeldInput } from "./pickups";
 import { usePickups } from "./PickupStore";
 import { useOperator } from "./SiteEdits";
 import type { CheckedPickLine } from "@/domain";
@@ -36,8 +36,7 @@ export function PickSummary({
   siteId,
   siteName,
   view: upstream,
-  siteClear,
-  siteBlocked,
+  site,
   operator,
   operatorText,
 }: {
@@ -45,9 +44,8 @@ export function PickSummary({
   siteName: string;
   /** Null when the pick system could not be read. */
   view: PickView | null;
-  siteClear: boolean;
-  /** The server read the site as Blocked. */
-  siteBlocked: boolean;
+  /** The site as the server read it, with its shortages; this device's pick-ups are applied to it (AC 95, 97). */
+  site: HeldInput;
   /** The sample data's operator; the one a card changed on this device wins (AC 88). */
   operator: ContactView | undefined;
   /** The "you can go" message the crew is sent. */
@@ -55,7 +53,7 @@ export function PickSummary({
 }) {
   const pickups = usePickups();
   const view = upstream ? { ...upstream, check: withPickups(siteId, upstream.check, pickups) } : null;
-  const heldBlocked = isHeldBlocked(siteId, pickups, false);
+  const held = heldSite(site, pickups, null);
   const connection = useConnection();
   const phase = connection.state;
   const saved = phase === "offline";
@@ -63,7 +61,7 @@ export function PickSummary({
   const headingId = useId();
   const reasonId = useId();
   const savedAt = clockLabel(connection.lastOkAt ?? connection.pageLoadedAt, connection.now) ?? "unknown";
-  const gate = crewGate(view ? view.check.status : "unavailable", siteClear && !heldBlocked, phase);
+  const gate = crewGate(view ? view.check.status : "unavailable", held.crewStatus === "clear", phase);
   const chosen = useOperator(siteId, operator);
   const operatorTextHref = chosen ? smsHref(chosen.phone, operatorText) : null;
   const canSend = gate.enabled && operatorTextHref !== null;
@@ -94,7 +92,7 @@ export function PickSummary({
                 checked={checked}
                 saved={saved}
                 moves={lineMoves(siteId, checked.line.id, pickups)}
-                pickup={siteBlocked || heldBlocked}
+                pickup={held.crewStatus === "blocked"}
               />
             ))}
           </ul>

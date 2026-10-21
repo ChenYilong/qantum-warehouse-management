@@ -15,7 +15,7 @@ import { StoredOperatorRow } from "@/ui/SiteEdits";
 import type { PenetrationPlace } from "@/ui/PenetrationGroups";
 import styles from "@/ui/primitives.module.css";
 import { shortageFacts } from "@/ui/signal";
-import { HeldSiteSignal } from "@/ui/HeldSiteSignal";
+import { HeldSiteSignal, WhileHeldBlocked } from "@/ui/HeldSiteSignal";
 import { siteChip } from "@/ui/status";
 
 /** The operator's name on the page, so the big signal is described by who it calls. */
@@ -60,6 +60,25 @@ export async function loadSiteFrame(id: string): Promise<SiteFrameData> {
 }
 
 /**
+ * The site as its signal, its Picks section and its pick-ups read it (AC 95, 97): the server's status, and each
+ * shortage by name with how many are missing.
+ */
+export function frameSite(frame: Extract<SiteFrameData, { status: "ready" }>) {
+  const { site, readiness } = frame;
+  const facts = readiness ? shortageFacts(readiness.shortages, readiness.materials, frame.referencedMaterials) : [];
+  return {
+    id: site.id,
+    name: site.name,
+    reference: site.reference,
+    crewStatus: readiness ? readiness.crewStatus : "unavailable",
+    shortageCount: readiness ? readiness.shortages.length : 0,
+    dataProblemCount: readiness ? readiness.blockers.length : 0,
+    shortages: facts.map((fact, index) => ({ ...fact, shortfallQty: readiness!.shortages[index]!.shortfallQty })),
+    operator: site.operator,
+  };
+}
+
+/**
  * The site's header, then its signal and the operator row, then the list. The signal replaces the banner (AC 57): a
  * blocked site has no summary banner, because the Needs your decision panel and the rows already say why.
  */
@@ -85,19 +104,8 @@ export function SiteFrame({
     );
   }
   const { site, readiness, plannedWork } = frame;
-  const crewStatus = readiness ? readiness.crewStatus : "unavailable";
-  const shortageCount = readiness ? readiness.shortages.length : 0;
-  const dataProblemCount = readiness ? readiness.blockers.length : 0;
-  const input = {
-    id: site.id,
-    name: site.name,
-    reference: site.reference,
-    crewStatus,
-    shortageCount,
-    dataProblemCount,
-    shortages: readiness ? shortageFacts(readiness.shortages, readiness.materials, frame.referencedMaterials) : [],
-    operator: site.operator,
-  };
+  const input = frameSite(frame);
+  const { crewStatus, shortageCount, dataProblemCount } = input;
   const action = siteAction(input);
   return (
     <>
@@ -123,7 +131,9 @@ export function SiteFrame({
           <StoredOperatorRow siteId={site.id} upstream={site.operator} text={action.operator.text} nameId={OPERATOR_ID} />
         ) : null}
         {/* A blocked site opens with what needs a decision (AC 50), right after its signal. */}
+        {/* A pick-up on this device that covered every shortage hides it (AC 97). */}
         {readiness && readiness.crewStatus === "blocked" ? (
+          <WhileHeldBlocked site={input}>
           <ActionNeeded
             siteId={site.id}
             operator={site.operator}
@@ -137,6 +147,7 @@ export function SiteFrame({
               referenced: frame.referencedMaterials,
             })}
           />
+          </WhileHeldBlocked>
         ) : null}
         {children}
       </main>

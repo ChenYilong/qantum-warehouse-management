@@ -131,9 +131,8 @@ describe("AC 87: who the operator can be changed to", () => {
     expect(operatorCandidates(sites, stranger)).toEqual([stranger, mere, sam, wiremu, tama]);
   });
 
-  it("says what changed, in English, and that it stays on this device", () => {
+  it("says what changed, in English", () => {
     expect(SITE_EDITS.deadlineUpdated("Cedar Court, Block A", "Fri 30 Oct 2026")).toBe("Cedar Court, Block A: deadline updated to Fri 30 Oct 2026.");
     expect(SITE_EDITS.operatorUpdated("Cedar Court, Block A", "Wiremu Ngata")).toBe("You've updated the operator for Cedar Court, Block A to Wiremu Ngata.");
-    expect(SITE_EDITS.savedHere).toBe("Saved on this device only.");
   });
 });

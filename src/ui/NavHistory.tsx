@@ -2,11 +2,14 @@
 
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { noteNavigation } from "./nav-history";
+import { noteNavigation, retractPush } from "./nav-history";
 
-// Set in the popstate listener, which runs before the pathname effect. Cleared after paint so a pop that
-// does not change the path and query cannot make the next forward visit look like a pop.
-let popRecorded = false;
+// Back and forward reach two places in either order: Next re-renders on popstate first, so the pathname effect can
+// run before this file's popstate listener (then the listener takes back the push the effect made), or after it
+// (then the effect skips the location the pop landed on). Before, a frame-based flag assumed the listener ran first,
+// so a pop was recorded as a new visit and the back control lost the screen under it (AC 96).
+let poppedTo: string | null = null;
+let pushedTo: string | null = null;
 
 /** Records push and pop for the back control. Renders nothing. Mount once, under a Suspense boundary. */
 export function NavHistory() {
@@ -15,19 +18,26 @@ export function NavHistory() {
 
   useEffect(() => {
     const onPop = () => {
-      popRecorded = true;
-      noteNavigation(window.location.pathname + window.location.search, true);
-      requestAnimationFrame(() => {
-        popRecorded = false;
-      });
+      const here = window.location.pathname + window.location.search;
+      if (pushedTo === here) {
+        retractPush(here);
+      } else {
+        poppedTo = here;
+      }
+      pushedTo = null;
+      noteNavigation(here, true);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   useEffect(() => {
-    if (popRecorded) return;
-    noteNavigation(window.location.pathname + window.location.search, false);
+    const here = window.location.pathname + window.location.search;
+    const popped = poppedTo === here;
+    poppedTo = null;
+    if (popped) return;
+    pushedTo = here;
+    noteNavigation(here, false);
   }, [pathname, search]);
 
   return null;

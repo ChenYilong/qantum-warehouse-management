@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { checkPickLine, checkPicks, type PickLine, type PickList } from "@/domain";
 import {
+  covers,
+  panelSites,
   applyPickup,
   available,
   heldLines,
@@ -154,19 +156,21 @@ describe("AC 95: the store is read before the sample data, and only ever blocks"
     for (const raw of [null, "", "{not json", "[1]", "42", "null"]) expect(parsePickups(raw)).toEqual({});
   });
 
-  it("drops a bad site id or any status but Blocked, and keeps an unreadable line as unreadable", () => {
+  it("drops a bad site id or a status other than Blocked or clear, and keeps an unreadable line as unreadable", () => {
     const good = { materialName: SEALANT, unit: "cartridge", plannedQty: 2, pickedQty: 0, pickedUpQty: 0, lentQty: 2 };
     const parsed = parsePickups(
       JSON.stringify({
         "site-a": { status: "blocked", updatedAt: AT, lines: { "a-sealant": good, "a-collar": { ...good, pickedQty: -1 }, "bad id!": good } },
-        "site-b": { status: "clear", lines: { "b-sealant": good } },
+        "site-b": { status: "go", lines: { "b-sealant": good } },
+        "site-f": { status: "clear", lines: { "f-collar": good } },
         "bad id!": { status: "blocked", lines: {} },
         "site-c": { status: "blocked", lines: [] },
         "site-d": "blocked",
         "site-e": { status: "blocked", updatedAt: 5, lines: { e1: { ...good, materialName: " " }, e2: { ...good, unit: 3 }, e3: { ...good, pickedUpQty: 5 }, e4: "x", e5: { ...good, plannedQty: 1.5 } } },
       }),
     );
-    expect(Object.keys(parsed)).toEqual(["site-a", "site-e"]);
+    expect(Object.keys(parsed)).toEqual(["site-a", "site-f", "site-e"]);
+    expect(parsed["site-f"]!.status).toBe("clear");
     expect(parsed["site-a"]!.lines).toEqual({ "a-sealant": good, "a-collar": null });
     expect(parsed["site-e"]!.updatedAt).toBe("");
     expect(Object.values(parsed["site-e"]!.lines)).toEqual([null, null, null, null, null]);
@@ -274,6 +278,7 @@ describe("AC 93, AC 94: the pick-up page's words", () => {
     expect(PICKUP.takes(2)).toBe("takes 2");
     expect(PICKUP.choose("Cedar Court, Block A")).toBe("Pick up from Cedar Court, Block A");
     expect(PICKUP.willTake(2, 4, "cartridge")).toBe("Takes 2 of the 4 cartridges needed.");
+    expect(PICKUP.willTake(1, 1, "each")).toBe("Takes the 1 item needed.");
     expect(PICKUP.stillShort(1, "cartridge")).toBe("1 cartridge still short.");
     expect(PICKUP.fromOthers(2)).toBe("2 picked up from other sites · on this phone");
     expect(PICKUP.lent(2)).toBe("2 given to another site · on this phone");
@@ -281,5 +286,71 @@ describe("AC 93, AC 94: the pick-up page's words", () => {
     expect(PICKUP.changed("Quayside House", 2, "cartridge", [])).toBe(
       "Quayside House picked up 2 cartridges from . Because their status changed to Blocked, change the deadline and the operator of each of those sites.",
     );
+  });
+});
+
+describe("AC 97: a pick-up that covers every shortage clears the site that picked up", () => {
+  const COLLAR = "Pipe collar for 25 mm pipe";
+  const harbour = {
+    id: "site-e",
+    name: "Harbour View",
+    reference: "HV-07",
+    crewStatus: "blocked",
+    shortageCount: 1,
+    dataProblemCount: 0,
+    shortages: [{ name: COLLAR, kind: "short" as const, shortfallQty: 1 }],
+  };
+  const targetLines = heldLines("site-e", [line("e-collar", COLLAR, 3, 2, { unit: "each" })], {});
+  const cedar: Lender[] = [{ siteId: "site-a", name: "Cedar Court", lines: heldLines("site-a", siteA, {}) }];
+
+  it("stores the site that picked up as clear only when the move covers what the server says is short", () => {
+    const plan = planPickup(targetLines[0]!, cedar, ["site-a"]);
+    expect(plan.total).toBe(1);
+    const next = applyPickup({}, { siteId: "site-e", lineId: "e-collar", lines: targetLines, site: harbour }, cedar, plan, AT);
+    expect(next["site-e"]).toMatchObject({ status: "clear", lines: { "e-collar": { pickedQty: 3, pickedUpQty: 1 } } });
+    expect(next["site-a"]).toMatchObject({ status: "blocked", lines: { "a-collar": { pickedQty: 3, lentQty: 1 } } });
+    // Without the server's shortages, or short of something else too, it stays Blocked.
+    expect(applyPickup({}, { siteId: "site-e", lineId: "e-collar", lines: targetLines }, cedar, plan, AT)["site-e"]!.status).toBe("blocked");
+    const twoShort = { ...harbour, shortageCount: 2, shortages: [...harbour.shortages, { name: SEALANT, kind: "short" as const, shortfallQty: 1 }] };
+    expect(applyPickup({}, { siteId: "site-e", lineId: "e-collar", lines: targetLines, site: twoShort }, cedar, plan, AT)["site-e"]!.status).toBe("blocked");
+    // A site that already gave something away stays Blocked when it picks up.
+    const gave = heldLines("site-e", [line("e-collar", COLLAR, 3, 2, { unit: "each" })], {}).map((item) => ({ ...item, lentQty: 1 }));
+    expect(applyPickup({}, { siteId: "site-e", lineId: "e-collar", lines: gave, site: harbour }, cedar, plan, AT)["site-e"]!.status).toBe("blocked");
+
+    // Read back: Crew can go, with nothing short.
+    expect(heldSite(harbour, next, null)).toEqual({ ...harbour, crewStatus: "clear", shortageCount: 0, dataProblemCount: 0, shortages: [] });
+    // Ticked on another pick-up page, or given away later, it is Blocked again.
+    expect(heldSite(harbour, next, COLLAR).crewStatus).toBe("blocked");
+  });
+
+  it("fails closed: data problems, unknown stock, a missing or bad shortfall, too few picked up, or an unreadable line", () => {
+    const picked = (qty: number, extra: object = {}) =>
+      ({ "e-collar": { materialName: COLLAR, unit: "each", plannedQty: 3, pickedQty: 2 + qty, pickedUpQty: qty, lentQty: 0, ...extra } }) as const;
+    expect(covers(harbour, picked(1))).toBe(true);
+    expect(covers(harbour, picked(2))).toBe(true);
+    expect(covers(harbour, picked(0))).toBe(false);
+    expect(covers({ ...harbour, crewStatus: "clear" }, picked(1))).toBe(false);
+    expect(covers({ ...harbour, dataProblemCount: 1 }, picked(1))).toBe(false);
+    expect(covers({ ...harbour, shortages: [] , shortageCount: 0 }, picked(1))).toBe(false);
+    expect(covers({ ...harbour, shortageCount: 2 }, picked(1))).toBe(false);
+    expect(covers({ ...harbour, shortages: undefined }, picked(1))).toBe(false);
+    for (const shortfallQty of [null, undefined, 0, -1, NaN, Infinity]) {
+      expect(covers({ ...harbour, shortages: [{ name: COLLAR, kind: "short", shortfallQty }] }, picked(1)), String(shortfallQty)).toBe(false);
+    }
+    expect(covers({ ...harbour, shortages: [{ name: COLLAR, kind: "unknown", shortfallQty: 1 }] }, picked(1))).toBe(false);
+    expect(covers(harbour, { ...picked(1), other: null })).toBe(false);
+    // A fraction short is covered by a whole one.
+    expect(covers({ ...harbour, shortages: [{ name: COLLAR, kind: "short", shortfallQty: 0.5 }] }, picked(1))).toBe(true);
+    // A stored "clear" that no longer covers (upstream now says more is short) leaves the server's status.
+    const stale = parsePickups(JSON.stringify({ "site-e": { status: "clear", lines: picked(1) } }));
+    const more = { ...harbour, shortages: [{ name: COLLAR, kind: "short" as const, shortfallQty: 2 }] };
+    expect(heldSite(more, stale, null)).toBe(more);
+  });
+
+  it("gives the Map and Calendar panels only what they read", () => {
+    const listed = { ...harbour, address: "7 Wharf Lane", location: { lat: -36.8, lng: 174.7 }, date: "2026-10-30", operator: { name: "Hana", phone: "+44 7700 900160" }, shortages: [{ ...harbour.shortages[0]!, materialId: "MAT-COLLAR-25", unit: "each" }] };
+    expect(panelSites([listed])).toEqual([
+      { id: "site-e", name: "Harbour View", crewStatus: "blocked", shortageCount: 1, dataProblemCount: 0, location: { lat: -36.8, lng: 174.7 }, date: "2026-10-30", shortages: [{ name: COLLAR, kind: "short", shortfallQty: 1 }] },
+    ]);
   });
 });

@@ -51,7 +51,7 @@ test("AC 86: the deadline opens this project's month; a picked day is kept on Co
   await dialog.getByRole("button", { name: "Confirm" }).click();
   await expect(dialog).toBeHidden();
   const notice = page.getByRole("alertdialog");
-  await expect(notice).toHaveText("Cedar Court, Block A: deadline updated to Mon 2 Nov 2026. Saved on this device only.OK");
+  await expect(notice).toHaveText("Cedar Court, Block A: deadline updated to Mon 2 Nov 2026.OK");
   await assertAxe(page);
   await notice.getByRole("button", { name: "OK" }).click();
   await expect(notice).toBeHidden();
@@ -76,7 +76,7 @@ test("AC 87: the operator opens a list with the current one ticked; only a diffe
   const dialog = page.getByRole("dialog", { name: "Change operator" });
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText("Cedar Court, Block A");
-  await expect(dialog.getByRole("radio")).toHaveCount(4);
+  await expect(dialog.getByRole("radio")).toHaveCount(5);
   await expect(dialog.getByRole("radio", { name: /Mere Tane/ })).toBeChecked();
   await assertAxe(page);
   await assertTargets(page);
@@ -98,7 +98,7 @@ test("AC 87: the operator opens a list with the current one ticked; only a diffe
   await dialog.getByRole("radio", { name: /Wiremu Ngata/ }).check();
   await dialog.getByRole("button", { name: "Confirm" }).click();
   const notice = page.getByRole("alertdialog");
-  await expect(notice).toContainText("You've updated the operator for Cedar Court, Block A to Wiremu Ngata. Saved on this device only.");
+  await expect(notice).toContainText("You've updated the operator for Cedar Court, Block A to Wiremu Ngata.");
   await notice.getByRole("button", { name: "OK" }).click();
 
   // The name, Text, Call and the big signal all go to the new operator.
